@@ -51,7 +51,7 @@
                     const resultCsv = [header1, ...uniqueData.map(([id, row]) => row)]
                         .map(row => row.join(',')).join('\n');
 
-                    const blob = new Blob([resultCsv], { type: 'text/csv' });
+                    const blob = new Blob([new TextEncoder().encode(resultCsv)], { type: 'text/csv;charset=utf-8;' });
                     const url = URL.createObjectURL(blob);
 
                     const downloadLink = document.getElementById('downloadLink');
