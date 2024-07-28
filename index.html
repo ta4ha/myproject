@@ -1,19 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>HTML5 Example Page</title>
-
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="HTML5 Example Page">
-  <link rel="stylesheet" href="/assets/css/stylesheet.css?v=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV File Uploader</title>
 </head>
 <body>
-  <header>
-    <h1>Hello World!</h1>
-  </header>
+    <h1>Upload Two CSV Files</h1>
+    <form id="uploadForm">
+        <label for="file1">CSV File 1:</label>
+        <input type="file" id="file1" accept=".csv" required><br><br>
+        <label for="file2">CSV File 2:</label>
+        <input type="file" id="file2" accept=".csv" required><br><br>
+        <button type="submit">Upload and Process</button>
+    </form>
 
+    <h2>Processed File</h2>
+    <a id="downloadLink" style="display: none;">Download CSV</a>
 
-  <script src="/assets/js/scripts.js"></script>
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const file1 = document.getElementById('file1').files[0];
+            const file2 = document.getElementById('file2').files[0];
+
+            if (file1 && file2) {
+                Promise.all([file1.text(), file2.text()]).then(contents => {
+                    const csv1 = contents[0].split('\n').map(row => row.split(','));
+                    const csv2 = contents[1].split('\n').map(row => row.split(','));
+
+                    const header1 = csv1.shift();
+                    const header2 = csv2.shift();
+
+                    if (JSON.stringify(header1) !== JSON.stringify(header2)) {
+                        alert('CSV files have different headers!');
+                        return;
+                    }
+
+                    const idIndex = header1.indexOf('id');
+                    if (idIndex === -1) {
+                        alert('No "id" column found in the headers!');
+                        return;
+                    }
+
+                    const data1 = new Map(csv1.map(row => [row[idIndex], row]));
+                    const data2 = new Map(csv2.map(row => [row[idIndex], row]));
+
+                    const uniqueData = [...data1].filter(([id, row]) => !data2.has(id));
+
+                    const resultCsv = [header1, ...uniqueData.map(([id, row]) => row)]
+                        .map(row => row.join(',')).join('\n');
+
+                    const blob = new Blob([resultCsv], { type: 'text/csv' });
+                    const url = URL.createObjectURL(blob);
+
+                    const downloadLink = document.getElementById('downloadLink');
+                    downloadLink.href = url;
+                    downloadLink.download = 'unique_data.csv';
+                    downloadLink.style.display = 'block';
+                }).catch(error => {
+                    console.error('Error reading files:', error);
+                    alert('Error processing files!');
+                });
+            }
+        });
+    </script>
 </body>
 </html>
