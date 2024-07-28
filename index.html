@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Uploader</title>
+    <title>رافع الملفات</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
             background-color: #f8f9fa;
+            direction: rtl;
+            font-family: 'Tajawal', sans-serif;
         }
         .card {
             margin-top: 20px;
@@ -24,32 +26,32 @@
 </head>
 <body>
     <header class="bg-primary text-white text-center py-3">
-        <h1>File Uploader</h1>
+        <h1>رافع الملفات</h1>
     </header>
 
     <div class="container mt-5">
         <div class="card">
             <div class="card-header bg-dark text-white">
-                <h2>Upload Two Files (CSV/XLSX)</h2>
+                <h2>رفع ملفين (CSV/XLSX)</h2>
             </div>
             <div class="card-body">
                 <form id="uploadForm">
                     <div class="form-group">
-                        <label for="file1">File 1:</label>
+                        <label for="file1">الملف الأول:</label>
                         <input type="file" class="form-control-file" id="file1" accept=".csv, .xlsx" required>
                     </div>
                     <div class="form-group">
-                        <label for="file2">File 2:</label>
+                        <label for="file2">الملف الثاني:</label>
                         <input type="file" class="form-control-file" id="file2" accept=".csv, .xlsx" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">Upload and Process</button>
+                    <button type="submit" class="btn btn-primary">رفع ومعالجة</button>
                 </form>
             </div>
         </div>
 
         <div class="card mt-4">
             <div class="card-header bg-success text-white">
-                <h2>Unmatched Data</h2>
+                <h2>البيانات غير المطابقة</h2>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -64,13 +66,13 @@
         </div>
 
         <div class="text-center mt-4">
-            <a id="downloadLink" class="btn btn-success" style="display: none;">Download CSV</a>
+            <a id="downloadLink" class="btn btn-success" style="display: none;">تحميل CSV</a>
         </div>
     </div>
 
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2024 File Uploader. All rights reserved.</p>
+            <p>&copy; 2024 رافع الملفات. جميع الحقوق محفوظة.</p>
         </div>
     </footer>
 
@@ -89,13 +91,13 @@
                     const header2 = csv2.shift();
 
                     if (JSON.stringify(header1) !== JSON.stringify(header2)) {
-                        alert('Files have different headers!');
+                        alert('ملفات CSV تحتوي على رؤوس مختلفة!');
                         return;
                     }
 
                     const idIndex = header1.indexOf('id');
                     if (idIndex === -1) {
-                        alert('No "id" column found in the headers!');
+                        alert('لا يوجد عمود "id" في الرؤوس!');
                         return;
                     }
 
@@ -118,6 +120,9 @@
 
                     const tableHeader = document.getElementById('tableHeader');
                     tableHeader.innerHTML = '';
+                    const sequenceHeader = document.createElement('th');
+                    sequenceHeader.textContent = '#';
+                    tableHeader.appendChild(sequenceHeader);
                     header1.forEach(header => {
                         const th = document.createElement('th');
                         th.textContent = header;
@@ -126,8 +131,11 @@
 
                     const tableBody = document.getElementById('tableBody');
                     tableBody.innerHTML = '';
-                    unmatchedData.forEach(([id, row]) => {
+                    unmatchedData.forEach(([id, row], index) => {
                         const tr = document.createElement('tr');
+                        const sequenceCell = document.createElement('td');
+                        sequenceCell.textContent = index + 1;
+                        tr.appendChild(sequenceCell);
                         row.forEach(cell => {
                             const td = document.createElement('td');
                             td.textContent = cell;
@@ -139,7 +147,7 @@
                     document.getElementById('unmatchedTable').style.display = 'table';
                 }).catch(error => {
                     console.error('Error reading files:', error);
-                    alert('Error processing files!');
+                    alert('خطأ في معالجة الملفات!');
                 });
             }
         });
