@@ -81,13 +81,18 @@
             </div>
         </div>
 
+        <div class="text-center mt-4">
+            <button id="showMatchedBtn" class="btn btn-success" style="display:none;">عرض البيانات المطابقة</button>
+            <button id="showUnmatchedBtn" class="btn btn-danger" style="display:none;">عرض البيانات غير المطابقة</button>
+        </div>
+
         <div class="card mt-4">
             <div class="card-header bg-success text-white">
-                <h2>البيانات غير المطابقة</h2>
+                <h2>البيانات</h2>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table id="unmatchedTable" class="table table-bordered table-hover" style="display: none;">
+                    <table id="dataTable" class="table table-bordered table-hover" style="display: none;">
                         <thead class="thead-dark">
                             <tr id="tableHeader"></tr>
                         </thead>
@@ -113,7 +118,7 @@
         document.getElementById('uploadForm').addEventListener('submit', function(event) {
             event.preventDefault();
             const file1 = document.getElementById('file1').files[0];
-            const file2 = document.getElementById('file2').files[0'];
+            const file2 = document.getElementById('file2').files[0];
 
             if (file1 && file2) {
                 Promise.all([readFile(file1), readFile(file2)]).then(contents => {
@@ -137,58 +142,50 @@
                     const data1 = new Map(csv1.map(row => [row[idIndex], row]));
                     const data2 = new Map(csv2.map(row => [row[idIndex], row]));
 
-                    const uniqueData = [...data1].filter(([id, row]) => !data2.has(id));
-                    const unmatchedData = [...uniqueData, ...[...data2].filter(([id, row]) => !data1.has(id))];
+                    const matchedData = [...data1].filter(([id, row]) => data2.has(id));
+                    const unmatchedData = [...data1].filter(([id, row]) => !data2.has(id))
+                                        .concat([...data2].filter(([id, row]) => !data1.has(id)));
 
-                    const resultCsv = [header1, ...unmatchedData.map(([id, row]) => row)]
-                        .map(row => row.join(',')).join('\n');
+                    document.getElementById('showMatchedBtn').style.display = 'inline-block';
+                    document.getElementById('showUnmatchedBtn').style.display = 'inline-block';
 
-                    const blob = new Blob([new TextEncoder().encode(resultCsv)], { type: 'text/csv;charset=utf-8;' });
-                    const url = URL.createObjectURL(blob);
-
-                    const downloadCsvLink = document.getElementById('downloadCsvLink');
-                    downloadCsvLink.href = url;
-                    downloadCsvLink.download = 'unmatched_data.csv';
-                    downloadCsvLink.style.display = 'block';
-
-                    const ws = XLSX.utils.aoa_to_sheet([header1, ...unmatchedData.map(([id, row]) => row)]);
-                    const wb = XLSX.utils.book_new();
-                    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-                    const xlsxBlob = new Blob([XLSX.write(wb, { bookType: 'xlsx', type: 'array' })], { type: 'application/octet-stream' });
-                    const xlsxUrl = URL.createObjectURL(xlsxBlob);
-
-                    const downloadXlsxLink = document.getElementById('downloadXlsxLink');
-                    downloadXlsxLink.href = xlsxUrl;
-                    downloadXlsxLink.download = 'unmatched_data.xlsx';
-                    downloadXlsxLink.style.display = 'block';
-
-                    const tableHeader = document.getElementById('tableHeader');
-                    tableHeader.innerHTML = '';
-                    const sequenceHeader = document.createElement('th');
-                    sequenceHeader.textContent = '#';
-                    tableHeader.appendChild(sequenceHeader);
-                    header1.forEach(header => {
-                        const th = document.createElement('th');
-                        th.textContent = header;
-                        tableHeader.appendChild(th);
+                    document.getElementById('showMatchedBtn').addEventListener('click', function() {
+                        showData(header1, matchedData);
                     });
 
-                    const tableBody = document.getElementById('tableBody');
-                    tableBody.innerHTML = '';
-                    unmatchedData.forEach(([id, row], index) => {
-                        const tr = document.createElement('tr');
-                        const sequenceCell = document.createElement('td');
-                        sequenceCell.textContent = index + 1;
-                        tr.appendChild(sequenceCell);
-                        row.forEach(cell => {
-                            const td = document.createElement('td');
-                            td.textContent = cell;
-                            tr.appendChild(td);
+                    document.getElementById('showUnmatchedBtn').addEventListener('click', function() {
+                        showData(header1, unmatchedData);
+                    });
+
+                    function showData(header, data) {
+                        const tableHeader = document.getElementById('tableHeader');
+                        tableHeader.innerHTML = '';
+                        const sequenceHeader = document.createElement('th');
+                        sequenceHeader.textContent = '#';
+                        tableHeader.appendChild(sequenceHeader);
+                        header.forEach(header => {
+                            const th = document.createElement('th');
+                            th.textContent = header;
+                            tableHeader.appendChild(th);
                         });
-                        tableBody.appendChild(tr);
-                    });
 
-                    document.getElementById('unmatchedTable').style.display = 'table';
+                        const tableBody = document.getElementById('tableBody');
+                        tableBody.innerHTML = '';
+                        data.forEach(([id, row], index) => {
+                            const tr = document.createElement('tr');
+                            const sequenceCell = document.createElement('td');
+                            sequenceCell.textContent = index + 1;
+                            tr.appendChild(sequenceCell);
+                            row.forEach(cell => {
+                                const td = document.createElement('td');
+                                td.textContent = cell;
+                                tr.appendChild(td);
+                            });
+                            tableBody.appendChild(tr);
+                        });
+
+                        document.getElementById('dataTable').style.display = 'table';
+                    }
                 }).catch(error => {
                     console.error('Error reading files:', error);
                     alert('خطأ في معالجة الملفات!');
@@ -221,3 +218,5 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src
+</body>
+</html>
