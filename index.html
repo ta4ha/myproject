@@ -5,10 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>File Uploader</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
     <style>
         body {
             background-color: #f8f9fa;
+            font-family: 'Tajawal', sans-serif;
         }
         .card {
             margin-top: 20px;
@@ -64,7 +66,8 @@
         </div>
 
         <div class="text-center mt-4">
-            <a id="downloadLink" class="btn btn-success" style="display: none;">Download CSV</a>
+            <a id="downloadCsvLink" class="btn btn-success" style="display: none;">Download CSV</a>
+            <a id="downloadXlsxLink" class="btn btn-info" style="display: none;">Download XLSX</a>
         </div>
     </div>
 
@@ -111,13 +114,27 @@
                     const blob = new Blob([new TextEncoder().encode(resultCsv)], { type: 'text/csv;charset=utf-8;' });
                     const url = URL.createObjectURL(blob);
 
-                    const downloadLink = document.getElementById('downloadLink');
-                    downloadLink.href = url;
-                    downloadLink.download = 'unmatched_data.csv';
-                    downloadLink.style.display = 'block';
+                    const downloadCsvLink = document.getElementById('downloadCsvLink');
+                    downloadCsvLink.href = url;
+                    downloadCsvLink.download = 'unmatched_data.csv';
+                    downloadCsvLink.style.display = 'block';
+
+                    const ws = XLSX.utils.aoa_to_sheet([header1, ...unmatchedData.map(([id, row]) => row)]);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+                    const xlsxBlob = new Blob([XLSX.write(wb, { bookType: 'xlsx', type: 'array' })], { type: 'application/octet-stream' });
+                    const xlsxUrl = URL.createObjectURL(xlsxBlob);
+
+                    const downloadXlsxLink = document.getElementById('downloadXlsxLink');
+                    downloadXlsxLink.href = xlsxUrl;
+                    downloadXlsxLink.download = 'unmatched_data.xlsx';
+                    downloadXlsxLink.style.display = 'block';
 
                     const tableHeader = document.getElementById('tableHeader');
                     tableHeader.innerHTML = '';
+                    const sequenceHeader = document.createElement('th');
+                    sequenceHeader.textContent = '#';
+                    tableHeader.appendChild(sequenceHeader);
                     header1.forEach(header => {
                         const th = document.createElement('th');
                         th.textContent = header;
@@ -126,8 +143,11 @@
 
                     const tableBody = document.getElementById('tableBody');
                     tableBody.innerHTML = '';
-                    unmatchedData.forEach(([id, row]) => {
+                    unmatchedData.forEach(([id, row], index) => {
                         const tr = document.createElement('tr');
+                        const sequenceCell = document.createElement('td');
+                        sequenceCell.textContent = index + 1;
+                        tr.appendChild(sequenceCell);
                         row.forEach(cell => {
                             const td = document.createElement('td');
                             td.textContent = cell;
