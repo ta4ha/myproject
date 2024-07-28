@@ -21,9 +21,9 @@
             <button type="submit" class="btn btn-primary">Upload and Process</button>
         </form>
 
-        <h2 class="text-center mb-4">Matched Data</h2>
+        <h2 class="text-center mb-4">Unmatched Data</h2>
         <div class="table-responsive">
-            <table id="matchedTable" class="table table-bordered table-hover" style="display: none;">
+            <table id="unmatchedTable" class="table table-bordered table-hover" style="display: none;">
                 <thead class="thead-dark">
                     <tr id="tableHeader"></tr>
                 </thead>
@@ -65,9 +65,9 @@
                     const data2 = new Map(csv2.map(row => [row[idIndex], row]));
 
                     const uniqueData = [...data1].filter(([id, row]) => !data2.has(id));
-                    const matchedData = [...data1].filter(([id, row]) => data2.has(id));
+                    const unmatchedData = [...uniqueData, ...[...data2].filter(([id, row]) => !data1.has(id))];
 
-                    const resultCsv = [header1, ...uniqueData.map(([id, row]) => row)]
+                    const resultCsv = [header1, ...unmatchedData.map(([id, row]) => row)]
                         .map(row => row.join(',')).join('\n');
 
                     const blob = new Blob([new TextEncoder().encode(resultCsv)], { type: 'text/csv;charset=utf-8;' });
@@ -75,7 +75,7 @@
 
                     const downloadLink = document.getElementById('downloadLink');
                     downloadLink.href = url;
-                    downloadLink.download = 'unique_data.csv';
+                    downloadLink.download = 'unmatched_data.csv';
                     downloadLink.style.display = 'block';
 
                     const tableHeader = document.getElementById('tableHeader');
@@ -88,7 +88,7 @@
 
                     const tableBody = document.getElementById('tableBody');
                     tableBody.innerHTML = '';
-                    matchedData.forEach(([id, row]) => {
+                    unmatchedData.forEach(([id, row]) => {
                         const tr = document.createElement('tr');
                         row.forEach(cell => {
                             const td = document.createElement('td');
@@ -98,7 +98,7 @@
                         tableBody.appendChild(tr);
                     });
 
-                    document.getElementById('matchedTable').style.display = 'table';
+                    document.getElementById('unmatchedTable').style.display = 'table';
                 }).catch(error => {
                     console.error('Error reading files:', error);
                     alert('Error processing files!');
