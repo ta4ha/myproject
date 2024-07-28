@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Uploader</title>
+    <title>رافع الملفات</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
@@ -22,36 +22,68 @@
             text-align: center;
             margin-top: 20px;
         }
+        .file-input-container {
+            position: relative;
+        }
+        .file-input-container input[type="file"] {
+            position: absolute;
+            top: 0;
+            right: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        .file-input-label {
+            display: block;
+            background-color: #007bff;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid #007bff;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .file-input-label:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        .file-input-label:active {
+            background-color: #004085;
+            border-color: #004085;
+        }
     </style>
 </head>
 <body>
     <header class="bg-primary text-white text-center py-3">
-        <h1>File Uploader</h1>
+        <h1>رافع الملفات</h1>
     </header>
 
     <div class="container mt-5">
         <div class="card">
             <div class="card-header bg-dark text-white">
-                <h2>Upload Two Files (CSV/XLSX)</h2>
+                <h2>رفع ملفين (CSV/XLSX)</h2>
             </div>
             <div class="card-body">
                 <form id="uploadForm">
-                    <div class="form-group">
-                        <label for="file1">File 1:</label>
-                        <input type="file" class="form-control-file" id="file1" accept=".csv, .xlsx" required>
+                    <div class="form-group file-input-container">
+                        <label for="file1" class="file-input-label">اختر الملف الأول (CSV/XLSX)</label>
+                        <input type="file" id="file1" accept=".csv, .xlsx" required>
                     </div>
-                    <div class="form-group">
-                        <label for="file2">File 2:</label>
-                        <input type="file" class="form-control-file" id="file2" accept=".csv, .xlsx" required>
+                    <div class="form-group file-input-container mt-3">
+                        <label for="file2" class="file-input-label">اختر الملف الثاني (CSV/XLSX)</label>
+                        <input type="file" id="file2" accept=".csv, .xlsx" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">Upload and Process</button>
+                    <button type="submit" class="btn btn-primary mt-3">رفع ومعالجة</button>
                 </form>
             </div>
         </div>
 
         <div class="card mt-4">
             <div class="card-header bg-success text-white">
-                <h2>Unmatched Data</h2>
+                <h2>البيانات غير المطابقة</h2>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -66,14 +98,14 @@
         </div>
 
         <div class="text-center mt-4">
-            <a id="downloadCsvLink" class="btn btn-success" style="display: none;">Download CSV</a>
-            <a id="downloadXlsxLink" class="btn btn-info" style="display: none;">Download XLSX</a>
+            <a id="downloadCsvLink" class="btn btn-success" style="display: none;">تحميل CSV</a>
+            <a id="downloadXlsxLink" class="btn btn-info" style="display: none;">تحميل XLSX</a>
         </div>
     </div>
 
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2024 File Uploader. All rights reserved.</p>
+            <p>&copy; 2024 رافع الملفات. جميع الحقوق محفوظة.</p>
         </div>
     </footer>
 
@@ -81,7 +113,7 @@
         document.getElementById('uploadForm').addEventListener('submit', function(event) {
             event.preventDefault();
             const file1 = document.getElementById('file1').files[0];
-            const file2 = document.getElementById('file2').files[0];
+            const file2 = document.getElementById('file2').files[0'];
 
             if (file1 && file2) {
                 Promise.all([readFile(file1), readFile(file2)]).then(contents => {
@@ -92,13 +124,13 @@
                     const header2 = csv2.shift();
 
                     if (JSON.stringify(header1) !== JSON.stringify(header2)) {
-                        alert('Files have different headers!');
+                        alert('ملفات CSV تحتوي على رؤوس مختلفة!');
                         return;
                     }
 
                     const idIndex = header1.indexOf('id');
                     if (idIndex === -1) {
-                        alert('No "id" column found in the headers!');
+                        alert('لا يوجد عمود "id" في الرؤوس!');
                         return;
                     }
 
@@ -159,7 +191,7 @@
                     document.getElementById('unmatchedTable').style.display = 'table';
                 }).catch(error => {
                     console.error('Error reading files:', error);
-                    alert('Error processing files!');
+                    alert('خطأ في معالجة الملفات!');
                 });
             }
         });
@@ -188,6 +220,4 @@
     </script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
-</html>
+    <script src
