@@ -1,21 +1,20 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>File Uploader</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
     <style>
+
         body {
             background-color: #f8f9fa;
             font-family: 'Tajawal', sans-serif;
-            direction: rtl;
-            text-align: right;
         }
         .card {
             margin-top: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         .footer {
             background-color: #343e48;
@@ -24,42 +23,36 @@
             text-align: center;
             margin-top: 20px;
         }
-        .header, .card-header {
-            border-radius: 0;
-        }
-        .btn {
-            border-radius: 50px;
-        }
     </style>
-</head>
+</head >
 <body>
     <header class="bg-info text-white text-center py-3">
-        <h1>رافع الملفات</h1>
+        <h1>File Uploader</h1>
     </header>
 
     <div class="container mt-5">
         <div class="card">
             <div class="card-header bg-dark text-white">
-                <h2>رفع ملفين (CSV/XLSX)</h2>
+                <h2>Upload Two Files (CSV/XLSX)</h2>
             </div>
             <div class="card-body">
                 <form id="uploadForm">
                     <div class="form-group">
-                        <label for="file1">الملف 1:</label>
+                        <label for="file1">File 1:</label>
                         <input type="file" class="form-control-file" id="file1" accept=".csv, .xlsx" required>
                     </div>
                     <div class="form-group">
-                        <label for="file2">الملف 2:</label>
+                        <label for="file2">File 2:</label>
                         <input type="file" class="form-control-file" id="file2" accept=".csv, .xlsx" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">رفع ومعالجة</button>
+                    <button type="submit" class="btn btn-primary">Upload and Process</button>
                 </form>
             </div>
         </div>
 
         <div class="card mt-4">
             <div class="card-header bg-success text-white">
-                <h2>البيانات</h2>
+                <h2>Data</h2>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -71,26 +64,25 @@
                     </table>
                 </div>
                 <div class="text-center mt-4">
-                    <button id="showUnmatchedBtn" class="btn btn-warning" style="display: none;">عرض البيانات غير المتطابقة</button>
-                    <button id="showMatchedBtn" class="btn btn-info" style="display: none;">عرض البيانات المتطابقة</button>
+                    <button id="showUnmatchedBtn" class="btn btn-warning" style="display: none;">Show Unmatched Data</button>
+                    <button id="showMatchedBtn" class="btn btn-info" style="display: none;">Show Matched Data</button>
                 </div>
             </div>
         </div>
 
         <div class="text-center mt-4">
-            <a id="downloadUnmatchedCsvLink" class="btn btn-success" style="display: none;">تحميل CSV غير المتطابق</a>
-            <a id="downloadUnmatchedXlsxLink" class="btn btn-info" style="display: none;">تحميل XLSX غير المتطابق</a>
-            <a id="downloadMatchedCsvLink" class="btn btn-success" style="display: none;">تحميل CSV المتطابق</a>
-            <a id="downloadMatchedXlsxLink" class="btn btn-info" style="display: none;">تحميل XLSX المتطابق</a>
+            <a id="downloadUnmatchedCsvLink" class="btn btn-success" style="display: none;">Download Unmatched CSV</a>
+            <a id="downloadUnmatchedXlsxLink" class="btn btn-info" style="display: none;">Download Unmatched XLSX</a>
+            <a id="downloadMatchedCsvLink" class="btn btn-success" style="display: none;">Download Matched CSV</a>
+            <a id="downloadMatchedXlsxLink" class="btn btn-info" style="display: none;">Download Matched XLSX</a>
         </div>
     </div>
 
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2024 رافع الملفات. جميع الحقوق محفوظة.</p>
+            <p>&copy; 2024 File Uploader. All rights reserved.</p>
         </div>
     </footer>
-
 
     <script>
         document.getElementById('uploadForm').addEventListener('submit', function(event) {
