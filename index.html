@@ -27,32 +27,32 @@
 </head >
 <body>
     <header class="bg-info text-white text-center py-3">
-        <h1>File Uploader</h1>
+        <h1>رفع الملفا</h1>
     </header>
 
     <div class="container mt-5">
         <div class="card">
-            <div class="card-header bg-dark text-white">
-                <h2>Upload Two Files (CSV/XLSX)</h2>
+            <div class="card-header bg-dark text-white-right">
+                <h2>ارفع الملف بصيعة xlsx او csv</h2>
             </div>
             <div class="card-body">
                 <form id="uploadForm">
                     <div class="form-group">
-                        <label for="file1">File 1:</label>
+                        <label for="file1">الملف 1:</label>
                         <input type="file" class="form-control-file" id="file1" accept=".csv, .xlsx" required>
                     </div>
                     <div class="form-group">
-                        <label for="file2">File 2:</label>
+                        <label for="file2">الملف 2:</label>
                         <input type="file" class="form-control-file" id="file2" accept=".csv, .xlsx" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">Upload and Process</button>
+                    <button type="submit" class="btn btn-primary">رفع ومعالجة</button>
                 </form>
             </div>
         </div>
 
         <div class="card mt-4">
             <div class="card-header bg-success text-white">
-                <h2>Data</h2>
+                <h2>البيانات</h2>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -64,17 +64,17 @@
                     </table>
                 </div>
                 <div class="text-center mt-4">
-                    <button id="showUnmatchedBtn" class="btn btn-warning" style="display: none;">Show Unmatched Data</button>
-                    <button id="showMatchedBtn" class="btn btn-info" style="display: none;">Show Matched Data</button>
+                    <button id="showUnmatchedBtn" class="btn btn-warning" style="display: none;">البيانات الغير مطابقة</button>
+                    <button id="showMatchedBtn" class="btn btn-info" style="display: none;">البيانات المطابقة</button>
                 </div>
             </div>
         </div>
 
         <div class="text-center mt-4">
-            <a id="downloadUnmatchedCsvLink" class="btn btn-success" style="display: none;">Download Unmatched CSV</a>
-            <a id="downloadUnmatchedXlsxLink" class="btn btn-info" style="display: none;">Download Unmatched XLSX</a>
-            <a id="downloadMatchedCsvLink" class="btn btn-success" style="display: none;">Download Matched CSV</a>
-            <a id="downloadMatchedXlsxLink" class="btn btn-info" style="display: none;">Download Matched XLSX</a>
+            <a id="downloadUnmatchedCsvLink" class="btn btn-success" style="display: none;">حمل الملف CSV</a>
+            <a id="downloadUnmatchedXlsxLink" class="btn btn-info" style="display: none;">حمل الملفXLSX</a>
+            <a id="downloadMatchedCsvLink" class="btn btn-success" style="display: none;">حمل الملف CSV</a>
+            <a id="downloadMatchedXlsxLink" class="btn btn-info" style="display: none;">حمل الملف XLSX</a>
         </div>
     </div>
 
