@@ -25,9 +25,10 @@ document.getElementById('uploadForm').addEventListener('submit', function(event)
             const data1 = new Map(csv1.map(row => [row[idIndex], row]));
             const data2 = new Map(csv2.map(row => [row[idIndex], row]));
 
-            const uniqueData = [...data1].filter(([id, row]) => !data2.has(id));
-            const unmatchedData = [...uniqueData, ...[...data2].filter(([id, row]) => !data1.has(id))];
-            const matchedData = [...data1].filter(([id, row]) => data2.has(id));
+            const unmatchedData1 = [...data1].filter(([id]) => !data2.has(id));
+            const unmatchedData2 = [...data2].filter(([id]) => !data1.has(id));
+            const unmatchedData = [...unmatchedData1, ...unmatchedData2];
+            const matchedData = [...data1].filter(([id]) => data2.has(id));
 
             displayTable(header1, unmatchedData);
 
@@ -75,9 +76,9 @@ function displayTable(header, data) {
     const sequenceHeader = document.createElement('th');
     sequenceHeader.textContent = '#';
     tableHeader.appendChild(sequenceHeader);
-    header.forEach(header => {
+    header.forEach(headerItem => {
         const th = document.createElement('th');
-        th.textContent = header;
+        th.textContent = headerItem;
         tableHeader.appendChild(th);
     });
 
@@ -141,4 +142,31 @@ function setupDownloadLinks(header, data, type) {
     }
 }
 
+// Update the label of the file input to show the file name
+document.querySelectorAll('.custom-file-input').forEach(input => {
+    input.addEventListener('change', function (e) {
+        const fileName = e.target.files[0].name;
+        e.target.nextElementSibling.innerText = fileName;
+    });
+});
 
+// Bootstrap validation for forms
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        const forms = document.getElementsByClassName('needs-validation');
+        Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                } else {
+                    event.preventDefault(); // Prevent actual form submission for demonstration
+                    // Show the data card after processing
+                    document.getElementById('dataCard').style.display = 'block';
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
