@@ -43,18 +43,21 @@
             </div>
             <div class="card-body">
                 <form id="uploadForm">
-                    <div class="form-group">
-                        <label for="file1">الملف 1:</label>
-                        <input type="file" class="form-control-file" id="file1" accept=".csv, .xlsx" required>
+                    <div id="fileInputs">
+                        <div class="form-group">
+                            <label for="file1">الملف 1:</label>
+                            <input type="file" class="form-control-file" name="files" accept=".csv, .xlsx" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="file2">الملف 2:</label>
+                            <input type="file" class="form-control-file" name="files" accept=".csv, .xlsx" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="file3">الملف 3:</label>
+                            <input type="file" class="form-control-file" name="files" accept=".csv, .xlsx" required>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="file2">الملف 2:</label>
-                        <input type="file" class="form-control-file" id="file2" accept=".csv, .xlsx" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="file3">الملف 3:</label>
-                        <input type="file" class="form-control-file" id="file3" accept=".csv, .xlsx" required>
-                    </div>
+                    <button type="button" class="btn btn-secondary mb-3" id="addFile">أضف ملف آخر</button>
                     <button type="submit" class="btn btn-primary">دمج الملفات</button>
                 </form>
             </div>
@@ -84,26 +87,38 @@
     </footer>
 
     <script>
+        document.getElementById('addFile').addEventListener('click', function() {
+            const fileInputs = document.getElementById('fileInputs');
+            const fileCount = fileInputs.getElementsByTagName('input').length + 1;
+            const formGroup = document.createElement('div');
+            formGroup.className = 'form-group';
+            const label = document.createElement('label');
+            label.textContent = `الملف ${fileCount}:`;
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.className = 'form-control-file';
+            input.name = 'files';
+            input.accept = '.csv, .xlsx';
+            input.required = true;
+            formGroup.appendChild(label);
+            formGroup.appendChild(input);
+            fileInputs.appendChild(formGroup);
+        });
+
         document.getElementById('uploadForm').addEventListener('submit', function(event) {
             event.preventDefault();
-            const file1 = document.getElementById('file1').files[0];
-            const file2 = document.getElementById('file2').files[0];
-            const file3 = document.getElementById('file3').files[0];
+            const files = document.querySelectorAll('input[name="files"]');
+            const filePromises = Array.from(files).map(fileInput => readFile(fileInput.files[0]));
 
-            if (file1 && file2 && file3) {
-                Promise.all([readFile(file1), readFile(file2), readFile(file3)]).then(contents => {
-                    const data1 = parseCSV(contents[0]);
-                    const data2 = parseCSV(contents[1]);
-                    const data3 = parseCSV(contents[2]);
+            Promise.all(filePromises).then(contents => {
+                const datasets = contents.map(parseCSV);
+                const mergedData = mergeData(datasets);
+                displayTable(mergedData.header, mergedData.data);
 
-                    const mergedData = mergeData([data1, data2, data3]);
-                    displayTable(mergedData.header, mergedData.data);
-
-                }).catch(error => {
-                    console.error('Error reading files:', error);
-                    alert('Error processing files!');
-                });
-            }
+            }).catch(error => {
+                console.error('Error reading files:', error);
+                alert('Error processing files!');
+            });
         });
 
         function readFile(file) {
@@ -137,7 +152,6 @@
         function mergeData(datasets) {
             const mergedHeaderSet = new Set();
             const dataMaps = [];
-            const idIndexes = [];
 
             datasets.forEach(dataset => {
                 dataset.header.forEach(header => mergedHeaderSet.add(header));
@@ -146,7 +160,6 @@
                     alert('No "id" column found in the headers!');
                     return;
                 }
-                idIndexes.push(idIndex);
                 const dataMap = new Map(dataset.rows.map(row => [row[idIndex], row]));
                 dataMaps.push({ dataMap, header: dataset.header });
             });
@@ -154,7 +167,7 @@
             const mergedHeader = Array.from(mergedHeaderSet);
             const mergedDataMap = new Map();
 
-            dataMaps.forEach(({ dataMap, header }, index) => {
+            dataMaps.forEach(({ dataMap, header }) => {
                 dataMap.forEach((row, id) => {
                     if (!mergedDataMap.has(id)) {
                         mergedDataMap.set(id, Array(mergedHeader.length).fill(null));
@@ -194,7 +207,7 @@
                 row.forEach((cell, colIndex) => {
                     const td = document.createElement('td');
                     td.textContent = cell ? cell : '';
-                    if (header.includes(header[colIndex]) && header[colIndex] !== 'id') {
+                    if (header[colIndex] !== 'id') {
                         td.classList.add('merged-column'); // تطبيق اللون المميز
                     }
                     tr.appendChild(td);
