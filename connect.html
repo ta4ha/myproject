@@ -40,14 +40,21 @@
             </div>
             <div class="card-body">
                 <form id="uploadForm">
-                    <div class="form-group">
-                        <label for="file1">الملف 1:</label>
-                        <input type="file" class="form-control-file" id="file1" accept=".csv, .xlsx" required>
+                    <div id="fileInputs">
+                        <div class="form-group">
+                            <label for="file1">الملف 1:</label>
+                            <input type="file" class="form-control-file" name="files" accept=".csv, .xlsx" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="file2">الملف 2:</label>
+                            <input type="file" class="form-control-file" name="files" accept=".csv, .xlsx" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="file3">الملف 3:</label>
+                            <input type="file" class="form-control-file" name="files" accept=".csv, .xlsx" required>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="file2">الملف 2:</label>
-                        <input type="file" class="form-control-file" id="file2" accept=".csv, .xlsx" required>
-                    </div>
+                    <button type="button" class="btn btn-secondary mb-3" id="addFile">أضف ملف آخر</button>
                     <button type="submit" class="btn btn-primary">دمج الملفات</button>
                 </form>
             </div>
@@ -66,6 +73,10 @@
                         <tbody id="tableBody"></tbody>
                     </table>
                 </div>
+                <div class="text-center mt-4">
+                    <a id="downloadCSV" class="btn btn-success" style="display: none;">تحميل كملف CSV</a>
+                    <a id="downloadExcel" class="btn btn-info" style="display: none;">تحميل كملف Excel</a>
+                </div>
             </div>
         </div>
     </div>
@@ -77,24 +88,39 @@
     </footer>
 
     <script>
+        document.getElementById('addFile').addEventListener('click', function() {
+            const fileInputs = document.getElementById('fileInputs');
+            const fileCount = fileInputs.getElementsByTagName('input').length + 1;
+            const formGroup = document.createElement('div');
+            formGroup.className = 'form-group';
+            const label = document.createElement('label');
+            label.textContent = `الملف ${fileCount}:`;
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.className = 'form-control-file';
+            input.name = 'files';
+            input.accept = '.csv, .xlsx';
+            input.required = true;
+            formGroup.appendChild(label);
+            formGroup.appendChild(input);
+            fileInputs.appendChild(formGroup);
+        });
+
         document.getElementById('uploadForm').addEventListener('submit', function(event) {
             event.preventDefault();
-            const file1 = document.getElementById('file1').files[0];
-            const file2 = document.getElementById('file2').files[0];
+            const files = document.querySelectorAll('input[name="files"]');
+            const filePromises = Array.from(files).map(fileInput => readFile(fileInput.files[0]));
 
-            if (file1 && file2) {
-                Promise.all([readFile(file1), readFile(file2)]).then(contents => {
-                    const data1 = parseCSV(contents[0]);
-                    const data2 = parseCSV(contents[1]);
+            Promise.all(filePromises).then(contents => {
+                const datasets = contents.map(parseCSV);
+                const mergedData = mergeData(datasets);
+                displayTable(mergedData.header, mergedData.data);
+                setupDownloadLinks(mergedData.header, mergedData.data);
 
-                    const mergedData = mergeData([data1, data2]);
-                    displayTable(mergedData.header, mergedData.data);
-
-                }).catch(error => {
-                    console.error('Error reading files:', error);
-                    alert('Error processing files!');
-                });
-            }
+            }).catch(error => {
+                console.error('Error reading files:', error);
+                alert('Error processing files!');
+            });
         });
 
         function readFile(file) {
@@ -189,6 +215,28 @@
             });
 
             document.getElementById('dataTable').style.display = 'table';
+            document.getElementById('downloadCSV').style.display = 'inline-block';
+            document.getElementById('downloadExcel').style.display = 'inline-block';
+        }
+
+        function setupDownloadLinks(header, data) {
+            const csvContent = [header, ...data].map(row => row.join(',')).join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+
+            const downloadCSV = document.getElementById('downloadCSV');
+            downloadCSV.href = url;
+            downloadCSV.download = 'merged_data.csv';
+
+            const ws = XLSX.utils.aoa_to_sheet([header, ...data]);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+            const xlsxBlob = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+            const xlsxUrl = URL.createObjectURL(new Blob([xlsxBlob], { type: 'application/octet-stream' }));
+
+            const downloadExcel = document.getElementById('downloadExcel');
+            downloadExcel.href = xlsxUrl;
+            downloadExcel.download = 'merged_data.xlsx';
         }
     </script>
 
