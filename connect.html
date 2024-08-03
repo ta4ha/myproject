@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دمج الملفات</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Tajawal', sans-serif;
+        }
+        .card {
+            margin-top: 20px;
+        }
+        .footer {
+            background-color: #343e48;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">File Merger</a>
+    </nav>
+
+    <header class="bg-info text-white text-center py-3">
+        <h1>دمج الملفات</h1>
+    </header>
+
+    <div class="container mt-5">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2>ارفع الملفات بصيغة xlsx أو csv</h2>
+            </div>
+            <div class="card-body">
+                <form id="uploadForm">
+                    <div class="form-group">
+                        <label for="file1">الملف 1:</label>
+                        <input type="file" class="form-control-file" id="file1" accept=".csv, .xlsx" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="file2">الملف 2:</label>
+                        <input type="file" class="form-control-file" id="file2" accept=".csv, .xlsx" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="file3">الملف 3:</label>
+                        <input type="file" class="form-control-file" id="file3" accept=".csv, .xlsx" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">دمج الملفات</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header bg-success text-white">
+                <h2>البيانات المدمجة</h2>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="dataTable" class="table table-bordered table-hover" style="display: none;">
+                        <thead class="thead-dark">
+                            <tr id="tableHeader"></tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 File Merger. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const file1 = document.getElementById('file1').files[0];
+            const file2 = document.getElementById('file2').files[0];
+            const file3 = document.getElementById('file3').files[0];
+
+            if (file1 && file2 && file3) {
+                Promise.all([readFile(file1), readFile(file2), readFile(file3)]).then(contents => {
+                    const data1 = parseCSV(contents[0]);
+                    const data2 = parseCSV(contents[1]);
+                    const data3 = parseCSV(contents[2]);
+
+                    const mergedData = mergeData([data1, data2, data3]);
+                    displayTable(mergedData.header, mergedData.data);
+
+                }).catch(error => {
+                    console.error('Error reading files:', error);
+                    alert('Error processing files!');
+                });
+            }
+        });
+
+        function readFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const data = new Uint8Array(event.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    const csv = XLSX.utils.sheet_to_csv(worksheet);
+                    resolve(csv);
+                };
+                reader.onerror = function(event) {
+                    reject(event);
+                };
+                if (file.name.endsWith('.csv')) {
+                    reader.readAsText(file);
+                } else if (file.name.endsWith('.xlsx')) {
+                    reader.readAsArrayBuffer(file);
+                }
+            });
+        }
+
+        function parseCSV(csv) {
+            const rows = csv.split('\n').map(row => row.split(','));
+            const header = rows.shift();
+            return { header, rows };
+        }
+
+        function mergeData(datasets) {
+            const [firstDataset, ...otherDatasets] = datasets;
+            const { header } = firstDataset;
+            const idIndex = header.indexOf('id');
+            if (idIndex === -1) {
+                alert('No "id" column found in the headers!');
+                return;
+            }
+
+            const dataMap = new Map(firstDataset.rows.map(row => [row[idIndex], row]));
+
+            for (const dataset of otherDatasets) {
+                for (const row of dataset.rows) {
+                    const id = row[idIndex];
+                    if (dataMap.has(id)) {
+                        const existingRow = dataMap.get(id);
+                        for (let i = 0; i < row.length; i++) {
+                            if (!existingRow[i] && row[i]) {
+                                existingRow[i] = row[i];
+                            }
+                        }
+                    } else {
+                        dataMap.set(id, row);
+                    }
+                }
+            }
+
+            return { header, data: Array.from(dataMap.values()) };
+        }
+
+        function displayTable(header, data) {
+            const tableHeader = document.getElementById('tableHeader');
+            tableHeader.innerHTML = '';
+            const sequenceHeader = document.createElement('th');
+            sequenceHeader.textContent = '#';
+            tableHeader.appendChild(sequenceHeader);
+            header.forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header;
+                tableHeader.appendChild(th);
+            });
+
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+            data.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                const sequenceCell = document.createElement('td');
+                sequenceCell.textContent = index + 1;
+                tr.appendChild(sequenceCell);
+                row.forEach(cell => {
+                    const td = document.createElement('td');
+                    td.textContent = cell;
+                    tr.appendChild(td);
+                });
+                tableBody.appendChild(tr);
+            });
+
+            document.getElementById('dataTable').style.display = 'table';
+        }
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
