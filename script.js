@@ -151,22 +151,4 @@ document.querySelectorAll('.custom-file-input').forEach(input => {
 });
 
 // Bootstrap validation for forms
-(function() {
-    'use strict';
-    window.addEventListener('load', function() {
-        const forms = document.getElementsByClassName('needs-validation');
-        Array.prototype.filter.call(forms, function(form) {
-            form.addEventListener('submit', function(event) {
-                if (form.checkValidity() === false) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                } else {
-                    event.preventDefault(); // Prevent actual form submission for demonstration
-                    // Show the data card after processing
-                    document.getElementById('dataCard').style.display = 'block';
-                }
-                form.classList.add('was-validated');
-            }, false);
-        });
-    }, false);
-})();
+
