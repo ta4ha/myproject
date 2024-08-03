@@ -133,7 +133,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-        // Update the label of the file input to show the file name
+        // تحديث التسمية عند اختيار ملف
         document.querySelectorAll('.custom-file-input').forEach(input => {
             input.addEventListener('change', function (e) {
                 const fileName = e.target.files[0].name;
@@ -141,7 +141,7 @@
             });
         });
 
-        // Bootstrap validation for forms
+        // التحقق من صحة النموذج باستخدام Bootstrap
         (function() {
             'use strict';
             window.addEventListener('load', function() {
