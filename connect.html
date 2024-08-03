@@ -136,6 +136,7 @@
             const dataMaps = [];
             const idIndexes = [];
 
+            // جمع كل العناوين في مجموعة لتجنب التكرار
             datasets.forEach(dataset => {
                 dataset.header.forEach(header => mergedHeaderSet.add(header));
                 const idIndex = dataset.header.indexOf('id');
@@ -151,6 +152,7 @@
             const mergedHeader = Array.from(mergedHeaderSet);
             const mergedDataMap = new Map();
 
+            // دمج البيانات من كل خريطة بيانات
             dataMaps.forEach(({ dataMap, header }, index) => {
                 dataMap.forEach((row, id) => {
                     if (!mergedDataMap.has(id)) {
