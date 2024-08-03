@@ -126,41 +126,41 @@
         }
 
         function parseCSV(csv) {
-            const rows = csv.split('\n').map(row => row.split(','));
+            const rows = csv.trim().split('\n').map(row => row.split(','));
             const header = rows.shift();
             return { header, rows };
         }
 
         function mergeData(datasets) {
             const mergedHeaderSet = new Set();
-            const idIndexMap = {};
-            const dataMaps = datasets.map(dataset => {
+            const dataMaps = [];
+            const idIndexes = [];
+
+            datasets.forEach(dataset => {
                 dataset.header.forEach(header => mergedHeaderSet.add(header));
                 const idIndex = dataset.header.indexOf('id');
                 if (idIndex === -1) {
                     alert('No "id" column found in the headers!');
                     return;
                 }
-                idIndexMap[dataset.header] = idIndex;
-                return new Map(dataset.rows.map(row => [row[idIndex], row]));
+                idIndexes.push(idIndex);
+                const dataMap = new Map(dataset.rows.map(row => [row[idIndex], row]));
+                dataMaps.push({ dataMap, header: dataset.header });
             });
 
             const mergedHeader = Array.from(mergedHeaderSet);
-            const idIndex = mergedHeader.indexOf('id');
-
             const mergedDataMap = new Map();
 
-            dataMaps.forEach((dataMap, datasetIndex) => {
+            dataMaps.forEach(({ dataMap, header }, index) => {
                 dataMap.forEach((row, id) => {
                     if (!mergedDataMap.has(id)) {
                         mergedDataMap.set(id, Array(mergedHeader.length).fill(null));
                     }
                     const mergedRow = mergedDataMap.get(id);
-                    const datasetHeader = datasets[datasetIndex].header;
-                    datasetHeader.forEach((header, columnIndex) => {
-                        const mergedColumnIndex = mergedHeader.indexOf(header);
-                        if (mergedColumnIndex !== -1 && row[columnIndex]) {
-                            mergedRow[mergedColumnIndex] = row[columnIndex];
+                    header.forEach((colHeader, colIndex) => {
+                        const mergedColIndex = mergedHeader.indexOf(colHeader);
+                        if (mergedColIndex !== -1 && row[colIndex]) {
+                            mergedRow[mergedColIndex] = row[colIndex];
                         }
                     });
                 });
