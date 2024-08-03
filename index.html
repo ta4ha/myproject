@@ -11,6 +11,12 @@
         body {
             background-color: #f8f9fa;
             font-family: 'Tajawal', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .content {
+            flex: 1;
         }
         .card {
             margin-top: 20px;
@@ -62,7 +68,7 @@
         <h1>أهلاً بك في رفع الملفات</h1>
     </header>
 
-    <div class="container mt-5">
+    <div class="container mt-5 content">
         <div class="card">
             <div class="card-header bg-dark text-white text-center">
                 <h2>ارفع الملف بصيغة XLSX أو CSV</h2>
