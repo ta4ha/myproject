@@ -47,4 +47,56 @@
                     <button type="submit" class="btn btn-primary">رفع ومعالجة</button>
                 </form>
             </div>
-       
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header bg-success text-white">
+                <h2>البيانات</h2>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="dataTable" class="table table-bordered table-hover" style="display: none;">
+                        <thead class="thead-dark">
+                            <tr id="tableHeader"></tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+                <div class="text-center mt-4">
+                    <button id="showUnmatchedBtn" class="btn btn-warning" style="display: none;">البيانات الغير مطابقة</button>
+                    <button id="showMatchedBtn" class="btn btn-info" style="display: none;">البيانات المطابقة</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a id="downloadUnmatchedCsvLink" class="btn btn-success" style="display: none;">حمل الملف CSV</a>
+        </div>
+
+        <div class="text-center mt-4">
+            <a id="downloadUnmatchedXlsxLink" class="btn btn-info" style="display: none;">حمل الملفXLSX</a>
+        </div>
+
+        <div class="text-center mt-4">
+            <a id="downloadMatchedCsvLink" class="btn btn-success" style="display: none;">حمل الملف CSV</a>
+        </div>
+
+        <div class="text-center mt-4">
+            <a id="downloadMatchedXlsxLink" class="btn btn-info" style="display: none;">حمل الملف XLSX</a>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 File Uploader. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- إضافة مرجع لملف JavaScript -->
+    <script src="script.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
