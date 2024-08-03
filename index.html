@@ -26,15 +26,13 @@
 </head>
 <body>
     <!-- Navbar -->
- 
-
-    <header class="bg-info text-white text-center py-3">
-        <h1>Welcome World!</h1>
-    </header>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">File Uploader</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
-
                 <li class="nav-item">
                     <a class="nav-link" href="#">جديد</a>
                 </li>
@@ -50,20 +48,35 @@
             </ul>
         </div>
     </nav>
+
+    <header class="bg-info text-white text-center py-3">
+        <h1>Welcome World!</h1>
+    </header>
+
     <div class="container mt-5">
         <div class="card">
             <div class="card-header bg-dark text-white">
                 <h2>ارفع الملف بصيغة xlsx او csv</h2>
             </div>
             <div class="card-body">
-                <form id="uploadForm">
-                    <div class="form-group">
-                        <label for="file1">الملف 1:</label>
-                        <input type="file" class="form-control-file" id="file1" accept=".csv, .xlsx" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="file2">الملف 2:</label>
-                        <input type="file" class="form-control-file" id="file2" accept=".csv, .xlsx" required>
+                <form id="uploadForm" class="needs-validation" novalidate>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="file1">الملف 1:</label>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="file1" accept=".csv, .xlsx" required>
+                                <label class="custom-file-label" for="file1">اختر الملف...</label>
+                                <div class="invalid-feedback">يرجى اختيار ملف.</div>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="file2">الملف 2:</label>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="file2" accept=".csv, .xlsx" required>
+                                <label class="custom-file-label" for="file2">اختر الملف...</label>
+                                <div class="invalid-feedback">يرجى اختيار ملف.</div>
+                            </div>
+                        </div>
                     </div>
                     <button type="submit" class="btn btn-primary">رفع ومعالجة</button>
                 </form>
@@ -76,7 +89,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table id="dataTable" class="table table-bordered table-hover" style="display: none;">
+                    <table id="dataTable" class="table table-striped table-bordered table-hover" style="display: none;">
                         <thead class="thead-dark">
                             <tr id="tableHeader"></tr>
                         </thead>
@@ -95,7 +108,7 @@
         </div>
 
         <div class="text-center mt-4">
-            <a id="downloadUnmatchedXlsxLink" class="btn btn-info" style="display: none;">حمل الملفXLSX</a>
+            <a id="downloadUnmatchedXlsxLink" class="btn btn-info" style="display: none;">حمل الملف XLSX</a>
         </div>
 
         <div class="text-center mt-4">
@@ -119,5 +132,31 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // Update the label of the file input to show the file name
+        document.querySelectorAll('.custom-file-input').forEach(input => {
+            input.addEventListener('change', function (e) {
+                const fileName = e.target.files[0].name;
+                e.target.nextElementSibling.innerText = fileName;
+            });
+        });
+
+        // Bootstrap validation for forms
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                const forms = document.getElementsByClassName('needs-validation');
+                Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
 </body>
 </html>
