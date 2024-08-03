@@ -132,33 +132,41 @@
         }
 
         function mergeData(datasets) {
-            const [firstDataset, ...otherDatasets] = datasets;
-            const { header } = firstDataset;
-            const idIndex = header.indexOf('id');
-            if (idIndex === -1) {
-                alert('No "id" column found in the headers!');
-                return;
-            }
-
-            const dataMap = new Map(firstDataset.rows.map(row => [row[idIndex], row]));
-
-            for (const dataset of otherDatasets) {
-                for (const row of dataset.rows) {
-                    const id = row[idIndex];
-                    if (dataMap.has(id)) {
-                        const existingRow = dataMap.get(id);
-                        for (let i = 0; i < row.length; i++) {
-                            if (!existingRow[i] && row[i]) {
-                                existingRow[i] = row[i];
-                            }
-                        }
-                    } else {
-                        dataMap.set(id, row);
-                    }
+            const mergedHeaderSet = new Set();
+            const idIndexMap = {};
+            const dataMaps = datasets.map(dataset => {
+                dataset.header.forEach(header => mergedHeaderSet.add(header));
+                const idIndex = dataset.header.indexOf('id');
+                if (idIndex === -1) {
+                    alert('No "id" column found in the headers!');
+                    return;
                 }
-            }
+                idIndexMap[dataset.header] = idIndex;
+                return new Map(dataset.rows.map(row => [row[idIndex], row]));
+            });
 
-            return { header, data: Array.from(dataMap.values()) };
+            const mergedHeader = Array.from(mergedHeaderSet);
+            const idIndex = mergedHeader.indexOf('id');
+
+            const mergedDataMap = new Map();
+
+            dataMaps.forEach((dataMap, datasetIndex) => {
+                dataMap.forEach((row, id) => {
+                    if (!mergedDataMap.has(id)) {
+                        mergedDataMap.set(id, Array(mergedHeader.length).fill(null));
+                    }
+                    const mergedRow = mergedDataMap.get(id);
+                    const datasetHeader = datasets[datasetIndex].header;
+                    datasetHeader.forEach((header, columnIndex) => {
+                        const mergedColumnIndex = mergedHeader.indexOf(header);
+                        if (mergedColumnIndex !== -1 && row[columnIndex]) {
+                            mergedRow[mergedColumnIndex] = row[columnIndex];
+                        }
+                    });
+                });
+            });
+
+            return { header: mergedHeader, data: Array.from(mergedDataMap.values()) };
         }
 
         function displayTable(header, data) {
@@ -182,7 +190,7 @@
                 tr.appendChild(sequenceCell);
                 row.forEach(cell => {
                     const td = document.createElement('td');
-                    td.textContent = cell;
+                    td.textContent = cell ? cell : '';
                     tr.appendChild(td);
                 });
                 tableBody.appendChild(tr);
