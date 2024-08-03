@@ -22,6 +22,9 @@
             text-align: center;
             margin-top: 20px;
         }
+        .merged-column {
+            background-color: #d4edda; /* لون أخضر فاتح لتمييز الأعمدة المدمجة */
+        }
     </style>
 </head>
 <body>
@@ -136,7 +139,6 @@
             const dataMaps = [];
             const idIndexes = [];
 
-            // جمع كل العناوين في مجموعة لتجنب التكرار
             datasets.forEach(dataset => {
                 dataset.header.forEach(header => mergedHeaderSet.add(header));
                 const idIndex = dataset.header.indexOf('id');
@@ -152,7 +154,6 @@
             const mergedHeader = Array.from(mergedHeaderSet);
             const mergedDataMap = new Map();
 
-            // دمج البيانات من كل خريطة بيانات
             dataMaps.forEach(({ dataMap, header }, index) => {
                 dataMap.forEach((row, id) => {
                     if (!mergedDataMap.has(id)) {
@@ -190,9 +191,12 @@
                 const sequenceCell = document.createElement('td');
                 sequenceCell.textContent = index + 1;
                 tr.appendChild(sequenceCell);
-                row.forEach(cell => {
+                row.forEach((cell, colIndex) => {
                     const td = document.createElement('td');
                     td.textContent = cell ? cell : '';
+                    if (header.includes(header[colIndex]) && header[colIndex] !== 'id') {
+                        td.classList.add('merged-column'); // تطبيق اللون المميز
+                    }
                     tr.appendChild(td);
                 });
                 tableBody.appendChild(tr);
