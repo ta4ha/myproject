@@ -92,13 +92,13 @@
             </div>
         </div>
 
-        <div class="card mt-4">
+        <div class="card mt-4" id="dataCard" style="display: none;">
             <div class="card-header bg-success text-white text-center">
                 <h2>البيانات</h2>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table id="dataTable" class="table table-striped table-bordered table-hover" style="display: none;">
+                    <table id="dataTable" class="table table-striped table-bordered table-hover">
                         <thead class="thead-dark">
                             <tr id="tableHeader"></tr>
                         </thead>
@@ -154,6 +154,10 @@
                         if (form.checkValidity() === false) {
                             event.preventDefault();
                             event.stopPropagation();
+                        } else {
+                            event.preventDefault(); // Prevent actual form submission for demonstration
+                            // Show the data card after processing
+                            document.getElementById('dataCard').style.display = 'block';
                         }
                         form.classList.add('was-validated');
                     }, false);
