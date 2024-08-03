@@ -11,38 +11,20 @@
         body {
             background-color: #f8f9fa;
             font-family: 'Tajawal', sans-serif;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        .content {
-            flex: 1;
         }
         .card {
             margin-top: 20px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         .footer {
-            background-color: #343a40;
+            background-color: #343e48;
             color: white;
             padding: 10px 0;
             text-align: center;
             margin-top: 20px;
         }
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-        }
-        .btn-primary:hover {
-            background-color: #0056b3;
-            border-color: #004085;
-        }
     </style>
 </head>
 <body>
-    <header class="bg-info text-white text-center py-4">
-        <h1>أهلاً بك في رفع الملفات</h1>
-    </header>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <a class="navbar-brand" href="#">File Uploader</a>
@@ -55,7 +37,7 @@
                     <a class="nav-link" href="#">جديد</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">جديد</a>
+                    <a class="nav-link" href="#">جديد </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">جديد</a>
@@ -66,10 +48,15 @@
             </ul>
         </div>
     </nav>
-    <div class="container mt-5 content">
+
+    <header class="bg-info text-white text-center py-3">
+        <h1>Welcome World!</h1>
+    </header>
+
+    <div class="container mt-5">
         <div class="card">
-            <div class="card-header bg-dark text-white text-center">
-                <h2>ارفع الملف بصيغة XLSX أو CSV</h2>
+            <div class="card-header bg-dark text-white">
+                <h2>ارفع الملف بصيغة xlsx او csv</h2>
             </div>
             <div class="card-body">
                 <form id="uploadForm" class="needs-validation" novalidate>
@@ -91,18 +78,18 @@
                             </div>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-block">رفع ومعالجة</button>
+                    <button type="submit" class="btn btn-primary">رفع ومعالجة</button>
                 </form>
             </div>
         </div>
 
-        <div class="card mt-4" id="dataCard" style="display: none;">
-            <div class="card-header bg-success text-white text-center">
+        <div class="card mt-4">
+            <div class="card-header bg-success text-white">
                 <h2>البيانات</h2>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table id="dataTable" class="table table-striped table-bordered table-hover">
+                    <table id="dataTable" class="table table-striped table-bordered table-hover" style="display: none;">
                         <thead class="thead-dark">
                             <tr id="tableHeader"></tr>
                         </thead>
@@ -118,11 +105,17 @@
 
         <div class="text-center mt-4">
             <a id="downloadUnmatchedCsvLink" class="btn btn-success" style="display: none;">حمل الملف CSV</a>
+        </div>
+
+        <div class="text-center mt-4">
             <a id="downloadUnmatchedXlsxLink" class="btn btn-info" style="display: none;">حمل الملف XLSX</a>
         </div>
 
         <div class="text-center mt-4">
             <a id="downloadMatchedCsvLink" class="btn btn-success" style="display: none;">حمل الملف CSV</a>
+        </div>
+
+        <div class="text-center mt-4">
             <a id="downloadMatchedXlsxLink" class="btn btn-info" style="display: none;">حمل الملف XLSX</a>
         </div>
     </div>
@@ -158,10 +151,6 @@
                         if (form.checkValidity() === false) {
                             event.preventDefault();
                             event.stopPropagation();
-                        } else {
-                            event.preventDefault(); // Prevent actual form submission for demonstration
-                            // Show the data card after processing
-                            document.getElementById('dataCard').style.display = 'block';
                         }
                         form.classList.add('was-validated');
                     }, false);
