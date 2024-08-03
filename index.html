@@ -14,13 +14,22 @@
         }
         .card {
             margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         .footer {
-            background-color: #343e48;
+            background-color: #343a40;
             color: white;
             padding: 10px 0;
             text-align: center;
             margin-top: 20px;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
         }
     </style>
 </head>
@@ -37,7 +46,7 @@
                     <a class="nav-link" href="#">جديد</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">جديد </a>
+                    <a class="nav-link" href="#">جديد</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">جديد</a>
@@ -49,14 +58,14 @@
         </div>
     </nav>
 
-    <header class="bg-info text-white text-center py-3">
-        <h1>Welcome World!</h1>
+    <header class="bg-info text-white text-center py-4">
+        <h1>أهلاً بك في رفع الملفات</h1>
     </header>
 
     <div class="container mt-5">
         <div class="card">
-            <div class="card-header bg-dark text-white">
-                <h2>ارفع الملف بصيغة xlsx او csv</h2>
+            <div class="card-header bg-dark text-white text-center">
+                <h2>ارفع الملف بصيغة XLSX أو CSV</h2>
             </div>
             <div class="card-body">
                 <form id="uploadForm" class="needs-validation" novalidate>
@@ -78,13 +87,13 @@
                             </div>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-primary">رفع ومعالجة</button>
+                    <button type="submit" class="btn btn-primary btn-block">رفع ومعالجة</button>
                 </form>
             </div>
         </div>
 
         <div class="card mt-4">
-            <div class="card-header bg-success text-white">
+            <div class="card-header bg-success text-white text-center">
                 <h2>البيانات</h2>
             </div>
             <div class="card-body">
@@ -105,17 +114,11 @@
 
         <div class="text-center mt-4">
             <a id="downloadUnmatchedCsvLink" class="btn btn-success" style="display: none;">حمل الملف CSV</a>
-        </div>
-
-        <div class="text-center mt-4">
             <a id="downloadUnmatchedXlsxLink" class="btn btn-info" style="display: none;">حمل الملف XLSX</a>
         </div>
 
         <div class="text-center mt-4">
             <a id="downloadMatchedCsvLink" class="btn btn-success" style="display: none;">حمل الملف CSV</a>
-        </div>
-
-        <div class="text-center mt-4">
             <a id="downloadMatchedXlsxLink" class="btn btn-info" style="display: none;">حمل الملف XLSX</a>
         </div>
     </div>
