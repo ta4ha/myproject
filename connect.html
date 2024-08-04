@@ -57,15 +57,30 @@
                     <div id="fileInputs">
                         <div class="form-group">
                             <label for="file1">الملف 1:</label>
-                            <input type="file" class="form-control-file" name="files" accept=".csv, .xlsx" required>
+                            <div class="input-group">
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="file1" name="files" accept=".csv, .xlsx" required>
+                                    <label class="custom-file-label" for="file1">اختر ملف</label>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="file2">الملف 2:</label>
-                            <input type="file" class="form-control-file" name="files" accept=".csv, .xlsx" required>
+                            <div class="input-group">
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="file2" name="files" accept=".csv, .xlsx" required>
+                                    <label class="custom-file-label" for="file2">اختر ملف</label>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="file3">الملف 3:</label>
-                            <input type="file" class="form-control-file" name="files" accept=".csv, .xlsx" required>
+                            <div class="input-group">
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="file3" name="files" accept=".csv, .xlsx" required>
+                                    <label class="custom-file-label" for="file3">اختر ملف</label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <button type="button" class="btn btn-secondary" id="addFile">أضف ملف آخر</button>
@@ -109,14 +124,27 @@
             formGroup.className = 'form-group';
             const label = document.createElement('label');
             label.textContent = `الملف ${fileCount}:`;
+            const inputGroup = document.createElement('div');
+            inputGroup.className = 'input-group';
+            const customFile = document.createElement('div');
+            customFile.className = 'custom-file';
             const input = document.createElement('input');
             input.type = 'file';
-            input.className = 'form-control-file';
+            input.className = 'custom-file-input';
+            input.id = `file${fileCount}`;
             input.name = 'files';
             input.accept = '.csv, .xlsx';
             input.required = true;
+            const inputLabel = document.createElement('label');
+            inputLabel.className = 'custom-file-label';
+            inputLabel.setAttribute('for', `file${fileCount}`);
+            inputLabel.textContent = 'اختر ملف';
+            
+            customFile.appendChild(input);
+            customFile.appendChild(inputLabel);
+            inputGroup.appendChild(customFile);
             formGroup.appendChild(label);
-            formGroup.appendChild(input);
+            formGroup.appendChild(inputGroup);
             fileInputs.appendChild(formGroup);
         });
 
@@ -252,6 +280,15 @@
             downloadExcel.href = xlsxUrl;
             downloadExcel.download = 'merged_data.xlsx';
         }
+
+        // Update file input labels with the selected file name
+        document.addEventListener('change', function(event) {
+            if (event.target.classList.contains('custom-file-input')) {
+                const inputLabel = event.target.nextElementSibling;
+                const fileName = event.target.files[0] ? event.target.files[0].name : 'اختر ملف';
+                inputLabel.textContent = fileName;
+            }
+        });
     </script>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
