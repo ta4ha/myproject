@@ -108,7 +108,7 @@
             const formGroup = document.createElement('div');
             formGroup.className = 'form-group';
             const label = document.createElement('label');
-            label.textContent = الملف ${fileCount}:;
+            label.textContent = `الملف ${fileCount}:`;
             const input = document.createElement('input');
             input.type = 'file';
             input.className = 'form-control-file';
@@ -133,7 +133,7 @@
 
             }).catch(error => {
                 console.error('Error reading files:', error);
-                alert('Error processing files!');
+                alert('حدث خطأ أثناء معالجة الملفات!');
             });
         });
 
@@ -173,7 +173,7 @@
                 dataset.header.forEach(header => mergedHeaderSet.add(header));
                 const idIndex = dataset.header.indexOf('id');
                 if (idIndex === -1) {
-                    alert('No "id" column found in the headers!');
+                    alert('لا يوجد عمود "id" في الملفات!');
                     return;
                 }
                 const dataMap = new Map(dataset.rows.map(row => [row[idIndex], row]));
