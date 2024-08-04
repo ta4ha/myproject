@@ -102,6 +102,11 @@
                         <tbody id="tableBody"></tbody>
                     </table>
                 </div>
+                <div class="pagination-container text-center mt-4" style="display: none;">
+                    <button class="btn btn-secondary" id="prevPage">السابق</button>
+                    <span id="pageInfo"></span>
+                    <button class="btn btn-secondary" id="nextPage">التالي</button>
+                </div>
                 <div class="text-center mt-4">
                     <a id="downloadCSV" class="btn btn-success" style="display: none;">تحميل كملف CSV</a>
                     <a id="downloadExcel" class="btn btn-info" style="display: none;">تحميل كملف Excel</a>
@@ -117,6 +122,9 @@
     </footer>
 
     <script>
+        let currentPage = 1;
+        const rowsPerPage = 50;
+
         document.getElementById('addFile').addEventListener('click', function() {
             const fileInputs = document.getElementById('fileInputs');
             const fileCount = fileInputs.getElementsByTagName('input').length + 1;
@@ -230,35 +238,66 @@
         }
 
         function displayTable(header, data) {
-            const tableHeader = document.getElementById('tableHeader');
-            tableHeader.innerHTML = '';
-            const sequenceHeader = document.createElement('th');
-            sequenceHeader.textContent = '#';
-            tableHeader.appendChild(sequenceHeader);
-            header.forEach(header => {
-                const th = document.createElement('th');
-                th.textContent = header;
-                tableHeader.appendChild(th);
-            });
+            const totalRows = data.length;
+            const totalPages = Math.ceil(totalRows / rowsPerPage);
+            const paginationContainer = document.querySelector('.pagination-container');
 
-            const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = '';
-            data.forEach((row, index) => {
-                const tr = document.createElement('tr');
-                const sequenceCell = document.createElement('td');
-                sequenceCell.textContent = index + 1;
-                tr.appendChild(sequenceCell);
-                row.forEach(cell => {
-                    const td = document.createElement('td');
-                    td.textContent = cell ? cell : '';
-                    tr.appendChild(td);
+            function renderTablePage(page) {
+                const startRow = (page - 1) * rowsPerPage;
+                const endRow = Math.min(startRow + rowsPerPage, totalRows);
+
+                const tableHeader = document.getElementById('tableHeader');
+                tableHeader.innerHTML = '';
+                const sequenceHeader = document.createElement('th');
+                sequenceHeader.textContent = '#';
+                tableHeader.appendChild(sequenceHeader);
+                header.forEach(header => {
+                    const th = document.createElement('th');
+                    th.textContent = header;
+                    tableHeader.appendChild(th);
                 });
-                tableBody.appendChild(tr);
+
+                const tableBody = document.getElementById('tableBody');
+                tableBody.innerHTML = '';
+                data.slice(startRow, endRow).forEach((row, index) => {
+                    const tr = document.createElement('tr');
+                    const sequenceCell = document.createElement('td');
+                    sequenceCell.textContent = startRow + index + 1;
+                    tr.appendChild(sequenceCell);
+                    row.forEach(cell => {
+                        const td = document.createElement('td');
+                        td.textContent = cell ? cell : '';
+                        tr.appendChild(td);
+                    });
+                    tableBody.appendChild(tr);
+                });
+
+                document.getElementById('dataTable').style.display = 'table';
+                document.getElementById('downloadCSV').style.display = 'inline-block';
+                document.getElementById('downloadExcel').style.display = 'inline-block';
+
+                paginationContainer.style.display = 'block';
+                document.getElementById('pageInfo').textContent = `الصفحة ${page} من ${totalPages}`;
+                document.getElementById('prevPage').disabled = (page === 1);
+                document.getElementById('nextPage').disabled = (page === totalPages);
+            }
+
+            document.getElementById('prevPage').addEventListener('click', function() {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTablePage(currentPage);
+                }
             });
 
-            document.getElementById('dataTable').style.display = 'table';
-            document.getElementById('downloadCSV').style.display = 'inline-block';
-            document.getElementById('downloadExcel').style.display = 'inline-block';
+            document.getElementById('nextPage').addEventListener('click', function() {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderTablePage(currentPage);
+                }
+            });
+
+            // Render the first page initially
+            renderTablePage(currentPage);
         }
 
         function setupDownloadLinks(header, data) {
