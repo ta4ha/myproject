@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Uploader</title>
+    <title>رفع الملفات</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
@@ -14,6 +14,7 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            direction: rtl; /* تغيير الاتجاه إلى اليمين إلى اليسار */
         }
         .card {
             margin-top: 20px;
@@ -33,12 +34,15 @@
 </head>
 <body>
     <header class="bg-info text-white text-center py-3">
-        <h1>Welcome World!</h1>
+        <h1>أهلاً بالعالم!</h1>
     </header>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="تبديل التنقل">
+            <span class="navbar-toggler-icon"></span>
+        </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ml-auto">
+            <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
                     <a class="nav-link" href="#">جديد</a>
                 </li>
@@ -111,10 +115,10 @@
             <a id="downloadMatchedXlsxLink" class="btn btn-info mx-1" style="display: none;">حمل الملف XLSX</a>
         </div>        
     </div>
-<br>
+
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2024 File Uploader. All rights reserved.</p>
+            <p>&copy; 2024 رفع الملفات. جميع الحقوق محفوظة.</p>
         </div>
     </footer>
 
@@ -154,7 +158,64 @@
         })();
 
         function processFiles() {
-            // إظهار الجدول بعد المعالجة
+            const fileInput1 = document.getElementById('file1');
+            const fileInput2 = document.getElementById('file2');
+
+            if (fileInput1.files.length === 0 || fileInput2.files.length === 0) {
+                alert("يرجى اختيار كلا الملفين.");
+                return;
+            }
+
+            const file1 = fileInput1.files[0];
+            const file2 = fileInput2.files[0];
+
+            readExcelFile(file1, 'file1');
+            readExcelFile(file2, 'file2');
+        }
+
+        function readExcelFile(file, fileLabel) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                displayData(jsonData, fileLabel);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function displayData(data, fileLabel) {
+            const tableHeader = document.getElementById('tableHeader');
+            const tableBody = document.getElementById('tableBody');
+
+            // إزالة البيانات السابقة
+            tableHeader.innerHTML = '';
+            tableBody.innerHTML = '';
+
+            // إعداد الرؤوس الجديدة
+            const headers = data[0];
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header;
+                tableHeader.appendChild(th);
+            });
+
+            // إعداد الصفوف
+            for (let i = 1; i < data.length; i++) {
+                const row = data[i];
+                const tr = document.createElement('tr');
+                row.forEach(cell => {
+                    const td = document.createElement('td');
+                    td.textContent = cell;
+                    tr.appendChild(td);
+                });
+                tableBody.appendChild(tr);
+            }
+
+            // عرض الجدول
             document.getElementById('dataCard').style.display = 'block';
         }
     </script>
