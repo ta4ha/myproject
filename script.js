@@ -1,52 +1,81 @@
-document.getElementById('uploadForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-    const file1 = document.getElementById('file1').files[0];
-    const file2 = document.getElementById('file2').files[0];
-
-    if (file1 && file2) {
-        Promise.all([readFile(file1), readFile(file2)]).then(contents => {
-            const csv1 = contents[0].split('\n').map(row => row.split(','));
-            const csv2 = contents[1].split('\n').map(row => row.split(','));
-
-            const header1 = csv1.shift();
-            const header2 = csv2.shift();
-
-            if (JSON.stringify(header1) !== JSON.stringify(header2)) {
-                alert('Files have different headers!');
-                return;
-            }
-
-            const idIndex = header1.indexOf('id');
-            if (idIndex === -1) {
-                alert('No "id" column found in the headers!');
-                return;
-            }
-
-            const data1 = new Map(csv1.map(row => [row[idIndex], row]));
-            const data2 = new Map(csv2.map(row => [row[idIndex], row]));
-
-            const unmatchedData1 = [...data1].filter(([id]) => !data2.has(id));
-            const unmatchedData2 = [...data2].filter(([id]) => !data1.has(id));
-            const unmatchedData = [...unmatchedData1, ...unmatchedData2];
-            const matchedData = [...data1].filter(([id]) => data2.has(id));
-
-            displayTable(header1, unmatchedData);
-
-            setupDownloadLinks(header1, unmatchedData, 'unmatched');
-            setupDownloadLinks(header1, matchedData, 'matched');
-            
-            document.getElementById('showUnmatchedBtn').addEventListener('click', () => displayTable(header1, unmatchedData));
-            document.getElementById('showMatchedBtn').addEventListener('click', () => displayTable(header1, matchedData));
-
-            document.getElementById('showUnmatchedBtn').style.display = 'inline-block';
-            document.getElementById('showMatchedBtn').style.display = 'inline-block';
-
-        }).catch(error => {
-            console.error('Error reading files:', error);
-            alert('Error processing files!');
-        });
-    }
+// تحديث اسم الملفات عند اختيارها
+document.querySelectorAll('.custom-file-input').forEach(input => {
+    input.addEventListener('change', function (e) {
+        const fileNames = Array.from(e.target.files).map(file => file.name).join(', ');
+        e.target.nextElementSibling.innerText = fileNames || 'اختر الملفات...';
+    });
 });
+
+// التحقق من صحة النموذج باستخدام Bootstrap
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        const forms = document.getElementsByClassName('needs-validation');
+        Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                } else {
+                    event.preventDefault(); // منع الإرسال الافتراضي للنموذج
+                    form.classList.add('was-validated');
+                    processFiles(); // إظهار الجدول بعد التحقق
+                }
+            }, false);
+        });
+    }, false);
+})();
+
+function processFiles() {
+    const fileInputs = document.getElementById('files');
+    const files = fileInputs.files;
+
+    if (files.length < 2) {
+        alert('يرجى اختيار ملفين على الأقل.');
+        return;
+    }
+
+    const filePromises = Array.from(files).map(file => readFile(file));
+
+    Promise.all(filePromises).then(fileContents => {
+        const csvs = fileContents.map(content => content.split('\n').map(row => row.split(',')));
+        const headers = csvs.map(csv => csv.shift());
+
+        if (!headers.every(header => JSON.stringify(header) === JSON.stringify(headers[0]))) {
+            alert('الملفات تحتوي على رؤوس مختلفة!');
+            return;
+        }
+
+        const idIndex = headers[0].indexOf('id');
+        if (idIndex === -1) {
+            alert('لم يتم العثور على عمود "id" في الرؤوس!');
+            return;
+        }
+
+        const dataMaps = csvs.map(csv => new Map(csv.map(row => [row[idIndex], row])));
+        const [data1, data2] = dataMaps;
+        
+        const unmatchedData1 = [...data1].filter(([id]) => !data2.has(id));
+        const unmatchedData2 = [...data2].filter(([id]) => !data1.has(id));
+        const unmatchedData = [...unmatchedData1, ...unmatchedData2];
+        const matchedData = [...data1].filter(([id]) => data2.has(id));
+
+        displayTable(headers[0], unmatchedData);
+
+        setupDownloadLinks(headers[0], unmatchedData, 'unmatched');
+        setupDownloadLinks(headers[0], matchedData, 'matched');
+        
+        document.getElementById('showUnmatchedBtn').addEventListener('click', () => displayTable(headers[0], unmatchedData));
+        document.getElementById('showMatchedBtn').addEventListener('click', () => displayTable(headers[0], matchedData));
+
+        document.getElementById('showUnmatchedBtn').style.display = 'inline-block';
+        document.getElementById('showMatchedBtn').style.display = 'inline-block';
+
+    }).catch(error => {
+        console.error('Error reading files:', error);
+        alert('Error processing files!');
+    });
+}
 
 function readFile(file) {
     return new Promise((resolve, reject) => {
@@ -141,14 +170,3 @@ function setupDownloadLinks(header, data, type) {
         downloadMatchedXlsxLink.style.display = 'block';
     }
 }
-
-// Update the label of the file input to show the file name
-document.querySelectorAll('.custom-file-input').forEach(input => {
-    input.addEventListener('change', function (e) {
-        const fileName = e.target.files[0].name;
-        e.target.nextElementSibling.innerText = fileName;
-    });
-});
-
-// Bootstrap validation for forms
-
