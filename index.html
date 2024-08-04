@@ -49,7 +49,7 @@
                     <a class="nav-link" href="#">جديد</a>
                 </li>
                 <li class="nav-item active">
-                    <a class="nav-link" href="index.html">المطابقعة والغير مطابقة</a>
+                    <a class="nav-link" href="index.html"> المطابقعة والغير مطابقة</a>
                 </li>
             </ul>
         </div>
@@ -57,16 +57,24 @@
     <div class="container mt-5">
         <div class="card">
             <div class="card-header bg-dark text-white">
-                <h2>ارفع الملفات بصيغة xlsx او csv</h2>
+                <h2>ارفع الملف بصيغة xlsx او csv</h2>
             </div>
             <div class="card-body">
                 <form id="uploadForm" class="needs-validation" novalidate>
                     <div class="form-row">
-                        <div class="form-group col-md-12">
-                            <label for="files">اختر الملفات:</label>
+                        <div class="form-group col-md-6">
+                            <label for="file1">الملف 1:</label>
                             <div class="custom-file">
-                                <input type="file" class="custom-file-input" id="files" accept=".csv, .xlsx" multiple required>
-                                <label class="custom-file-label" for="files">اختر الملفات...</label>
+                                <input type="file" class="custom-file-input" id="file1" accept=".csv, .xlsx" required>
+                                <label class="custom-file-label" for="file1">اختر الملف...</label>
+                                <div class="invalid-feedback">يرجى اختيار ملف.</div>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="file2">الملف 2:</label>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="file2" accept=".csv, .xlsx" required>
+                                <label class="custom-file-label" for="file2">اختر الملف...</label>
                                 <div class="invalid-feedback">يرجى اختيار ملف.</div>
                             </div>
                         </div>
@@ -103,6 +111,7 @@
             <a id="downloadMatchedXlsxLink" class="btn btn-info mx-1" style="display: none;">حمل الملف XLSX</a>
         </div>        
     </div>
+<br>
     <footer class="footer">
         <div class="container">
             <p>&copy; 2024 File Uploader. All rights reserved.</p>
@@ -110,9 +119,44 @@
     </footer>
 
     <!-- إضافة مرجع لملف JavaScript -->
+    <script src="script.js"></script>
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="script.js"></script> <!-- ربط ملف JavaScript الخارجي -->
+    <script>
+        // تحديث اسم الملف عند اختياره
+        document.querySelectorAll('.custom-file-input').forEach(input => {
+            input.addEventListener('change', function (e) {
+                const fileName = e.target.files[0] ? e.target.files[0].name : 'اختر الملف...';
+                e.target.nextElementSibling.innerText = fileName;
+            });
+        });
+
+        // التحقق من صحة النموذج باستخدام Bootstrap
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                const forms = document.getElementsByClassName('needs-validation');
+                Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        } else {
+                            event.preventDefault(); // منع الإرسال الافتراضي للنموذج
+                            form.classList.add('was-validated');
+                            processFiles(); // إظهار الجدول بعد التحقق
+                        }
+                    }, false);
+                });
+            }, false);
+        })();
+
+        function processFiles() {
+            // إظهار الجدول بعد المعالجة
+            document.getElementById('dataCard').style.display = 'block';
+        }
+    </script>
 </body>
 </html>
