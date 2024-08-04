@@ -46,13 +46,16 @@
     </header>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
                     <a class="nav-link" href="#">جديد</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">جديد </a>
+                    <a class="nav-link" href="#">جديد</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">جديد</a>
@@ -107,8 +110,7 @@
                     </table>
                 </div>
                 <div class="text-center mt-4">
-                    <button id="showUnmatchedBtn" class="btn btn-warning" style="display: none;">البيانات الغير
-                        مطابقة</button>
+                    <button id="showUnmatchedBtn" class="btn btn-warning" style="display: none;">البيانات الغير مطابقة</button>
                     <button id="showMatchedBtn" class="btn btn-info" style="display: none;">البيانات المطابقة</button>
                 </div>
             </div>
@@ -128,25 +130,25 @@
         </div>
     </footer>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
         // Update the label of the file input to show the file name
         document.querySelectorAll('.custom-file-input').forEach(input => {
-            input.addEventListener('change', function (e) {
+            input.addEventListener('change', function(e) {
                 const fileName = e.target.files[0] ? e.target.files[0].name : 'اختر الملف...';
                 e.target.nextElementSibling.innerText = fileName;
             });
         });
 
         // Bootstrap validation for forms
-        (function () {
+        (function() {
             'use strict';
-            window.addEventListener('load', function () {
+            window.addEventListener('load', function() {
                 const forms = document.getElementsByClassName('needs-validation');
-                Array.prototype.filter.call(forms, function (form) {
-                    form.addEventListener('submit', function (event) {
+                Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
                         if (form.checkValidity() === false) {
                             event.preventDefault();
                             event.stopPropagation();
@@ -168,6 +170,15 @@
             setTimeout(() => {
                 const tableHeader = document.getElementById('tableHeader');
                 const tableBody = document.getElementById('tableBody');
+
+                // Dummy data for demonstration
+                const headers = ['Column 1', 'Column 2', 'Column 3'];
+                const data = [
+                    ['Data 1-1', 'Data 1-2', 'Data 1-3'],
+                    ['Data 2-1', 'Data 2-2', 'Data 2-3'],
+                    ['Data 3-1', 'Data 3-2', 'Data 3-3']
+                ];
+
                 // Clear existing content
                 tableHeader.innerHTML = '';
                 tableBody.innerHTML = '';
