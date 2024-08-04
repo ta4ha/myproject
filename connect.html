@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>دمج الملفات</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
@@ -31,12 +31,11 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
-
                 <li class="nav-item">
-                    <a class="nav-link" href="#">جديد</a>
+                    <a class="nav-link" href="#">الإعدادات</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">جديد </a>
+                    <a class="nav-link" href="#">تواصل معنا</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="connect.html">دمج الملفات</a>
@@ -89,27 +88,27 @@
             </div>
         </div>
 
-        <div class="card mt-4">
+        <div class="card mt-4" id="mergedDataCard" style="display: none;">
             <div class="card-header bg-success text-white">
                 <h2>البيانات المدمجة</h2>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table id="dataTable" class="table table-bordered table-hover" style="display: none;">
+                    <table id="dataTable" class="table table-bordered table-hover">
                         <thead class="thead-dark">
                             <tr id="tableHeader"></tr>
                         </thead>
                         <tbody id="tableBody"></tbody>
                     </table>
                 </div>
-                <div class="pagination-container text-center mt-4" style="display: none;">
+                <div class="pagination-container text-center mt-4">
                     <button class="btn btn-secondary" id="prevPage">السابق</button>
                     <span id="pageInfo"></span>
                     <button class="btn btn-secondary" id="nextPage">التالي</button>
                 </div>
                 <div class="text-center mt-4">
-                    <a id="downloadCSV" class="btn btn-success" style="display: none;">تحميل كملف CSV</a>
-                    <a id="downloadExcel" class="btn btn-info" style="display: none;">تحميل كملف Excel</a>
+                    <a id="downloadCSV" class="btn btn-success">تحميل كملف CSV</a>
+                    <a id="downloadExcel" class="btn btn-info">تحميل كملف Excel</a>
                 </div>
             </div>
         </div>
@@ -166,6 +165,9 @@
                 const mergedData = mergeData(datasets);
                 displayTable(mergedData.header, mergedData.data);
                 setupDownloadLinks(mergedData.header, mergedData.data);
+
+                // Show the merged data card after merging
+                document.getElementById('mergedDataCard').style.display = 'block';
 
             }).catch(error => {
                 console.error('Error reading files:', error);
@@ -272,7 +274,6 @@
                     tableBody.appendChild(tr);
                 });
 
-                document.getElementById('dataTable').style.display = 'table';
                 document.getElementById('downloadCSV').style.display = 'inline-block';
                 document.getElementById('downloadExcel').style.display = 'inline-block';
 
