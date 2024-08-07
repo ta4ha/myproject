@@ -158,7 +158,7 @@ function readFile(file) {
 
 function populateFieldDropdown(headers) {
     const matchFieldDropdown = document.getElementById('matchField');
-    matchFieldDropdown.innerHTML = '';
+    matchFieldDropdown.innerHTML = '<option value="" disabled selected>يرجى اختيار حقل للمطابقة</option>';
 
     headers.forEach(header => {
         const option = document.createElement('option');
