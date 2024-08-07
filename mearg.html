@@ -12,19 +12,22 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body {
-            background-color: #f7f7f7;
+            background-color: #e9ecef;
             font-family: 'Tajawal', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
-        .navbar, .footer {
-            background-color: #343a40;
+        .navbar {
+            background-color: #007bff;
         }
-        .navbar-brand, .navbar-nav .nav-link, .footer p {
+        .navbar-brand, .navbar-nav .nav-link {
             color: #ffffff !important;
         }
         .card {
             border-radius: 10px;
+            margin-top: 30px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin-top: 20px;
         }
         .btn-primary {
             background-color: #007bff;
@@ -32,6 +35,13 @@
         }
         .btn-primary:hover {
             background-color: #0056b3;
+        }
+        .footer {
+            background-color: #343a40;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+            margin-top: auto;
         }
     </style>
 </head>
@@ -64,7 +74,7 @@
     </nav>
 
     <!-- Main Container -->
-    <div class="container my-5">
+    <div class="container mt-5">
         <div class="card">
             <div class="card-header bg-primary text-white text-center">
                 <h2>رفع ملفات Excel وCSV</h2>
@@ -117,7 +127,7 @@
     </div>
 
     <!-- Footer -->
-    <footer class="footer py-3">
+    <footer class="footer mt-5">
         <div class="container text-center">
             <p>&copy; 2024 نظام معالجة الملفات. جميع الحقوق محفوظة.</p>
         </div>
