@@ -62,16 +62,6 @@
             <div class="card-body">
                 <form id="uploadForm" class="needs-validation" novalidate>
                     <div class="form-row">
-                        <!-- قائمة منسدلة لاختيار الحقل للمطابقة -->
-                        <div class="form-group col-md-6">
-                            <label for="matchField">اختر الحقل للمطابقة:</label>
-                            <select id="matchField" class="form-control" required>
-                                <!-- سيتم ملء الخيارات ديناميكيًا من ملف الإكسل -->
-                            </select>
-                            <div class="invalid-feedback">يرجى اختيار حقل للمطابقة.</div>
-                        </div>
-                    </div>
-                    <div class="form-row">
                         <div class="form-group col-md-6">
                             <label for="file1">الملف 1:</label>
                             <div class="custom-file">
@@ -87,6 +77,18 @@
                                 <label class="custom-file-label" for="file2">اختر الملف...</label>
                                 <div class="invalid-feedback">يرجى اختيار ملف.</div>
                             </div>
+                        </div>
+                    </div>
+                    <button type="button" id="loadHeadersBtn" class="btn btn-secondary">تحميل الحقول للمطابقة</button>
+                    <div class="form-row mt-3">
+                        <!-- قائمة منسدلة لاختيار الحقل للمطابقة -->
+                        <div class="form-group col-md-6">
+                            <label for="matchField">اختر الحقل للمطابقة:</label>
+                            <select id="matchField" class="form-control" required>
+                                <option value="" disabled selected>يرجى اختيار ملفين أولا</option>
+                                <!-- سيتم ملء الخيارات ديناميكيًا من ملف الإكسل -->
+                            </select>
+                            <div class="invalid-feedback">يرجى اختيار حقل للمطابقة.</div>
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary">رفع ومعالجة</button>
