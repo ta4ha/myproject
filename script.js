@@ -1,7 +1,7 @@
 // Update the label of the file input to show the file name
 document.querySelectorAll('.custom-file-input').forEach(input => {
     input.addEventListener('change', function (e) {
-        const fileName = e.target.files[0] ? e.target.files[0].name : 'Choose file...';
+        const fileName = e.target.files[0] ? e.target.files[0].name : 'اختر الملف...';
         e.target.nextElementSibling.innerText = fileName;
     });
 });
@@ -19,7 +19,7 @@ document.querySelectorAll('.custom-file-input').forEach(input => {
                 } else {
                     event.preventDefault(); // Prevent the default form submission
                     form.classList.add('was-validated');
-                    matchData(); // Show the table after validation
+                    matchData(); // Match data after validation
                 }
             }, false);
         });
