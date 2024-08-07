@@ -1,4 +1,4 @@
-// Update the label of the file input to show the file name
+// تحديث تسمية الملف المدخل لعرض اسم الملف
 document.querySelectorAll('.custom-file-input').forEach(input => {
     input.addEventListener('change', function (e) {
         const fileName = e.target.files[0] ? e.target.files[0].name : 'اختر الملف...';
@@ -6,7 +6,7 @@ document.querySelectorAll('.custom-file-input').forEach(input => {
     });
 });
 
-// Bootstrap validation for forms
+// التحقق من صحة النماذج Bootstrap
 (function() {
     'use strict';
     window.addEventListener('load', function() {
@@ -17,9 +17,9 @@ document.querySelectorAll('.custom-file-input').forEach(input => {
                     event.preventDefault();
                     event.stopPropagation();
                 } else {
-                    event.preventDefault(); // Prevent the default form submission
+                    event.preventDefault(); // منع إرسال النموذج بشكل افتراضي
                     form.classList.add('was-validated');
-                    matchData(); // Match data after validation
+                    matchData(); // مطابقة البيانات بعد التحقق
                 }
             }, false);
         });
