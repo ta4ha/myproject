@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>رفع ملفي Excel ومقاطعة البيانات</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -107,34 +108,49 @@
     </script>
 </head>
 <body>
-    <h1>رفع ملفي Excel ومقاطعة البيانات</h1>
-    
-    <label for="file1">اختر الملف الأول:</label>
-    <input type="file" id="file1" accept=".xlsx">
-    <br><br>
-    
-    <label for="file2">اختر الملف الثاني:</label>
-    <input type="file" id="file2" accept=".xlsx">
-    <br><br>
-    
-    <label for="matchColumn">اختر عمود المطابقة:</label>
-    <select id="matchColumn">
-        <!-- سيتم ملء الخيارات عند تحميل الملفات -->
-    </select>
-    <br><br>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">رفع ملفي Excel ومقاطعة البيانات</h1>
 
-    <button id="matchButton">عرض البيانات المطابقة</button>
-    
-    <h2>البيانات المطابقة</h2>
-    <table border="1" id="resultTable">
-        <thead>
-            <tr id="tableHeader">
-                <!-- سيتم ملء العناوين هنا -->
-            </tr>
-        </thead>
-        <tbody id="tableBody">
-            <!-- سيتم ملء البيانات هنا -->
-        </tbody>
-    </table>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="file1" class="form-label">اختر الملف الأول:</label>
+                <input type="file" class="form-control" id="file1" accept=".xlsx">
+            </div>
+            <div class="col-md-6">
+                <label for="file2" class="form-label">اختر الملف الثاني:</label>
+                <input type="file" class="form-control" id="file2" accept=".xlsx">
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <label for="matchColumn" class="form-label">اختر عمود المطابقة:</label>
+                <select id="matchColumn" class="form-select">
+                    <!-- سيتم ملء الخيارات عند تحميل الملفات -->
+                </select>
+            </div>
+        </div>
+
+        <div class="text-center mb-4">
+            <button id="matchButton" class="btn btn-primary">عرض البيانات المطابقة</button>
+        </div>
+
+        <h2 class="text-center mb-4">البيانات المطابقة</h2>
+        <div class="table-responsive">
+            <table class="table table-bordered" id="resultTable">
+                <thead class="table-light">
+                    <tr id="tableHeader">
+                        <!-- سيتم ملء العناوين هنا -->
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- سيتم ملء البيانات هنا -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
