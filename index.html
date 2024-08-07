@@ -167,7 +167,7 @@
                 displayDataFromResponse(record);
             } catch (error) {
                 console.error('Error uploading files:', error);
-                alert('Error uploading files!');
+                alert('Error uploading files! ' + (error.message || error));
             }
         } else {
             alert('يرجى اختيار ملفين للرفع');
