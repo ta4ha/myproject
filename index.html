@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -119,7 +119,91 @@
     </footer>
 
     <!-- إضافة مرجع لملف JavaScript -->
-    <script src="script.js"></script>
+    <script src="https://unpkg.com/pocketbase@0.14.0/dist/pocketbase.umd.js"></script>
+    <script>
+    // تحديث ملصق إدخال الملف لعرض اسم الملف
+    document.querySelectorAll('.custom-file-input').forEach(input => {
+        input.addEventListener('change', function (e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'اختر الملف...';
+            e.target.nextElementSibling.innerText = fileName;
+        });
+    });
+
+    // التحقق من صحة النموذج باستخدام Bootstrap
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            const forms = document.getElementsByClassName('needs-validation');
+            Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    } else {
+                        event.preventDefault(); // منع الإرسال الافتراضي للنموذج
+                        form.classList.add('was-validated');
+                        uploadFiles(); // رفع الملفات
+                    }
+                }, false);
+            });
+        }, false);
+    })();
+
+    async function uploadFiles() {
+        const file1 = document.getElementById('file1').files[0];
+        const file2 = document.getElementById('file2').files[0];
+
+        if (file1 && file2) {
+            const formData = new FormData();
+            formData.append('file1', file1);
+            formData.append('file2', file2);
+
+            const pb = new PocketBase('https://db.ta4ha.com');
+
+            try {
+                const record = await pb.collection('mearg').create(formData);
+                console.log('Files uploaded successfully:', record);
+                alert('Files uploaded successfully!');
+                // تنفيذ أي عملية إضافية بناءً على الاستجابة
+                displayDataFromResponse(record); // عرض البيانات إذا كانت متوفرة في الاستجابة
+            } catch (error) {
+                console.error('Error uploading files:', error);
+                alert('Error uploading files!');
+            }
+        } else {
+            alert('يرجى اختيار ملفين للرفع');
+        }
+    }
+
+    function displayDataFromResponse(data) {
+        // هذه الوظيفة لعرض البيانات في الجدول إذا كانت البيانات متوفرة في الاستجابة
+        if (data) {
+            const header = Object.keys(data);
+            const tableHeader = document.getElementById('tableHeader');
+            const tableBody = document.getElementById('tableBody');
+            tableHeader.innerHTML = '';
+            tableBody.innerHTML = '';
+
+            // إنشاء رأس الجدول
+            header.forEach(column => {
+                const th = document.createElement('th');
+                th.textContent = column;
+                tableHeader.appendChild(th);
+            });
+
+            // إضافة الصفوف إلى جسم الجدول
+            const tr = document.createElement('tr');
+            header.forEach(column => {
+                const td = document.createElement('td');
+                td.textContent = data[column] || '';
+                tr.appendChild(td);
+            });
+            tableBody.appendChild(tr);
+
+            document.getElementById('dataCard').style.display = 'block';
+        }
+    }
+</script>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
