@@ -164,8 +164,7 @@
                 const record = await pb.collection('mearg').create(formData);
                 console.log('Files uploaded successfully:', record);
                 alert('Files uploaded successfully!');
-                // تنفيذ أي عملية إضافية بناءً على الاستجابة
-                displayDataFromResponse(record); // عرض البيانات إذا كانت متوفرة في الاستجابة
+                displayDataFromResponse(record);
             } catch (error) {
                 console.error('Error uploading files:', error);
                 alert('Error uploading files!');
