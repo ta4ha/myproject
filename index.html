@@ -1,128 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Uploader</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Tajawal', sans-serif;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        .card {
-            margin-top: 20px;
-        }
-        .footer {
-            background-color: #343e48;
-            color: white;
-            padding: 10px 0;
-            text-align: center;
-            margin-top: auto;
-            width: 100%;
-        }
-        #dataCard {
-            display: none; /* إخفاء الجدول بالكامل في البداية */
-        }
-    </style>
-</head>
-<body>
-    <header class="bg-info text-white text-center py-3">
-        <h1>Welcome World!</h1>
-    </header>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="#">جديد</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">جديد </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="connect.html"> دمج البيانات</a>
-                </li>
-                <li class="nav-item active">
-                    <a class="nav-link" href="index.html"> المطابقة والغير مطابقة</a>
-                </li>
-            </ul>
-        </div>
-    </nav>
-    <div class="container mt-5">
-        <div class="card">
-            <div class="card-header bg-dark text-white">
-                <h2>ارفع الملف بصيغة xlsx او csv</h2>
-            </div>
-            <div class="card-body">
-                <form id="uploadForm" class="needs-validation" novalidate>
-                    <div class="form-row">
-                        <div class="form-group col-md-6">
-                            <label for="file1">الملف 1:</label>
-                            <div class="custom-file">
-                                <input type="file" class="custom-file-input" id="file1" accept=".csv, .xlsx" required>
-                                <label class="custom-file-label" for="file1">اختر الملف...</label>
-                                <div class="invalid-feedback">يرجى اختيار ملف.</div>
-                            </div>
-                        </div>
-                        <div class="form-group col-md-6">
-                            <label for="file2">الملف 2:</label>
-                            <div class="custom-file">
-                                <input type="file" class="custom-file-input" id="file2" accept=".csv, .xlsx" required>
-                                <label class="custom-file-label" for="file2">اختر الملف...</label>
-                                <div class="invalid-feedback">يرجى اختيار ملف.</div>
-                            </div>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">رفع ومعالجة</button>
-                </form>
+<div class="card-body">
+    <form id="uploadForm" class="needs-validation" novalidate>
+        <div class="form-row">
+            <!-- قائمة منسدلة لاختيار الحقل للمطابقة -->
+            <div class="form-group col-md-6">
+                <label for="matchField">اختر الحقل للمطابقة:</label>
+                <select id="matchField" class="form-control" required>
+                    <!-- سيتم ملء الخيارات ديناميكيًا من ملف الإكسل -->
+                </select>
+                <div class="invalid-feedback">يرجى اختيار حقل للمطابقة.</div>
             </div>
         </div>
-
-        <div class="card mt-4" id="dataCard">
-            <div class="card-header bg-success text-white">
-                <h2>البيانات</h2>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table id="dataTable" class="table table-striped table-bordered table-hover">
-                        <thead class="thead-dark">
-                            <tr id="tableHeader"></tr>
-                        </thead>
-                        <tbody id="tableBody"></tbody>
-                    </table>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="file1">الملف 1:</label>
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="file1" accept=".csv, .xlsx" required>
+                    <label class="custom-file-label" for="file1">اختر الملف...</label>
+                    <div class="invalid-feedback">يرجى اختيار ملف.</div>
                 </div>
-                <div class="text-center mt-4">
-                    <button id="showUnmatchedBtn" class="btn btn-warning" style="display: none;">البيانات الغير مطابقة</button>
-                    <button id="showMatchedBtn" class="btn btn-info" style="display: none;">البيانات المطابقة</button>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="file2">الملف 2:</label>
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="file2" accept=".csv, .xlsx" required>
+                    <label class="custom-file-label" for="file2">اختر الملف...</label>
+                    <div class="invalid-feedback">يرجى اختيار ملف.</div>
                 </div>
             </div>
         </div>
-
-        <div class="text-center mt-4 d-flex justify-content-center">
-            <a id="downloadUnmatchedCsvLink" class="btn btn-success mx-1" style="display: none;">حمل الملف CSV</a>
-            <a id="downloadUnmatchedXlsxLink" class="btn btn-info mx-1" style="display: none;">حمل الملف XLSX</a>
-            <a id="downloadMatchedCsvLink" class="btn btn-success mx-1" style="display: none;">حمل الملف CSV</a>
-            <a id="downloadMatchedXlsxLink" class="btn btn-info mx-1" style="display: none;">حمل الملف XLSX</a>
-        </div>        
-    </div>
-<br>
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; 2024 File Uploader. All rights reserved.</p>
-        </div>
-    </footer>
-
-    <!-- إضافة مرجع لملف JavaScript -->
-    <script src="script.js"></script>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-</body>
-</html>
+        <button type="submit" class="btn btn-primary">رفع ومعالجة</button>
+    </form>
+</div>
