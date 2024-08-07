@@ -155,8 +155,8 @@
 
         if (file1 && file2) {
             const formData = new FormData();
-            formData.append('file1', file1);
-            formData.append('file2', file2);
+            formData.append('field1', file1);
+            formData.append('field2', file2);
 
             const pb = new PocketBase('https://db.ta4ha.com');
 
@@ -177,6 +177,8 @@
                     console.error('Response error:', error.response);
                     console.error('Response data:', error.response.data);
                     console.error('Response status:', error.response.status);
+                } else {
+                    console.error('Unknown error occurred:', error);
                 }
 
                 alert('Error uploading files! ' + (error.message || error));
