@@ -1,34 +1,5 @@
-// تحديث تسمية الملف المدخل لعرض اسم الملف
-document.querySelectorAll('.custom-file-input').forEach(input => {
-    input.addEventListener('change', function (e) {
-        const fileName = e.target.files[0] ? e.target.files[0].name : 'اختر الملف...';
-        e.target.nextElementSibling.innerText = fileName;
-    });
-});
-
-// التحقق من صحة النماذج Bootstrap
-(function() {
-    'use strict';
-    window.addEventListener('load', function() {
-        const forms = document.getElementsByClassName('needs-validation');
-        Array.prototype.filter.call(forms, function(form) {
-            form.addEventListener('submit', function(event) {
-                if (form.checkValidity() === false) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                } else {
-                    event.preventDefault(); // منع إرسال النموذج بشكل افتراضي
-                    form.classList.add('was-validated');
-                    matchData(); // مطابقة البيانات بعد التحقق
-                }
-            }, false);
-        });
-    }, false);
-})();
-
 document.getElementById('loadHeadersBtn').addEventListener('click', loadHeaders);
 
-let headersLoaded = false;
 let globalHeaders = [];
 
 function loadHeaders() {
@@ -48,7 +19,6 @@ function loadHeaders() {
 
         globalHeaders = headers[0];
         populateFieldDropdown(globalHeaders);
-        headersLoaded = true;
         alert('تم تحميل الحقول بنجاح!');
     }).catch(error => {
         console.error('Error loading headers:', error);
@@ -56,12 +26,12 @@ function loadHeaders() {
     });
 }
 
-function matchData() {
-    if (!headersLoaded) {
-        alert('يرجى تحميل الحقول أولاً!');
-        return;
-    }
+document.getElementById('uploadForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    matchData();
+});
 
+function matchData() {
     const matchField = document.getElementById('matchField').value;
     if (!matchField) {
         alert('يرجى اختيار حقل للمطابقة!');
@@ -85,23 +55,9 @@ function matchData() {
         }
 
         const data1 = new Map(csv1.map(row => [row[idIndex], row]));
-        const data2 = new Map(csv2.map(row => [row[idIndex], row]));
+        const matchedData = [...data1].filter(([id]) => csv2.some(row => row[idIndex] === id));
 
-        const unmatchedData1 = [...data1].filter(([id]) => !data2.has(id));
-        const unmatchedData2 = [...data2].filter(([id]) => !data1.has(id));
-        const unmatchedData = [...unmatchedData1, ...unmatchedData2];
-        const matchedData = [...data1].filter(([id]) => data2.has(id));
-
-        displayTable(header1, unmatchedData);
-
-        setupDownloadLinks(header1, unmatchedData, 'unmatched');
-        setupDownloadLinks(header1, matchedData, 'matched');
-        
-        document.getElementById('showUnmatchedBtn').addEventListener('click', () => displayTable(header1, unmatchedData));
-        document.getElementById('showMatchedBtn').addEventListener('click', () => displayTable(header1, matchedData));
-
-        document.getElementById('showUnmatchedBtn').style.display = 'inline-block';
-        document.getElementById('showMatchedBtn').style.display = 'inline-block';
+        displayTable(header1, matchedData);
 
         document.getElementById('dataCard').style.display = 'block';
 
@@ -196,46 +152,4 @@ function displayTable(header, data) {
     });
 
     document.getElementById('dataTable').style.display = 'table';
-}
-
-function setupDownloadLinks(header, data, type) {
-    const resultCsv = [header, ...data.map(([id, row]) => row)]
-        .map(row => row.join(',')).join('\n');
-
-    const blob = new Blob([new TextEncoder().encode(resultCsv)], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-
-    if (type === 'unmatched') {
-        const downloadUnmatchedCsvLink = document.getElementById('downloadUnmatchedCsvLink');
-        downloadUnmatchedCsvLink.href = url;
-        downloadUnmatchedCsvLink.download = `unmatched_data.csv`;
-        downloadUnmatchedCsvLink.style.display = 'block';
-        
-        const wsUnmatched = XLSX.utils.aoa_to_sheet([header, ...data.map(([id, row]) => row)]);
-        const wbUnmatched = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wbUnmatched, wsUnmatched, "Sheet1");
-        const xlsxBlobUnmatched = new Blob([XLSX.write(wbUnmatched, { bookType: 'xlsx', type: 'array' })], { type: 'application/octet-stream' });
-        const xlsxUrlUnmatched = URL.createObjectURL(xlsxBlobUnmatched);
-
-        const downloadUnmatchedXlsxLink = document.getElementById('downloadUnmatchedXlsxLink');
-        downloadUnmatchedXlsxLink.href = xlsxUrlUnmatched;
-        downloadUnmatchedXlsxLink.download = `unmatched_data.xlsx`;
-        downloadUnmatchedXlsxLink.style.display = 'block';
-    } else if (type === 'matched') {
-        const downloadMatchedCsvLink = document.getElementById('downloadMatchedCsvLink');
-        downloadMatchedCsvLink.href = url;
-        downloadMatchedCsvLink.download = `matched_data.csv`;
-        downloadMatchedCsvLink.style.display = 'block';
-
-        const wsMatched = XLSX.utils.aoa_to_sheet([header, ...data.map(([id, row]) => row)]);
-        const wbMatched = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wbMatched, wsMatched, "Sheet1");
-        const xlsxBlobMatched = new Blob([XLSX.write(wbMatched, { bookType: 'xlsx', type: 'array' })], { type: 'application/octet-stream' });
-        const xlsxUrlMatched = URL.createObjectURL(xlsxBlobMatched);
-
-        const downloadMatchedXlsxLink = document.getElementById('downloadMatchedXlsxLink');
-        downloadMatchedXlsxLink.href = xlsxUrlMatched;
-        downloadMatchedXlsxLink.download = `matched_data.xlsx`;
-        downloadMatchedXlsxLink.style.display = 'block';
-    }
 }
