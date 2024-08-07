@@ -3,36 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>رفع ملفي Excel ومقاطعة البيانات</title>
+    <title>رفع ملفي Excel ومقارنة البيانات</title>
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <style>
         body {
-            background-color: #f4f4f9;
+            background-color: #f0f2f5;
         }
         .container {
             margin-top: 50px;
-            max-width: 800px;
+            max-width: 900px;
         }
-        h1, h2 {
-            color: #343a40;
-            font-weight: bold;
-        }
-        .form-label {
-            color: #495057;
-            font-weight: bold;
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         .btn-primary {
             background-color: #007bff;
             border-color: #007bff;
+            border-radius: 20px;
         }
         .btn-primary:hover {
             background-color: #0056b3;
             border-color: #004085;
         }
         .table {
-            margin-top: 30px;
+            margin-top: 20px;
+        }
+        .table th, .table td {
+            text-align: center;
         }
     </style>
     <!-- XLSX Library -->
@@ -40,41 +40,45 @@
 </head>
 <body>
     <div class="container">
-        <h1 class="text-center mb-4">رفع ملفي Excel ومقارنة البيانات</h1>
-        
-        <div class="mb-3">
-            <label for="file1" class="form-label">اختر الملف الأول:</label>
-            <input type="file" class="form-control" id="file1" accept=".xlsx">
-        </div>
-        
-        <div class="mb-3">
-            <label for="file2" class="form-label">اختر الملف الثاني:</label>
-            <input type="file" class="form-control" id="file2" accept=".xlsx">
-        </div>
+        <div class="card p-4">
+            <h1 class="text-center mb-4">رفع ملفي Excel ومقارنة البيانات</h1>
 
-        <div class="mb-3">
-            <label for="matchColumn" class="form-label">اختر عمود المطابقة:</label>
-            <select id="matchColumn" class="form-select">
-                <!-- سيتم ملء الخيارات عند تحميل الملفات -->
-            </select>
-        </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="file1" class="form-label">اختر الملف الأول:</label>
+                    <input type="file" class="form-control" id="file1" accept=".xlsx">
+                </div>
 
-        <div class="text-center">
-            <button id="matchButton" class="btn btn-primary">عرض البيانات المطابقة</button>
-        </div>
+                <div class="col-md-6 mb-3">
+                    <label for="file2" class="form-label">اختر الملف الثاني:</label>
+                    <input type="file" class="form-control" id="file2" accept=".xlsx">
+                </div>
+            </div>
 
-        <h2 class="text-center mt-5">البيانات المطابقة</h2>
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped" id="resultTable">
-                <thead class="table-light">
-                    <tr id="tableHeader">
-                        <!-- سيتم ملء العناوين هنا -->
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <!-- سيتم ملء البيانات هنا -->
-                </tbody>
-            </table>
+            <div class="mb-3">
+                <label for="matchColumn" class="form-label">اختر عمود المطابقة:</label>
+                <select id="matchColumn" class="form-select">
+                    <!-- سيتم ملء الخيارات عند تحميل الملفات -->
+                </select>
+            </div>
+
+            <div class="text-center">
+                <button id="matchButton" class="btn btn-primary">عرض البيانات المطابقة</button>
+            </div>
+
+            <h2 class="text-center mt-5">البيانات المطابقة</h2>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead class="table-light">
+                        <tr id="tableHeader">
+                            <!-- سيتم ملء العناوين هنا -->
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- سيتم ملء البيانات هنا -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
