@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رفع ملفي Excel ومقاطعة البيانات</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('file1').addEventListener('change', handleFileSelect);
+            document.getElementById('file2').addEventListener('change', handleFileSelect);
+
+            let workbook1, workbook2;
+
+            function handleFileSelect(event) {
+                const file = event.target.files[0];
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+
+                    if (event.target.id === 'file1') {
+                        workbook1 = workbook;
+                    } else {
+                        workbook2 = workbook;
+                    }
+
+                    if (workbook1 && workbook2) {
+                        populateMatchColumns(workbook1, workbook2);
+                    }
+                };
+
+                reader.readAsArrayBuffer(file);
+            }
+
+            function populateMatchColumns(workbook1, workbook2) {
+                const sheet1 = workbook1.Sheets[workbook1.SheetNames[0]];
+                const sheet2 = workbook2.Sheets[workbook2.SheetNames[0]];
+                const columns1 = XLSX.utils.sheet_to_json(sheet1, { header: 1 })[0];
+                const columns2 = XLSX.utils.sheet_to_json(sheet2, { header: 1 })[0];
+
+                const matchColumnSelect = document.getElementById('matchColumn');
+                matchColumnSelect.innerHTML = '';
+
+                const commonColumns = columns1.filter(column => columns2.includes(column));
+
+                commonColumns.forEach(column => {
+                    const option = document.createElement('option');
+                    option.value = column;
+                    option.textContent = column;
+                    matchColumnSelect.appendChild(option);
+                });
+            }
+
+            function matchData() {
+                const matchColumn = document.getElementById('matchColumn').value;
+                if (!matchColumn) {
+                    alert('يرجى اختيار عمود للمطابقة.');
+                    return;
+                }
+
+                const sheet1 = workbook1.Sheets[workbook1.SheetNames[0]];
+                const sheet2 = workbook2.Sheets[workbook2.SheetNames[0]];
+                const data1 = XLSX.utils.sheet_to_json(sheet1);
+                const data2 = XLSX.utils.sheet_to_json(sheet2);
+
+                const matchedData = data1.filter(row1 =>
+                    data2.some(row2 => row1[matchColumn] === row2[matchColumn])
+                );
+
+                displayMatchedData(matchedData);
+            }
+
+            function displayMatchedData(matchedData) {
+                const tableBody = document.getElementById('tableBody');
+                tableBody.innerHTML = '';
+
+                if (matchedData.length === 0) {
+                    alert('لم يتم العثور على بيانات مطابقة.');
+                    return;
+                }
+
+                const columns = Object.keys(matchedData[0]);
+                const tableHeader = document.getElementById('tableHeader');
+                tableHeader.innerHTML = '';
+
+                columns.forEach(column => {
+                    const th = document.createElement('th');
+                    th.textContent = column;
+                    tableHeader.appendChild(th);
+                });
+
+                matchedData.forEach(row => {
+                    const tr = document.createElement('tr');
+                    columns.forEach(column => {
+                        const td = document.createElement('td');
+                        td.textContent = row[column];
+                        tr.appendChild(td);
+                    });
+                    tableBody.appendChild(tr);
+                });
+            }
+
+            document.getElementById('matchButton').addEventListener('click', matchData);
+        });
+    </script>
+</head>
+<body>
+    <h1>رفع ملفي Excel ومقاطعة البيانات</h1>
+    
+    <label for="file1">اختر الملف الأول:</label>
+    <input type="file" id="file1" accept=".xlsx">
+    <br><br>
+    
+    <label for="file2">اختر الملف الثاني:</label>
+    <input type="file" id="file2" accept=".xlsx">
+    <br><br>
+    
+    <label for="matchColumn">اختر عمود المطابقة:</label>
+    <select id="matchColumn">
+        <!-- سيتم ملء الخيارات عند تحميل الملفات -->
+    </select>
+    <br><br>
+
+    <button id="matchButton">عرض البيانات المطابقة</button>
+    
+    <h2>البيانات المطابقة</h2>
+    <table border="1" id="resultTable">
+        <thead>
+            <tr id="tableHeader">
+                <!-- سيتم ملء العناوين هنا -->
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- سيتم ملء البيانات هنا -->
+        </tbody>
+    </table>
+</body>
+</html>
