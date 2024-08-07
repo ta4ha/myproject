@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>معالجة ملفات Excel</title>
+    <title>معالجة ملفات Excel وCSV</title>
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <!-- Google Fonts -->
@@ -18,7 +18,7 @@
             flex-direction: column;
             min-height: 100vh;
         }
-        .header, .footer {
+        .header {
             background-color: #007bff;
             color: white;
             text-align: center;
@@ -31,6 +31,10 @@
             background-color: #ffffff;
         }
         .footer {
+            background-color: #343e48;
+            color: white;
+            text-align: center;
+            padding: 15px 0;
             margin-top: auto;
         }
         .btn-custom {
@@ -45,7 +49,7 @@
 </head>
 <body>
     <header class="header">
-        <h1>معالجة ملفات Excel وCSV</h1>
+        <h1>نظام معالجة ملفات Excel وCSV</h1>
     </header>
 
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -72,7 +76,7 @@
 
     <div class="container mt-5">
         <div class="card">
-            <div class="card-header text-center bg-dark text-white">
+            <div class="card-header text-center bg-primary text-white">
                 <h2>ارفع ملفات Excel أو CSV</h2>
             </div>
             <div class="card-body">
@@ -100,7 +104,7 @@
             </div>
         </div>
 
-        <div class="card mt-4" id="dataCard">
+        <div class="card mt-4" id="dataCard" style="display: none;">
             <div class="card-header text-center bg-success text-white">
                 <h2>البيانات المطابقة</h2>
             </div>
