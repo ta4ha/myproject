@@ -3,115 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>رفع ملفي Excel ومقارنة البيانات</title>
-    <!-- Bootstrap CSS -->
+    <title>معالجة ملفات Excel</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
     <style>
         body {
             background-color: #f8f9fa;
-        }
-        .container {
-            margin-top: 50px;
-            max-width: 900px;
+            font-family: 'Tajawal', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
         .card {
+            margin-top: 20px;
             border-radius: 12px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            padding: 20px;
         }
-        .btn-primary {
-            border-radius: 30px;
-            padding: 10px 20px;
-        }
-        .table th, .table td {
+        .footer {
+            background-color: #343e48;
+            color: white;
+            padding: 10px 0;
             text-align: center;
-            vertical-align: middle;
+            margin-top: auto;
+            width: 100%;
         }
-        .form-label {
-            font-weight: bold;
+        #dataCard {
+            display: none; /* إخفاء الجدول بالكامل في البداية */
         }
     </style>
-    <!-- XLSX Library -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 </head>
 <body>
-    <div class="container">
+    <header class="bg-info text-white text-center py-3">
+        <h1>مرحبا بكم في معالجة الملفات!</h1>
+    </header>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">جديد</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">جديد</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="connect.html">دمج البيانات</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="index.html">المطابقة والغير مطابقة</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container mt-5">
         <div class="card">
-            <h1 class="text-center mb-4">رفع ملفي Excel ومقارنة البيانات</h1>
-
-            <form>
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="file1" class="form-label">اختر الملف الأول:</label>
-                        <input type="file" class="form-control" id="file1" accept=".xlsx">
+            <div class="card-header bg-dark text-white">
+                <h2>ارفع الملفات بصيغة xlsx أو csv</h2>
+            </div>
+            <div class="card-body">
+                <form id="uploadForm" class="needs-validation" novalidate>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="file1" class="form-label">الملف 1:</label>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="file1" accept=".csv, .xlsx" required>
+                                <label class="custom-file-label" for="file1">اختر الملف...</label>
+                                <div class="invalid-feedback">يرجى اختيار ملف.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="file2" class="form-label">الملف 2:</label>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="file2" accept=".csv, .xlsx" required>
+                                <label class="custom-file-label" for="file2">اختر الملف...</label>
+                                <div class="invalid-feedback">يرجى اختيار ملف.</div>
+                            </div>
+                        </div>
                     </div>
-
-                    <div class="col-md-6">
-                        <label for="file2" class="form-label">اختر الملف الثاني:</label>
-                        <input type="file" class="form-control" id="file2" accept=".xlsx">
+                    <div class="mb-3">
+                        <label for="matchColumn" class="form-label">اختر عمود المطابقة:</label>
+                        <select id="matchColumn" class="form-select">
+                            <!-- سيتم ملء الخيارات عند تحميل الملفات -->
+                        </select>
                     </div>
-                </div>
-
-                <div class="mb-3">
-                    <label for="matchColumn" class="form-label">اختر عمود المطابقة:</label>
-                    <select id="matchColumn" class="form-select">
-                        <!-- سيتم ملء الخيارات عند تحميل الملفات -->
-                    </select>
-                </div>
-
-                <div class="text-center">
-                    <button type="button" id="matchButton" class="btn btn-primary">عرض البيانات المطابقة</button>
-                </div>
-            </form>
-
-            <h2 class="text-center mt-5">البيانات المطابقة</h2>
-            <div class="table-responsive">
-                <table class="table table-bordered table-striped mt-3">
-                    <thead class="table-light">
-                        <tr id="tableHeader">
-                            <!-- سيتم ملء العناوين هنا -->
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        <!-- سيتم ملء البيانات هنا -->
-                    </tbody>
-                </table>
+                    <button type="button" id="matchButton" class="btn btn-primary w-100">رفع ومعالجة</button>
+                </form>
             </div>
         </div>
+
+        <div class="card mt-4" id="dataCard">
+            <div class="card-header bg-success text-white">
+                <h2>البيانات</h2>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="dataTable" class="table table-striped table-bordered table-hover">
+                        <thead class="thead-dark">
+                            <tr id="tableHeader"></tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+                <div class="text-center mt-4">
+                    <button id="showUnmatchedBtn" class="btn btn-warning" style="display: none;">البيانات الغير مطابقة</button>
+                    <button id="showMatchedBtn" class="btn btn-info" style="display: none;">البيانات المطابقة</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4 d-flex justify-content-center">
+            <a id="downloadUnmatchedCsvLink" class="btn btn-success mx-1" style="display: none;">حمل الملف CSV</a>
+            <a id="downloadUnmatchedXlsxLink" class="btn btn-info mx-1" style="display: none;">حمل الملف XLSX</a>
+            <a id="downloadMatchedCsvLink" class="btn btn-success mx-1" style="display: none;">حمل الملف CSV</a>
+            <a id="downloadMatchedXlsxLink" class="btn btn-info mx-1" style="display: none;">حمل الملف XLSX</a>
+        </div>        
     </div>
+    <br>
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 File Uploader. All rights reserved.</p>
+        </div>
+    </footer>
 
-    <!-- Bootstrap JavaScript and jQuery -->
+    <!-- JavaScript -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('file1').addEventListener('change', handleFileSelect);
-            document.getElementById('file2').addEventListener('change', handleFileSelect);
+        $(document).ready(function() {
+            $('input[type="file"]').on('change', function(event) {
+                let inputFile = event.currentTarget;
+                $(inputFile).next('.custom-file-label').html(inputFile.files[0].name);
+            });
 
-            let workbook1, workbook2;
+            $('#matchButton').click(function() {
+                // التحقق من صحة النموذج قبل المعالجة
+                let form = $('#uploadForm')[0];
+                if (form.checkValidity() === false) {
+                    form.classList.add('was-validated');
+                    return;
+                }
 
-            function handleFileSelect(event) {
-                const file = event.target.files[0];
-                const reader = new FileReader();
+                // معالجة الملفات بعد التحقق
+                handleFileSelect();
+            });
 
-                reader.onload = function(e) {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
+            function handleFileSelect() {
+                let file1 = document.getElementById('file1').files[0];
+                let file2 = document.getElementById('file2').files[0];
+                if (!file1 || !file2) {
+                    alert('يرجى اختيار كلا الملفين.');
+                    return;
+                }
 
-                    if (event.target.id === 'file1') {
-                        workbook1 = workbook;
-                    } else {
-                        workbook2 = workbook;
-                    }
+                let reader1 = new FileReader();
+                let reader2 = new FileReader();
 
-                    if (workbook1 && workbook2) {
-                        populateMatchColumns(workbook1, workbook2);
-                    }
+                reader1.onload = function(e) {
+                    let data1 = new Uint8Array(e.target.result);
+                    let workbook1 = XLSX.read(data1, { type: 'array' });
+                    processWorkbook(workbook1, 1);
                 };
 
-                reader.readAsArrayBuffer(file);
+                reader2.onload = function(e) {
+                    let data2 = new Uint8Array(e.target.result);
+                    let workbook2 = XLSX.read(data2, { type: 'array' });
+                    processWorkbook(workbook2, 2);
+                };
+
+                reader1.readAsArrayBuffer(file1);
+                reader2.readAsArrayBuffer(file2);
+            }
+
+            let workbooks = {};
+            function processWorkbook(workbook, index) {
+                workbooks[index] = workbook;
+                if (workbooks[1] && workbooks[2]) {
+                    populateMatchColumns(workbooks[1], workbooks[2]);
+                }
             }
 
             function populateMatchColumns(workbook1, workbook2) {
@@ -131,6 +201,8 @@
                     option.textContent = column;
                     matchColumnSelect.appendChild(option);
                 });
+
+                $('#dataCard').show();
             }
 
             function matchData() {
@@ -140,8 +212,8 @@
                     return;
                 }
 
-                const sheet1 = workbook1.Sheets[workbook1.SheetNames[0]];
-                const sheet2 = workbook2.Sheets[workbook2.SheetNames[0]];
+                const sheet1 = workbooks[1].Sheets[workbooks[1].SheetNames[0]];
+                const sheet2 = workbooks[2].Sheets[workbooks[2].SheetNames[0]];
                 const data1 = XLSX.utils.sheet_to_json(sheet1);
                 const data2 = XLSX.utils.sheet_to_json(sheet2);
 
@@ -182,7 +254,9 @@
                 });
             }
 
-            document.getElementById('matchButton').addEventListener('click', matchData);
+            $('#matchButton').click(function() {
+                matchData();
+            });
         });
     </script>
 </body>
