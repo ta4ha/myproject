@@ -167,6 +167,18 @@
                 displayDataFromResponse(record);
             } catch (error) {
                 console.error('Error uploading files:', error);
+
+                // طباعة تفاصيل الخطأ
+                if (error.isAbort) {
+                    console.error('Request was aborted.');
+                } else if (error.isAuth) {
+                    console.error('Authentication error.');
+                } else if (error.response) {
+                    console.error('Response error:', error.response);
+                    console.error('Response data:', error.response.data);
+                    console.error('Response status:', error.response.status);
+                }
+
                 alert('Error uploading files! ' + (error.message || error));
             }
         } else {
