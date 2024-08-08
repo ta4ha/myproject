@@ -28,6 +28,19 @@
             const recordId = 'YOUR_RECORD_ID'; // Replace with your actual RECORD_ID
             fetchData(recordId);
         }
+
+        app.get('/data/:recordId', async (req, res) => {
+    try {
+        const recordId = req.params.recordId;
+        const record = await pb.collection('mearg').getOne(recordId, {
+            expand: 'relField1,relField2.subRelField',
+        });
+        res.json(record);
+    } catch (error) {
+        console.error('Error fetching record:', error);
+        res.status(500).json({ error: error.message, details: error.data });
+    }
+});
     </script>
 </head>
 <body>
