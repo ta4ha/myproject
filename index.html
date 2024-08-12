@@ -9,39 +9,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
     <style>
         body {
-            background-color: #eef2f7;
+            background-color: #f8f9fa;
             font-family: 'Tajawal', sans-serif;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            color: #333;
-        }
-        header {
-            background-color: #007bff;
-            color: white;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        nav {
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         .card {
             margin-top: 20px;
-            border: none;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .card-header {
-            background-color: #007bff;
-            color: white;
-            font-weight: bold;
-        }
-        .btn-primary {
-            background-color: #0056b3;
-            border-color: #004085;
-        }
-        .btn-primary:hover {
-            background-color: #004085;
         }
         .footer {
             background-color: #343e48;
@@ -52,45 +27,36 @@
             width: 100%;
         }
         #dataCard {
-            display: none;
-        }
-        .table-responsive {
-            overflow-x: auto;
-        }
-        .table th, .table td {
-            vertical-align: middle;
-        }
-        .custom-file-label::after {
-            content: "Browse";
+            display: none; /* إخفاء الجدول بالكامل في البداية */
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>File Uploader</h1>
+    <header class="bg-info text-white text-center py-3">
+        <h1>Welcome World!</h1>
     </header>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
                     <a class="nav-link" href="#">جديد</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">جديد</a>
+                    <a class="nav-link" href="#">جديد </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="connect.html">دمج البيانات</a>
+                    <a class="nav-link" href="connect.html"> دمج البيانات</a>
                 </li>
                 <li class="nav-item active">
-                    <a class="nav-link" href="index.html">المطابقة والغير مطابقة</a>
+                    <a class="nav-link" href="index.html"> المطابقة والغير مطابقة</a>
                 </li>
             </ul>
         </div>
     </nav>
     <div class="container mt-5">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header bg-dark text-white">
                 <h2>ارفع الملف بصيغة xlsx او csv</h2>
             </div>
             <div class="card-body">
@@ -143,16 +109,16 @@
             <a id="downloadUnmatchedXlsxLink" class="btn btn-info mx-1" style="display: none;">حمل الملف XLSX</a>
             <a id="downloadMatchedCsvLink" class="btn btn-success mx-1" style="display: none;">حمل الملف CSV</a>
             <a id="downloadMatchedXlsxLink" class="btn btn-info mx-1" style="display: none;">حمل الملف XLSX</a>
-        </div>
+        </div>        
     </div>
-    <br>
+<br>
     <footer class="footer">
         <div class="container">
             <p>&copy; 2024 File Uploader. All rights reserved.</p>
         </div>
     </footer>
 
-    <!-- Adding reference to JavaScript file -->
+    <!-- إضافة مرجع لملف JavaScript -->
     <script src="script.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
