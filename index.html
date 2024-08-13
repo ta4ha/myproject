@@ -82,6 +82,12 @@
                             </div>
                         </div>
                     </div>
+
+                    <div id="additionalFiles" class="form-group">
+                        <!-- سيتم إضافة حقول رفع ملفات إضافية هنا -->
+                    </div>
+                    <button type="button" id="addFileBtn" class="btn btn-secondary">إضافة ملف جديد</button>
+
                     <!-- حقل اختيار للعمود المستخدم في المطابقة -->
                     <div class="form-group">
                         <label for="mergeField">اختر حقل الدمج:</label>
@@ -173,6 +179,26 @@
             });
         });
 
+        // إضافة ملف جديد
+        document.getElementById('addFileBtn').addEventListener('click', function () {
+            const additionalFilesDiv = document.getElementById('additionalFiles');
+            const newFileInput = document.createElement('div');
+            newFileInput.className = 'custom-file mt-3';
+            newFileInput.innerHTML = `
+                <input type="file" class="custom-file-input" accept=".csv, .xlsx" required>
+                <label class="custom-file-label">اختر الملف...</label>
+                <div class="invalid-feedback">يرجى اختيار ملف.</div>
+            `;
+            additionalFilesDiv.appendChild(newFileInput);
+
+            // إعادة تعيين الحدث لتحديث تسمية الملف الجديد
+            newFileInput.querySelector('.custom-file-input').addEventListener('change', function (e) {
+                const fileName = e.target.files[0] ? e.target.files[0].name : 'Choose file...';
+                e.target.nextElementSibling.innerText = fileName;
+                populateMergeFieldDropdown(); // تعبئة القائمة المنسدلة عند اختيار ملف جديد
+            });
+        });
+
         // تعبئة القائمة المنسدلة بحقول الدمج من الملف الأول
         function populateMergeFieldDropdown() {
             const file1 = document.getElementById('file1').files[0];
@@ -240,46 +266,44 @@
         })();
 
         function processFiles() {
-            const file1 = document.getElementById('file1').files[0];
-            const file2 = document.getElementById('file2').files[0];
+            const files = Array.from(document.querySelectorAll('.custom-file-input')).map(input => input.files[0]);
             const mergeField = document.getElementById('mergeField').value;
 
-            if (file1 && file2 && mergeField) {
+            if (files.every(file => file) && mergeField) {
                 document.getElementById('progressCard').style.display = 'block';
                 updateProgress(0);
-                Promise.all([readFile(file1), readFile(file2)]).then(contents => {
+
+                Promise.all(files.map(file => readFile(file))).then(contents => {
                     updateProgress(30);
-                    const csv1 = contents[0].split('\n').map(row => row.split(','));
-                    const csv2 = contents[1].split('\n').map(row => row.split(','));
 
-                    header1 = csv1.shift();
-                    const header2 = csv2.shift();
+                    const csvs = contents.map(content => content.split('\n').map(row => row.split(',')));
+                    const headers = csvs.map(csv => csv.shift());
 
-                    const idIndex1 = header1.indexOf(mergeField);
-                    const idIndex2 = header2.indexOf(mergeField);
-
-                    if (idIndex1 === -1 || idIndex2 === -1) {
-                        alert(`No "${mergeField}" column found in one or both headers!`);
+                    const mergeFieldIndices = headers.map(header => header.indexOf(mergeField));
+                    if (mergeFieldIndices.some(index => index === -1)) {
+                        alert(`No "${mergeField}" column found in one or more headers!`);
                         return;
                     }
 
-                    const data1 = new Map(csv1.map(row => [row[idIndex1], row]));
-                    const data2 = new Map(csv2.map(row => [row[idIndex2], row]));
+                    const dataMaps = csvs.map((csv, i) => new Map(csv.map(row => [row[mergeFieldIndices[i]], row])));
 
-                    const allFields = Array.from(new Set([...header1, ...header2]));
+                    const allFields = Array.from(new Set(headers.flat()));
                     setupFieldsSelection(allFields);
 
-                    const unmatchedData1 = [...data1].filter(([id]) => !data2.has(id));
-                    const unmatchedData2 = [...data2].filter(([id]) => !data1.has(id));
-                    unmatchedData = [...unmatchedData1, ...unmatchedData2];
-                    matchedData = [...data1].filter(([id]) => data2.has(id));
+                    matchedData = dataMaps.reduce((acc, dataMap) => {
+                        return acc.filter(([id]) => dataMap.has(id));
+                    }, [...dataMaps[0]]);
+
+                    unmatchedData = dataMaps.reduce((acc, dataMap) => {
+                        return acc.concat([...dataMap].filter(([id]) => !matchedData.find(matchedRow => matchedRow[0] === id)));
+                    }, []);
 
                     updateProgress(70);
                     document.getElementById('fieldsSelectionCard').style.display = 'block';
 
                     document.getElementById('displayDataBtn').addEventListener('click', () => {
                         const selectedFields = getSelectedFields();
-                        displayTable(selectedFields, matchedData, header1);
+                        displayTable(selectedFields, matchedData, headers[0]);
                         document.getElementById('dataCard').style.display = 'block';
                         document.getElementById('showUnmatchedBtn').style.display = 'inline-block';
                         document.getElementById('showMatchedBtn').style.display = 'inline-block';
@@ -288,12 +312,12 @@
 
                     document.getElementById('showUnmatchedBtn').addEventListener('click', () => {
                         const selectedFields = getSelectedFields();
-                        displayTable(selectedFields, unmatchedData, header1);
+                        displayTable(selectedFields, unmatchedData, headers[0]);
                     });
 
                     document.getElementById('showMatchedBtn').addEventListener('click', () => {
                         const selectedFields = getSelectedFields();
-                        displayTable(selectedFields, matchedData, header1);
+                        displayTable(selectedFields, matchedData, headers[0]);
                     });
 
                     document.getElementById('downloadCsvBtn').addEventListener('click', () => {
