@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>File Uploader</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
     <style>
         body {
             background-color: #f8f9fa;
@@ -25,8 +26,8 @@
             margin-top: auto;
             width: 100%;
         }
-        #dataCard, #fieldsSelectionCard, #progressCard, #mergeFieldCard {
-            display: none;
+        #dataCard, #fieldsSelectionCard, #progressCard {
+            display: none; /* إخفاء الجدول واختيار الحقول وشريط التقدم في البداية */
         }
         .pagination {
             justify-content: center;
@@ -37,6 +38,7 @@
     <header class="bg-info text-white text-center py-3">
         <h1>Welcome World!</h1>
     </header>
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
@@ -44,13 +46,13 @@
                     <a class="nav-link" href="#">جديد</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">جديد</a>
+                    <a class="nav-link" href="#">جديد </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="connect.html">دمج البيانات</a>
+                    <a class="nav-link" href="connect.html"> دمج البيانات</a>
                 </li>
                 <li class="nav-item active">
-                    <a class="nav-link" href="index.html">المطابقة والغير مطابقة</a>
+                    <a class="nav-link" href="index.html"> المطابقة والغير مطابقة</a>
                 </li>
             </ul>
         </div>
@@ -58,38 +60,38 @@
     <div class="container mt-5">
         <div class="card">
             <div class="card-header bg-dark text-white">
-                <h2>ارفع الملفات بصيغة xlsx او csv</h2>
+                <h2>ارفع الملف بصيغة xlsx او csv</h2>
             </div>
             <div class="card-body">
                 <form id="uploadForm" class="needs-validation" novalidate>
                     <div class="form-row">
-                        <div class="form-group col-md-12">
-                            <label for="files">الملفات:</label>
+                        <div class="form-group col-md-6">
+                            <label for="file1">الملف 1:</label>
                             <div class="custom-file">
-                                <input type="file" class="custom-file-input" id="files" accept=".csv, .xlsx" multiple required>
-                                <label class="custom-file-label" for="files">اختر الملفات...</label>
-                                <div class="invalid-feedback">يرجى اختيار الملفات.</div>
+                                <input type="file" class="custom-file-input" id="file1" accept=".csv, .xlsx" required>
+                                <label class="custom-file-label" for="file1">اختر الملف...</label>
+                                <div class="invalid-feedback">يرجى اختيار ملف.</div>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="file2">الملف 2:</label>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="file2" accept=".csv, .xlsx" required>
+                                <label class="custom-file-label" for="file2">اختر الملف...</label>
+                                <div class="invalid-feedback">يرجى اختيار ملف.</div>
                             </div>
                         </div>
                     </div>
-                    <button type="button" id="uploadBtn" class="btn btn-primary">رفع الملفات</button>
+                    <!-- حقل اختيار للعمود المستخدم في المطابقة -->
+                    <div class="form-group">
+                        <label for="mergeField">اختر حقل الدمج:</label>
+                        <select class="form-control" id="mergeField" required>
+                            <option value="" disabled selected>اختر الحقل...</option>
+                        </select>
+                        <div class="invalid-feedback">يرجى اختيار حقل الدمج.</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">رفع ومعالجة</button>
                 </form>
-            </div>
-        </div>
-
-        <div class="card mt-4" id="mergeFieldCard">
-            <div class="card-header bg-secondary text-white">
-                <h2>اختر حقل الدمج</h2>
-            </div>
-            <div class="card-body">
-                <div class="form-group">
-                    <label for="mergeField">اختر حقل الدمج:</label>
-                    <select class="form-control" id="mergeField" required>
-                        <option value="" disabled selected>اختر الحقل...</option>
-                    </select>
-                    <div class="invalid-feedback">يرجى اختيار حقل الدمج.</div>
-                </div>
-                <button type="button" id="processBtn" class="btn btn-success">رفع ومعالجة</button>
             </div>
         </div>
 
@@ -113,6 +115,7 @@
                         <label class="form-check-label" for="selectAllFields">تحديد الكل</label>
                     </div>
                     <div id="fieldsCheckboxes" class="form-group">
+                        <!-- سيتم ملء الحقول ديناميكياً -->
                     </div>
                     <button type="button" id="displayDataBtn" class="btn btn-success">عرض البيانات</button>
                 </form>
@@ -154,21 +157,30 @@
         </div>
     </footer>
 
+    <!-- إضافة مرجع لملف JavaScript -->
     <script>
-        let header1;
-        let matchedData = [];
-        let unmatchedData = [];
+        let selectedHeader1;
+        let matchedData, unmatchedData, header1;
         const itemsPerPage = 50;
         let currentPage = 1;
-        let fileContents = [];
 
-        document.getElementById('uploadBtn').addEventListener('click', function() {
-            const files = document.getElementById('files').files;
-            if (files.length > 0) {
-                readFiles(files).then(contents => {
-                    fileContents = contents;
-                    const headers = contents.map(content => content.split('\n')[0].split(','));
-                    header1 = Array.from(new Set(headers.flat()));
+        // تحديث تسمية ملف الإدخال لعرض اسم الملف
+        document.querySelectorAll('.custom-file-input').forEach(input => {
+            input.addEventListener('change', function (e) {
+                const fileName = e.target.files[0] ? e.target.files[0].name : 'Choose file...';
+                e.target.nextElementSibling.innerText = fileName;
+                populateMergeFieldDropdown(); // تعبئة القائمة المنسدلة عند اختيار ملف
+            });
+        });
+
+        // تعبئة القائمة المنسدلة بحقول الدمج من الملف الأول
+        function populateMergeFieldDropdown() {
+            const file1 = document.getElementById('file1').files[0];
+            if (file1) {
+                readFile(file1).then(contents => {
+                    const csv1 = contents.split('\n').map(row => row.split(','));
+                    header1 = csv1.shift(); // استخراج الصف العلوي
+                    selectedHeader1 = header1;
                     const mergeFieldDropdown = document.getElementById('mergeField');
                     mergeFieldDropdown.innerHTML = '<option value="" disabled selected>اختر الحقل...</option>';
                     header1.forEach(headerItem => {
@@ -177,23 +189,12 @@
                         option.textContent = headerItem;
                         mergeFieldDropdown.appendChild(option);
                     });
-                    document.getElementById('mergeFieldCard').style.display = 'block';
+                    localStorage.setItem('header1', JSON.stringify(header1)); // حفظ في المتصفح
                 }).catch(error => {
-                    console.error('Error reading files:', error);
-                    alert('Error processing files!');
+                    console.error('Error reading file:', error);
+                    alert('Error processing file!');
                 });
-            } else {
-                alert('يرجى اختيار الملفات أولاً');
             }
-        });
-
-        document.getElementById('processBtn').addEventListener('click', function() {
-            processFiles();
-        });
-
-        function readFiles(files) {
-            const promises = Array.from(files).map(file => readFile(file));
-            return Promise.all(promises);
         }
 
         function readFile(file) {
@@ -218,76 +219,95 @@
             });
         }
 
+        // التحقق من صحة النموذج
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                const forms = document.getElementsByClassName('needs-validation');
+                Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        } else {
+                            event.preventDefault(); // منع الإرسال الافتراضي للنموذج
+                            form.classList.add('was-validated');
+                            processFiles(); // معالجة الملفات بعد التحقق
+                        }
+                    }, false);
+                });
+            }, false);
+        })();
+
         function processFiles() {
+            const file1 = document.getElementById('file1').files[0];
+            const file2 = document.getElementById('file2').files[0];
             const mergeField = document.getElementById('mergeField').value;
-            if (mergeField) {
+
+            if (file1 && file2 && mergeField) {
                 document.getElementById('progressCard').style.display = 'block';
                 updateProgress(0);
+                Promise.all([readFile(file1), readFile(file2)]).then(contents => {
+                    updateProgress(30);
+                    const csv1 = contents[0].split('\n').map(row => row.split(','));
+                    const csv2 = contents[1].split('\n').map(row => row.split(','));
 
-                const csvArrays = fileContents.map(content => content.split('\n').map(row => row.split(',')));
-                const headers = csvArrays.map(csv => csv.shift());
+                    header1 = csv1.shift();
+                    const header2 = csv2.shift();
 
-                const allData = new Map();
+                    const idIndex1 = header1.indexOf(mergeField);
+                    const idIndex2 = header2.indexOf(mergeField);
 
-                csvArrays.forEach((csv, index) => {
-                    const idIndex = headers[index].indexOf(mergeField);
-                    csv.forEach(row => {
-                        const id = row[idIndex];
-                        if (!allData.has(id)) {
-                            allData.set(id, new Array(header1.length).fill(''));
-                        }
-                        row.forEach((value, i) => {
-                            const headerIndex = header1.indexOf(headers[index][i]);
-                            allData.get(id)[headerIndex] = value;
-                        });
-                    });
-                });
-
-                matchedData = [];
-                unmatchedData = [];
-
-                allData.forEach(row => {
-                    if (row.every(value => value !== '')) {
-                        matchedData.push(row);
-                    } else {
-                        unmatchedData.push(row);
+                    if (idIndex1 === -1 || idIndex2 === -1) {
+                        alert(`No "${mergeField}" column found in one or both headers!`);
+                        return;
                     }
+
+                    const data1 = new Map(csv1.map(row => [row[idIndex1], row]));
+                    const data2 = new Map(csv2.map(row => [row[idIndex2], row]));
+
+                    const allFields = Array.from(new Set([...header1, ...header2]));
+                    setupFieldsSelection(allFields);
+
+                    const unmatchedData1 = [...data1].filter(([id]) => !data2.has(id));
+                    const unmatchedData2 = [...data2].filter(([id]) => !data1.has(id));
+                    unmatchedData = [...unmatchedData1, ...unmatchedData2];
+                    matchedData = [...data1].filter(([id]) => data2.has(id));
+
+                    updateProgress(70);
+                    document.getElementById('fieldsSelectionCard').style.display = 'block';
+
+                    document.getElementById('displayDataBtn').addEventListener('click', () => {
+                        const selectedFields = getSelectedFields();
+                        displayTable(selectedFields, matchedData, header1);
+                        document.getElementById('dataCard').style.display = 'block';
+                        document.getElementById('showUnmatchedBtn').style.display = 'inline-block';
+                        document.getElementById('showMatchedBtn').style.display = 'inline-block';
+                        updateProgress(100);
+                    });
+
+                    document.getElementById('showUnmatchedBtn').addEventListener('click', () => {
+                        const selectedFields = getSelectedFields();
+                        displayTable(selectedFields, unmatchedData, header1);
+                    });
+
+                    document.getElementById('showMatchedBtn').addEventListener('click', () => {
+                        const selectedFields = getSelectedFields();
+                        displayTable(selectedFields, matchedData, header1);
+                    });
+
+                    document.getElementById('downloadCsvBtn').addEventListener('click', () => {
+                        downloadTableAsCsv();
+                    });
+
+                    document.getElementById('downloadXlsxBtn').addEventListener('click', () => {
+                        downloadTableAsXlsx();
+                    });
+
+                }).catch(error => {
+                    console.error('Error reading files:', error);
+                    alert('Error processing files!');
                 });
-
-                setupFieldsSelection(header1);
-
-                updateProgress(70);
-                document.getElementById('fieldsSelectionCard').style.display = 'block';
-
-                document.getElementById('displayDataBtn').addEventListener('click', () => {
-                    const selectedFields = getSelectedFields();
-                    displayTable(selectedFields, matchedData);
-                    document.getElementById('dataCard').style.display = 'block';
-                    document.getElementById('showUnmatchedBtn').style.display = 'inline-block';
-                    document.getElementById('showMatchedBtn').style.display = 'inline-block';
-                    updateProgress(100);
-                });
-
-                document.getElementById('showUnmatchedBtn').addEventListener('click', () => {
-                    const selectedFields = getSelectedFields();
-                    displayTable(selectedFields, unmatchedData);
-                });
-
-                document.getElementById('showMatchedBtn').addEventListener('click', () => {
-                    const selectedFields = getSelectedFields();
-                    displayTable(selectedFields, matchedData);
-                });
-
-                document.getElementById('downloadCsvBtn').addEventListener('click', () => {
-                    downloadTableAsCsv();
-                });
-
-                document.getElementById('downloadXlsxBtn').addEventListener('click', () => {
-                    downloadTableAsXlsx();
-                });
-
-            } else {
-                alert('يرجى اختيار حقل الدمج أولاً');
             }
         }
 
@@ -326,7 +346,7 @@
             return selectedFields;
         }
 
-        function displayTable(selectedFields, data) {
+        function displayTable(selectedFields, data, header) {
             const tableHeader = document.getElementById('tableHeader');
             tableHeader.innerHTML = '';
             const sequenceHeader = document.createElement('th');
@@ -346,14 +366,15 @@
             const end = start + itemsPerPage;
             const currentData = data.slice(start, end);
 
-            currentData.forEach((row, index) => {
+            currentData.forEach(([id, row], index) => {
                 const tr = document.createElement('tr');
                 const sequenceCell = document.createElement('td');
                 sequenceCell.textContent = start + index + 1;
                 tr.appendChild(sequenceCell);
                 selectedFields.forEach(field => {
                     const td = document.createElement('td');
-                    td.textContent = row[header1.indexOf(field)] || '';
+                    const fieldIndex = header.indexOf(field);
+                    td.textContent = row[fieldIndex] || ''; // التأكد من وجود البيانات
                     tr.appendChild(td);
                 });
                 tableBody.appendChild(tr);
@@ -375,8 +396,8 @@
                     e.preventDefault();
                     currentPage = i;
                     const selectedFields = getSelectedFields();
-                    const dataToDisplay = document.getElementById('showMatchedBtn').classList.contains('active') ? matchedData : unmatchedData;
-                    displayTable(selectedFields, dataToDisplay);
+                    const dataToDisplay = document.getElementById('showMatchedBtn').style.display === 'inline-block' ? matchedData : unmatchedData;
+                    displayTable(selectedFields, dataToDisplay, header1);
                 });
                 pagination.appendChild(li);
             }
@@ -417,4 +438,4 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 </body>
-</html> 
+</html>
