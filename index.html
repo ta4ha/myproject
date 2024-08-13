@@ -26,19 +26,18 @@
             width: 100%;
         }
         #dataCard, #fieldsSelectionCard, #progressCard {
-            display: none;
+            display: none; /* إخفاء الجدول واختيار الحقول وشريط التقدم في البداية */
         }
         .pagination {
             justify-content: center;
         }
     </style>
-    <!-- ربط ملف JavaScript -->
-    <script src="script.js" defer></script>
 </head>
 <body>
     <header class="bg-info text-white text-center py-3">
         <h1>Welcome World!</h1>
     </header>
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
@@ -46,13 +45,13 @@
                     <a class="nav-link" href="#">جديد</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">جديد</a>
+                    <a class="nav-link" href="#">جديد </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="connect.html">دمج البيانات</a>
+                    <a class="nav-link" href="connect.html"> دمج البيانات</a>
                 </li>
                 <li class="nav-item active">
-                    <a class="nav-link" href="index.html">المطابقة والغير مطابقة</a>
+                    <a class="nav-link" href="index.html"> المطابقة والغير مطابقة</a>
                 </li>
             </ul>
         </div>
@@ -88,6 +87,7 @@
                     </div>
                     <button type="button" id="addFileBtn" class="btn btn-secondary">إضافة ملف جديد</button>
 
+                    <!-- حقل اختيار للعمود المستخدم في المطابقة -->
                     <div class="form-group">
                         <label for="mergeField">اختر حقل الدمج:</label>
                         <select class="form-control" id="mergeField" required>
@@ -154,11 +154,14 @@
             </div>
         </div>
     </div>
-
+<br>
     <footer class="footer">
         <div class="container">
             <p>&copy; 2024 File Uploader. All rights reserved.</p>
         </div>
     </footer>
+
+    <!-- تحميل JavaScript -->
+    <script src="script.js"></script>
 </body>
 </html>
