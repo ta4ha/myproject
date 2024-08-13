@@ -60,25 +60,17 @@
     <div class="container mt-5">
         <div class="card">
             <div class="card-header bg-dark text-white">
-                <h2>ارفع الملف بصيغة xlsx او csv</h2>
+                <h2>ارفع الملفات بصيغة xlsx او csv</h2>
             </div>
             <div class="card-body">
                 <form id="uploadForm" class="needs-validation" novalidate>
                     <div class="form-row">
-                        <div class="form-group col-md-6">
-                            <label for="file1">الملف 1:</label>
+                        <div class="form-group col-md-12">
+                            <label for="files">الملفات:</label>
                             <div class="custom-file">
-                                <input type="file" class="custom-file-input" id="file1" accept=".csv, .xlsx" required>
-                                <label class="custom-file-label" for="file1">اختر الملف...</label>
-                                <div class="invalid-feedback">يرجى اختيار ملف.</div>
-                            </div>
-                        </div>
-                        <div class="form-group col-md-6">
-                            <label for="file2">الملف 2:</label>
-                            <div class="custom-file">
-                                <input type="file" class="custom-file-input" id="file2" accept=".csv, .xlsx" required>
-                                <label class="custom-file-label" for="file2">اختر الملف...</label>
-                                <div class="invalid-feedback">يرجى اختيار ملف.</div>
+                                <input type="file" class="custom-file-input" id="files" accept=".csv, .xlsx" multiple required>
+                                <label class="custom-file-label" for="files">اختر الملفات...</label>
+                                <div class="invalid-feedback">يرجى اختيار الملفات.</div>
                             </div>
                         </div>
                     </div>
@@ -164,23 +156,20 @@
         const itemsPerPage = 50;
         let currentPage = 1;
 
-        // تحديث تسمية ملف الإدخال لعرض اسم الملف
-        document.querySelectorAll('.custom-file-input').forEach(input => {
-            input.addEventListener('change', function (e) {
-                const fileName = e.target.files[0] ? e.target.files[0].name : 'Choose file...';
-                e.target.nextElementSibling.innerText = fileName;
-                populateMergeFieldDropdown(); // تعبئة القائمة المنسدلة عند اختيار ملف
-            });
+        // تحديث تسمية ملف الإدخال لعرض اسم الملفات
+        document.getElementById('files').addEventListener('change', function (e) {
+            const fileNames = Array.from(e.target.files).map(file => file.name).join(', ');
+            e.target.nextElementSibling.innerText = fileNames;
+            populateMergeFieldDropdown(); // تعبئة القائمة المنسدلة عند اختيار ملفات
         });
 
-        // تعبئة القائمة المنسدلة بحقول الدمج من الملف الأول
+        // تعبئة القائمة المنسدلة بحقول الدمج من الملفات
         function populateMergeFieldDropdown() {
-            const file1 = document.getElementById('file1').files[0];
-            if (file1) {
-                readFile(file1).then(contents => {
-                    const csv1 = contents.split('\n').map(row => row.split(','));
-                    header1 = csv1.shift(); // استخراج الصف العلوي
-                    selectedHeader1 = header1;
+            const files = document.getElementById('files').files;
+            if (files.length > 0) {
+                readFiles(files).then(contents => {
+                    const headers = contents.map(content => content.split('\n')[0].split(','));
+                    header1 = Array.from(new Set(headers.flat())); // دمج كل الحقول من كل الملفات
                     const mergeFieldDropdown = document.getElementById('mergeField');
                     mergeFieldDropdown.innerHTML = '<option value="" disabled selected>اختر الحقل...</option>';
                     header1.forEach(headerItem => {
@@ -191,10 +180,15 @@
                     });
                     localStorage.setItem('header1', JSON.stringify(header1)); // حفظ في المتصفح
                 }).catch(error => {
-                    console.error('Error reading file:', error);
-                    alert('Error processing file!');
+                    console.error('Error reading files:', error);
+                    alert('Error processing files!');
                 });
             }
+        }
+
+        function readFiles(files) {
+            const promises = Array.from(files).map(file => readFile(file));
+            return Promise.all(promises);
         }
 
         function readFile(file) {
@@ -240,46 +234,44 @@
         })();
 
         function processFiles() {
-            const file1 = document.getElementById('file1').files[0];
-            const file2 = document.getElementById('file2').files[0];
+            const files = document.getElementById('files').files;
             const mergeField = document.getElementById('mergeField').value;
 
-            if (file1 && file2 && mergeField) {
+            if (files.length > 0 && mergeField) {
                 document.getElementById('progressCard').style.display = 'block';
                 updateProgress(0);
-                Promise.all([readFile(file1), readFile(file2)]).then(contents => {
+                readFiles(files).then(contents => {
                     updateProgress(30);
-                    const csv1 = contents[0].split('\n').map(row => row.split(','));
-                    const csv2 = contents[1].split('\n').map(row => row.split(','));
+                    const csvArrays = contents.map(content => content.split('\n').map(row => row.split(',')));
+                    const headers = csvArrays.map(csv => csv.shift());
 
-                    header1 = csv1.shift();
-                    const header2 = csv2.shift();
+                    const dataMaps = csvArrays.map((csv, index) => {
+                        const idIndex = headers[index].indexOf(mergeField);
+                        return new Map(csv.map(row => [row[idIndex], row]));
+                    });
 
-                    const idIndex1 = header1.indexOf(mergeField);
-                    const idIndex2 = header2.indexOf(mergeField);
-
-                    if (idIndex1 === -1 || idIndex2 === -1) {
-                        alert(`No "${mergeField}" column found in one or both headers!`);
-                        return;
-                    }
-
-                    const data1 = new Map(csv1.map(row => [row[idIndex1], row]));
-                    const data2 = new Map(csv2.map(row => [row[idIndex2], row]));
-
-                    const allFields = Array.from(new Set([...header1, ...header2]));
+                    const allFields = Array.from(new Set(headers.flat()));
                     setupFieldsSelection(allFields);
 
-                    const unmatchedData1 = [...data1].filter(([id]) => !data2.has(id));
-                    const unmatchedData2 = [...data2].filter(([id]) => !data1.has(id));
-                    unmatchedData = [...unmatchedData1, ...unmatchedData2];
-                    matchedData = [...data1].filter(([id]) => data2.has(id));
+                    const allData = dataMaps.reduce((acc, dataMap) => {
+                        dataMap.forEach((value, key) => {
+                            if (!acc.has(key)) {
+                                acc.set(key, []);
+                            }
+                            acc.get(key).push(...value);
+                        });
+                        return acc;
+                    }, new Map());
+
+                    matchedData = Array.from(allData.values()).filter(rows => rows.length === dataMaps.length);
+                    unmatchedData = Array.from(allData.values()).filter(rows => rows.length < dataMaps.length);
 
                     updateProgress(70);
                     document.getElementById('fieldsSelectionCard').style.display = 'block';
 
                     document.getElementById('displayDataBtn').addEventListener('click', () => {
                         const selectedFields = getSelectedFields();
-                        displayTable(selectedFields, matchedData, header1);
+                        displayTable(selectedFields, matchedData, allFields);
                         document.getElementById('dataCard').style.display = 'block';
                         document.getElementById('showUnmatchedBtn').style.display = 'inline-block';
                         document.getElementById('showMatchedBtn').style.display = 'inline-block';
@@ -288,12 +280,12 @@
 
                     document.getElementById('showUnmatchedBtn').addEventListener('click', () => {
                         const selectedFields = getSelectedFields();
-                        displayTable(selectedFields, unmatchedData, header1);
+                        displayTable(selectedFields, unmatchedData, allFields);
                     });
 
                     document.getElementById('showMatchedBtn').addEventListener('click', () => {
                         const selectedFields = getSelectedFields();
-                        displayTable(selectedFields, matchedData, header1);
+                        displayTable(selectedFields, matchedData, allFields);
                     });
 
                     document.getElementById('downloadCsvBtn').addEventListener('click', () => {
@@ -366,7 +358,7 @@
             const end = start + itemsPerPage;
             const currentData = data.slice(start, end);
 
-            currentData.forEach(([id, row], index) => {
+            currentData.forEach((row, index) => {
                 const tr = document.createElement('tr');
                 const sequenceCell = document.createElement('td');
                 sequenceCell.textContent = start + index + 1;
