@@ -119,6 +119,10 @@
                         <tbody id="tableBody"></tbody>
                     </table>
                 </div>
+                <div class="text-center mt-4">
+                    <button id="showUnmatchedBtn" class="btn btn-warning" style="display: none;">البيانات الغير مطابقة</button>
+                    <button id="showMatchedBtn" class="btn btn-info" style="display: none;">البيانات المطابقة</button>
+                </div>
             </div>
         </div>
 
@@ -133,6 +137,7 @@
     <!-- إضافة مرجع لملف JavaScript -->
     <script>
         let selectedHeader1;
+        let matchedData, unmatchedData, header1;
 
         // تحديث تسمية ملف الإدخال لعرض اسم الملف
         document.querySelectorAll('.custom-file-input').forEach(input => {
@@ -149,7 +154,7 @@
             if (file1) {
                 readFile(file1).then(contents => {
                     const csv1 = contents.split('\n').map(row => row.split(','));
-                    const header1 = csv1.shift(); // استخراج الصف العلوي
+                    header1 = csv1.shift(); // استخراج الصف العلوي
                     selectedHeader1 = header1;
                     const mergeFieldDropdown = document.getElementById('mergeField');
                     mergeFieldDropdown.innerHTML = '<option value="" disabled selected>اختر الحقل...</option>';
@@ -237,8 +242,8 @@
 
                     const unmatchedData1 = [...data1].filter(([id]) => !data2.has(id));
                     const unmatchedData2 = [...data2].filter(([id]) => !data1.has(id));
-                    const unmatchedData = [...unmatchedData1, ...unmatchedData2];
-                    const matchedData = [...data1].filter(([id]) => data2.has(id));
+                    unmatchedData = [...unmatchedData1, ...unmatchedData2];
+                    matchedData = [...data1].filter(([id]) => data2.has(id));
 
                     document.getElementById('fieldsSelectionCard').style.display = 'block';
 
@@ -246,6 +251,18 @@
                         const selectedFields = getSelectedFields();
                         displayTable(selectedFields, matchedData, header1);
                         document.getElementById('dataCard').style.display = 'block';
+                        document.getElementById('showUnmatchedBtn').style.display = 'inline-block';
+                        document.getElementById('showMatchedBtn').style.display = 'inline-block';
+                    });
+
+                    document.getElementById('showUnmatchedBtn').addEventListener('click', () => {
+                        const selectedFields = getSelectedFields();
+                        displayTable(selectedFields, unmatchedData, header1);
+                    });
+
+                    document.getElementById('showMatchedBtn').addEventListener('click', () => {
+                        const selectedFields = getSelectedFields();
+                        displayTable(selectedFields, matchedData, header1);
                     });
 
                 }).catch(error => {
