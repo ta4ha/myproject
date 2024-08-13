@@ -1,4 +1,4 @@
-window.addEventListener('load', function() {
+document.addEventListener('DOMContentLoaded', function() {
     let selectedHeader1;
     let matchedData, unmatchedData, header1;
     const itemsPerPage = 50;
@@ -6,7 +6,7 @@ window.addEventListener('load', function() {
 
     document.querySelectorAll('.custom-file-input').forEach(input => {
         input.addEventListener('change', function (e) {
-            const fileName = e.target.files[0] ? e.target.files[0].name : 'Choose file...';
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'اختر الملف...';
             e.target.nextElementSibling.innerText = fileName;
             populateMergeFieldDropdown();
         });
@@ -24,7 +24,7 @@ window.addEventListener('load', function() {
         additionalFilesDiv.appendChild(newFileInput);
 
         newFileInput.querySelector('.custom-file-input').addEventListener('change', function (e) {
-            const fileName = e.target.files[0] ? e.target.files[0].name : 'Choose file...';
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'اختر الملف...';
             e.target.nextElementSibling.innerText = fileName;
             populateMergeFieldDropdown();
         });
