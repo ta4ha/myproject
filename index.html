@@ -153,13 +153,13 @@
         let currentPage = 1;
 
         document.getElementById('files').addEventListener('change', function (e) {
-            const fileNames = Array.from(e.target.files).map(file => file.name).join(', ');
+            const files = e.target.files;
+            const fileNames = Array.from(files).map(file => file.name).join(', ');
             e.target.nextElementSibling.innerText = fileNames;
-            populateMergeFieldDropdown();
+            populateMergeFieldDropdown(files);
         });
 
-        function populateMergeFieldDropdown() {
-            const files = document.getElementById('files').files;
+        function populateMergeFieldDropdown(files) {
             if (files.length > 0) {
                 readFiles(files).then(contents => {
                     const headers = contents.map(content => content.split('\n')[0].split(','));
