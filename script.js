@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // Update the label of the file input to show the file name
+    // تحديث تسمية حقل إدخال الملف لإظهار اسم الملف
     document.querySelectorAll('.custom-file-input').forEach(input => {
         input.addEventListener('change', function (e) {
             const fileName = e.target.files[0] ? e.target.files[0].name : 'Choose file...';
@@ -10,21 +10,27 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Populate the merge field dropdown with column names from the first file
+    // تعبئة قائمة الحقول المنسدلة بأسماء الأعمدة من الملف الأول
     function populateMergeFieldDropdown() {
         const file1 = document.getElementById('file1').files[0];
         if (file1) {
             readFile(file1).then(contents => {
                 const csv1 = contents.split('\n').map(row => row.split(','));
-                const header1 = csv1.shift(); // Extract header row
-                const mergeFieldDropdown = document.getElementById('mergeField');
-                mergeFieldDropdown.innerHTML = '<option value="" disabled selected>اختر الحقل...</option>';
-                header1.forEach(headerItem => {
-                    const option = document.createElement('option');
-                    option.value = headerItem;
-                    option.textContent = headerItem;
-                    mergeFieldDropdown.appendChild(option);
-                });
+                const header1 = csv1.shift(); // استخراج صف الرؤوس
+                console.log("Extracted Headers:", header1); // عرض الحقول في وحدة التحكم
+
+                if (header1.length > 0) {
+                    const mergeFieldDropdown = document.getElementById('mergeField');
+                    mergeFieldDropdown.innerHTML = '<option value="" disabled selected>اختر الحقل...</option>';
+                    header1.forEach(headerItem => {
+                        const option = document.createElement('option');
+                        option.value = headerItem;
+                        option.textContent = headerItem;
+                        mergeFieldDropdown.appendChild(option);
+                    });
+                } else {
+                    alert("No headers found in the file.");
+                }
             }).catch(error => {
                 console.error('Error reading file:', error);
                 alert('Error processing file!');
@@ -32,6 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    // قراءة محتوى الملف
     function readFile(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -54,7 +61,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Bootstrap validation for forms
+    // التحقق من صحة النموذج
     (function () {
         'use strict';
         window.addEventListener('load', function () {
@@ -65,9 +72,9 @@ document.addEventListener("DOMContentLoaded", function () {
                         event.preventDefault();
                         event.stopPropagation();
                     } else {
-                        event.preventDefault(); // Prevent the default form submission
+                        event.preventDefault(); // منع الإرسال الافتراضي للنموذج
                         form.classList.add('was-validated');
-                        processFiles(); // Show the table after validation
+                        processFiles(); // عرض الجدول بعد التحقق من النموذج
                     }
                 }, false);
             });
