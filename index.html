@@ -166,7 +166,7 @@
     <!-- إضافة مرجع لملف JavaScript -->
     <script>
         let selectedHeader1;
-        let matchedData, unmatchedData, header1;
+        let matchedData, unmatchedData;
         const itemsPerPage = 50;
         let currentPage = 1;
 
@@ -199,28 +199,30 @@
             });
         });
 
-        // تعبئة القائمة المنسدلة بحقول الدمج من الملف الأول
+        // تعبئة القائمة المنسدلة بحقول الدمج من جميع الملفات
         function populateMergeFieldDropdown() {
-            const file1 = document.getElementById('file1').files[0];
-            if (file1) {
-                readFile(file1).then(contents => {
-                    const csv1 = contents.split('\n').map(row => row.split(','));
-                    header1 = csv1.shift(); // استخراج الصف العلوي
-                    selectedHeader1 = header1;
-                    const mergeFieldDropdown = document.getElementById('mergeField');
-                    mergeFieldDropdown.innerHTML = '<option value="" disabled selected>اختر الحقل...</option>';
-                    header1.forEach(headerItem => {
-                        const option = document.createElement('option');
-                        option.value = headerItem;
-                        option.textContent = headerItem;
-                        mergeFieldDropdown.appendChild(option);
-                    });
-                    localStorage.setItem('header1', JSON.stringify(header1)); // حفظ في المتصفح
-                }).catch(error => {
-                    console.error('Error reading file:', error);
-                    alert('Error processing file!');
+            const files = Array.from(document.querySelectorAll('.custom-file-input')).map(input => input.files[0]);
+            const allHeaders = new Set();
+
+            Promise.all(files.map(file => readFile(file))).then(contents => {
+                contents.forEach(content => {
+                    const csv = content.split('\n').map(row => row.split(','));
+                    const header = csv.shift();
+                    header.forEach(h => allHeaders.add(h));
                 });
-            }
+
+                const mergeFieldDropdown = document.getElementById('mergeField');
+                mergeFieldDropdown.innerHTML = '<option value="" disabled selected>اختر الحقل...</option>';
+                allHeaders.forEach(headerItem => {
+                    const option = document.createElement('option');
+                    option.value = headerItem;
+                    option.textContent = headerItem;
+                    mergeFieldDropdown.appendChild(option);
+                });
+            }).catch(error => {
+                console.error('Error reading files:', error);
+                alert('Error processing files!');
+            });
         }
 
         function readFile(file) {
