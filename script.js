@@ -287,4 +287,4 @@ function downloadTableAsXlsx() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Data");
     XLSX.writeFile(wb, "data.xlsx");
-}
+} 
