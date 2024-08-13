@@ -245,33 +245,32 @@
                     const csvArrays = contents.map(content => content.split('\n').map(row => row.split(',')));
                     const headers = csvArrays.map(csv => csv.shift());
 
-                    const dataMaps = csvArrays.map((csv, index) => {
+                    const allData = new Map();
+
+                    csvArrays.forEach((csv, index) => {
                         const idIndex = headers[index].indexOf(mergeField);
-                        return new Map(csv.map(row => [row[idIndex], row]));
+                        csv.forEach(row => {
+                            const id = row[idIndex];
+                            if (!allData.has(id)) {
+                                allData.set(id, new Array(header1.length).fill(''));
+                            }
+                            row.forEach((value, i) => {
+                                allData.get(id)[header1.indexOf(headers[index][i])] = value;
+                            });
+                        });
                     });
 
-                    const allFields = Array.from(new Set(headers.flat()));
-                    setupFieldsSelection(allFields);
+                    matchedData = Array.from(allData.values()).filter(row => !row.includes(''));
+                    unmatchedData = Array.from(allData.values()).filter(row => row.includes(''));
 
-                    const allData = dataMaps.reduce((acc, dataMap) => {
-                        dataMap.forEach((value, key) => {
-                            if (!acc.has(key)) {
-                                acc.set(key, []);
-                            }
-                            acc.get(key).push(...value);
-                        });
-                        return acc;
-                    }, new Map());
-
-                    matchedData = Array.from(allData.values()).filter(rows => rows.length === dataMaps.length);
-                    unmatchedData = Array.from(allData.values()).filter(rows => rows.length < dataMaps.length);
+                    setupFieldsSelection(header1);
 
                     updateProgress(70);
                     document.getElementById('fieldsSelectionCard').style.display = 'block';
 
                     document.getElementById('displayDataBtn').addEventListener('click', () => {
                         const selectedFields = getSelectedFields();
-                        displayTable(selectedFields, matchedData, allFields);
+                        displayTable(selectedFields, matchedData);
                         document.getElementById('dataCard').style.display = 'block';
                         document.getElementById('showUnmatchedBtn').style.display = 'inline-block';
                         document.getElementById('showMatchedBtn').style.display = 'inline-block';
@@ -280,12 +279,12 @@
 
                     document.getElementById('showUnmatchedBtn').addEventListener('click', () => {
                         const selectedFields = getSelectedFields();
-                        displayTable(selectedFields, unmatchedData, allFields);
+                        displayTable(selectedFields, unmatchedData);
                     });
 
                     document.getElementById('showMatchedBtn').addEventListener('click', () => {
                         const selectedFields = getSelectedFields();
-                        displayTable(selectedFields, matchedData, allFields);
+                        displayTable(selectedFields, matchedData);
                     });
 
                     document.getElementById('downloadCsvBtn').addEventListener('click', () => {
@@ -338,7 +337,7 @@
             return selectedFields;
         }
 
-        function displayTable(selectedFields, data, header) {
+        function displayTable(selectedFields, data) {
             const tableHeader = document.getElementById('tableHeader');
             tableHeader.innerHTML = '';
             const sequenceHeader = document.createElement('th');
@@ -365,8 +364,7 @@
                 tr.appendChild(sequenceCell);
                 selectedFields.forEach(field => {
                     const td = document.createElement('td');
-                    const fieldIndex = header.indexOf(field);
-                    td.textContent = row[fieldIndex] || ''; // التأكد من وجود البيانات
+                    td.textContent = row[header1.indexOf(field)] || ''; // التأكد من وجود البيانات
                     tr.appendChild(td);
                 });
                 tableBody.appendChild(tr);
@@ -389,7 +387,7 @@
                     currentPage = i;
                     const selectedFields = getSelectedFields();
                     const dataToDisplay = document.getElementById('showMatchedBtn').style.display === 'inline-block' ? matchedData : unmatchedData;
-                    displayTable(selectedFields, dataToDisplay, header1);
+                    displayTable(selectedFields, dataToDisplay);
                 });
                 pagination.appendChild(li);
             }
