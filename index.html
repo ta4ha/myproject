@@ -26,8 +26,8 @@
             margin-top: auto;
             width: 100%;
         }
-        #dataCard {
-            display: none; /* إخفاء الجدول بالكامل في البداية */
+        #dataCard, #fieldsSelectionCard {
+            display: none; /* إخفاء الجدول واختيار الحقول في البداية */
         }
     </style>
 </head>
@@ -92,6 +92,20 @@
             </div>
         </div>
 
+        <div class="card mt-4" id="fieldsSelectionCard">
+            <div class="card-header bg-secondary text-white">
+                <h2>اختر الحقول لعرضها في الجدول</h2>
+            </div>
+            <div class="card-body">
+                <form id="fieldsForm">
+                    <div id="fieldsCheckboxes" class="form-group">
+                        <!-- سيتم ملء الحقول ديناميكياً -->
+                    </div>
+                    <button type="button" id="displayDataBtn" class="btn btn-success">عرض البيانات</button>
+                </form>
+            </div>
+        </div>
+
         <div class="card mt-4" id="dataCard">
             <div class="card-header bg-success text-white">
                 <h2>البيانات</h2>
@@ -105,19 +119,9 @@
                         <tbody id="tableBody"></tbody>
                     </table>
                 </div>
-                <div class="text-center mt-4">
-                    <button id="showUnmatchedBtn" class="btn btn-warning" style="display: none;">البيانات الغير مطابقة</button>
-                    <button id="showMatchedBtn" class="btn btn-info" style="display: none;">البيانات المطابقة</button>
-                </div>
             </div>
         </div>
 
-        <div class="text-center mt-4 d-flex justify-content-center">
-            <a id="downloadUnmatchedCsvLink" class="btn btn-success mx-1" style="display: none;">حمل الملف CSV</a>
-            <a id="downloadUnmatchedXlsxLink" class="btn btn-info mx-1" style="display: none;">حمل الملف XLSX</a>
-            <a id="downloadMatchedCsvLink" class="btn btn-success mx-1" style="display: none;">حمل الملف CSV</a>
-            <a id="downloadMatchedXlsxLink" class="btn btn-info mx-1" style="display: none;">حمل الملف XLSX</a>
-        </div>        
     </div>
 <br>
     <footer class="footer">
@@ -128,22 +132,25 @@
 
     <!-- إضافة مرجع لملف JavaScript -->
     <script>
-        // Update the label of the file input to show the file name
+        let selectedHeader1;
+
+        // تحديث تسمية ملف الإدخال لعرض اسم الملف
         document.querySelectorAll('.custom-file-input').forEach(input => {
             input.addEventListener('change', function (e) {
                 const fileName = e.target.files[0] ? e.target.files[0].name : 'Choose file...';
                 e.target.nextElementSibling.innerText = fileName;
-                populateMergeFieldDropdown(); // Populate dropdown when file is selected
+                populateMergeFieldDropdown(); // تعبئة القائمة المنسدلة عند اختيار ملف
             });
         });
 
-        // Populate the merge field dropdown with column names from the first file
+        // تعبئة القائمة المنسدلة بحقول الدمج من الملف الأول
         function populateMergeFieldDropdown() {
             const file1 = document.getElementById('file1').files[0];
             if (file1) {
                 readFile(file1).then(contents => {
                     const csv1 = contents.split('\n').map(row => row.split(','));
-                    const header1 = csv1.shift(); // Extract header row
+                    const header1 = csv1.shift(); // استخراج الصف العلوي
+                    selectedHeader1 = header1;
                     const mergeFieldDropdown = document.getElementById('mergeField');
                     mergeFieldDropdown.innerHTML = '<option value="" disabled selected>اختر الحقل...</option>';
                     header1.forEach(headerItem => {
@@ -181,7 +188,7 @@
             });
         }
 
-        // Bootstrap validation for forms
+        // التحقق من صحة النموذج
         (function() {
             'use strict';
             window.addEventListener('load', function() {
@@ -192,9 +199,9 @@
                             event.preventDefault();
                             event.stopPropagation();
                         } else {
-                            event.preventDefault(); // Prevent the default form submission
+                            event.preventDefault(); // منع الإرسال الافتراضي للنموذج
                             form.classList.add('was-validated');
-                            processFiles(); // Show the table after validation
+                            processFiles(); // معالجة الملفات بعد التحقق
                         }
                     }, false);
                 });
@@ -225,23 +232,21 @@
                     const data1 = new Map(csv1.map(row => [row[idIndex1], row]));
                     const data2 = new Map(csv2.map(row => [row[idIndex2], row]));
 
+                    const allFields = Array.from(new Set([...header1, ...header2]));
+                    setupFieldsSelection(allFields);
+
                     const unmatchedData1 = [...data1].filter(([id]) => !data2.has(id));
                     const unmatchedData2 = [...data2].filter(([id]) => !data1.has(id));
                     const unmatchedData = [...unmatchedData1, ...unmatchedData2];
                     const matchedData = [...data1].filter(([id]) => data2.has(id));
 
-                    displayTable(header1, unmatchedData);
+                    document.getElementById('fieldsSelectionCard').style.display = 'block';
 
-                    setupDownloadLinks(header1, unmatchedData, 'unmatched');
-                    setupDownloadLinks(header1, matchedData, 'matched');
-                    
-                    document.getElementById('showUnmatchedBtn').addEventListener('click', () => displayTable(header1, unmatchedData));
-                    document.getElementById('showMatchedBtn').addEventListener('click', () => displayTable(header1, matchedData));
-
-                    document.getElementById('showUnmatchedBtn').style.display = 'inline-block';
-                    document.getElementById('showMatchedBtn').style.display = 'inline-block';
-
-                    document.getElementById('dataCard').style.display = 'block';
+                    document.getElementById('displayDataBtn').addEventListener('click', () => {
+                        const selectedFields = getSelectedFields();
+                        displayTable(selectedFields, matchedData, header1);
+                        document.getElementById('dataCard').style.display = 'block';
+                    });
 
                 }).catch(error => {
                     console.error('Error reading files:', error);
@@ -250,15 +255,40 @@
             }
         }
 
-        function displayTable(header, data) {
+        function setupFieldsSelection(fields) {
+            const fieldsCheckboxes = document.getElementById('fieldsCheckboxes');
+            fieldsCheckboxes.innerHTML = '';
+            fields.forEach(field => {
+                const checkbox = document.createElement('div');
+                checkbox.className = 'form-check';
+                checkbox.innerHTML = `
+                    <input class="form-check-input" type="checkbox" value="${field}" id="${field}">
+                    <label class="form-check-label" for="${field}">
+                        ${field}
+                    </label>
+                `;
+                fieldsCheckboxes.appendChild(checkbox);
+            });
+        }
+
+        function getSelectedFields() {
+            const selectedFields = [];
+            document.querySelectorAll('#fieldsCheckboxes input:checked').forEach(checkbox => {
+                selectedFields.push(checkbox.value);
+            });
+            return selectedFields;
+        }
+
+        function displayTable(selectedFields, data, header) {
             const tableHeader = document.getElementById('tableHeader');
             tableHeader.innerHTML = '';
             const sequenceHeader = document.createElement('th');
             sequenceHeader.textContent = '#';
             tableHeader.appendChild(sequenceHeader);
-            header.forEach(headerItem => {
+
+            selectedFields.forEach(field => {
                 const th = document.createElement('th');
-                th.textContent = headerItem;
+                th.textContent = field;
                 tableHeader.appendChild(th);
             });
 
@@ -269,9 +299,10 @@
                 const sequenceCell = document.createElement('td');
                 sequenceCell.textContent = index + 1;
                 tr.appendChild(sequenceCell);
-                row.forEach(cell => {
+                selectedFields.forEach(field => {
                     const td = document.createElement('td');
-                    td.textContent = cell;
+                    const fieldIndex = header.indexOf(field);
+                    td.textContent = row[fieldIndex] || ''; // التأكد من وجود البيانات
                     tr.appendChild(td);
                 });
                 tableBody.appendChild(tr);
@@ -280,51 +311,10 @@
             document.getElementById('dataTable').style.display = 'table';
         }
 
-        function setupDownloadLinks(header, data, type) {
-            const resultCsv = [header, ...data.map(([id, row]) => row)]
-                .map(row => row.join(',')).join('\n');
-
-            const blob = new Blob([new TextEncoder().encode(resultCsv)], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-
-            if (type === 'unmatched') {
-                const downloadUnmatchedCsvLink = document.getElementById('downloadUnmatchedCsvLink');
-                downloadUnmatchedCsvLink.href = url;
-                downloadUnmatchedCsvLink.download = `unmatched_data.csv`;
-                downloadUnmatchedCsvLink.style.display = 'block';
-                
-                const wsUnmatched = XLSX.utils.aoa_to_sheet([header, ...data.map(([id, row]) => row)]);
-                const wbUnmatched = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wbUnmatched, wsUnmatched, "Sheet1");
-                const xlsxBlobUnmatched = new Blob([XLSX.write(wbUnmatched, { bookType: 'xlsx', type: 'array' })], { type: 'application/octet-stream' });
-                const xlsxUrlUnmatched = URL.createObjectURL(xlsxBlobUnmatched);
-
-                const downloadUnmatchedXlsxLink = document.getElementById('downloadUnmatchedXlsxLink');
-                downloadUnmatchedXlsxLink.href = xlsxUrlUnmatched;
-                downloadUnmatchedXlsxLink.download = `unmatched_data.xlsx`;
-                downloadUnmatchedXlsxLink.style.display = 'block';
-            } else if (type === 'matched') {
-                const downloadMatchedCsvLink = document.getElementById('downloadMatchedCsvLink');
-                downloadMatchedCsvLink.href = url;
-                downloadMatchedCsvLink.download = `matched_data.csv`;
-                downloadMatchedCsvLink.style.display = 'block';
-
-                const wsMatched = XLSX.utils.aoa_to_sheet([header, ...data.map(([id, row]) => row)]);
-                const wbMatched = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wbMatched, wsMatched, "Sheet1");
-                const xlsxBlobMatched = new Blob([XLSX.write(wbMatched, { bookType: 'xlsx', type: 'array' })], { type: 'application/octet-stream' });
-                const xlsxUrlMatched = URL.createObjectURL(xlsxBlobMatched);
-
-                const downloadMatchedXlsxLink = document.getElementById('downloadMatchedXlsxLink');
-                downloadMatchedXlsxLink.href = xlsxUrlMatched;
-                downloadMatchedXlsxLink.download = `matched_data.xlsx`;
-                downloadMatchedXlsxLink.style.display = 'block';
-            }
-        }
     </script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-</body> 
+</body>
 </html>
