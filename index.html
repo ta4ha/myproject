@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>File Uploader</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
     <style>
         body {
             background-color: #f8f9fa;
@@ -389,7 +388,7 @@
                     e.preventDefault();
                     currentPage = i;
                     const selectedFields = getSelectedFields();
-                    const dataToDisplay = document.getElementById('showMatchedBtn').style.display === 'inline-block' ? matchedData : unmatchedData;
+                    const dataToDisplay = document.getElementById('showMatchedBtn').classList.contains('active') ? matchedData : unmatchedData;
                     displayTable(selectedFields, dataToDisplay);
                 });
                 pagination.appendChild(li);
