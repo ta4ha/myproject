@@ -26,8 +26,11 @@
             margin-top: auto;
             width: 100%;
         }
-        #dataCard, #fieldsSelectionCard {
-            display: none; /* إخفاء الجدول واختيار الحقول في البداية */
+        #dataCard, #fieldsSelectionCard, #progressCard {
+            display: none; /* إخفاء الجدول واختيار الحقول وشريط التقدم في البداية */
+        }
+        .pagination {
+            justify-content: center;
         }
     </style>
 </head>
@@ -92,12 +95,25 @@
             </div>
         </div>
 
+        <div class="card mt-4" id="progressCard">
+            <div class="card-body">
+                <h5>جاري المعالجة...</h5>
+                <div class="progress">
+                    <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
+        </div>
+
         <div class="card mt-4" id="fieldsSelectionCard">
             <div class="card-header bg-secondary text-white">
                 <h2>اختر الحقول لعرضها في الجدول</h2>
             </div>
             <div class="card-body">
                 <form id="fieldsForm">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="selectAllFields">
+                        <label class="form-check-label" for="selectAllFields">تحديد الكل</label>
+                    </div>
                     <div id="fieldsCheckboxes" class="form-group">
                         <!-- سيتم ملء الحقول ديناميكياً -->
                     </div>
@@ -107,8 +123,12 @@
         </div>
 
         <div class="card mt-4" id="dataCard">
-            <div class="card-header bg-success text-white">
+            <div class="card-header bg-success text-white d-flex justify-content-between">
                 <h2>البيانات</h2>
+                <div>
+                    <button id="downloadCsvBtn" class="btn btn-info">تحميل CSV</button>
+                    <button id="downloadXlsxBtn" class="btn btn-info">تحميل XLSX</button>
+                </div>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -118,6 +138,9 @@
                         </thead>
                         <tbody id="tableBody"></tbody>
                     </table>
+                </div>
+                <div id="paginationContainer" class="mt-3">
+                    <ul id="pagination" class="pagination"></ul>
                 </div>
                 <div class="text-center mt-4">
                     <button id="showUnmatchedBtn" class="btn btn-warning" style="display: none;">البيانات الغير مطابقة</button>
@@ -138,6 +161,8 @@
     <script>
         let selectedHeader1;
         let matchedData, unmatchedData, header1;
+        const itemsPerPage = 50;
+        let currentPage = 1;
 
         // تحديث تسمية ملف الإدخال لعرض اسم الملف
         document.querySelectorAll('.custom-file-input').forEach(input => {
@@ -164,6 +189,7 @@
                         option.textContent = headerItem;
                         mergeFieldDropdown.appendChild(option);
                     });
+                    localStorage.setItem('header1', JSON.stringify(header1)); // حفظ في المتصفح
                 }).catch(error => {
                     console.error('Error reading file:', error);
                     alert('Error processing file!');
@@ -219,11 +245,14 @@
             const mergeField = document.getElementById('mergeField').value;
 
             if (file1 && file2 && mergeField) {
+                document.getElementById('progressCard').style.display = 'block';
+                updateProgress(0);
                 Promise.all([readFile(file1), readFile(file2)]).then(contents => {
+                    updateProgress(30);
                     const csv1 = contents[0].split('\n').map(row => row.split(','));
                     const csv2 = contents[1].split('\n').map(row => row.split(','));
 
-                    const header1 = csv1.shift();
+                    header1 = csv1.shift();
                     const header2 = csv2.shift();
 
                     const idIndex1 = header1.indexOf(mergeField);
@@ -245,6 +274,7 @@
                     unmatchedData = [...unmatchedData1, ...unmatchedData2];
                     matchedData = [...data1].filter(([id]) => data2.has(id));
 
+                    updateProgress(70);
                     document.getElementById('fieldsSelectionCard').style.display = 'block';
 
                     document.getElementById('displayDataBtn').addEventListener('click', () => {
@@ -253,6 +283,7 @@
                         document.getElementById('dataCard').style.display = 'block';
                         document.getElementById('showUnmatchedBtn').style.display = 'inline-block';
                         document.getElementById('showMatchedBtn').style.display = 'inline-block';
+                        updateProgress(100);
                     });
 
                     document.getElementById('showUnmatchedBtn').addEventListener('click', () => {
@@ -265,11 +296,25 @@
                         displayTable(selectedFields, matchedData, header1);
                     });
 
+                    document.getElementById('downloadCsvBtn').addEventListener('click', () => {
+                        downloadTableAsCsv();
+                    });
+
+                    document.getElementById('downloadXlsxBtn').addEventListener('click', () => {
+                        downloadTableAsXlsx();
+                    });
+
                 }).catch(error => {
                     console.error('Error reading files:', error);
                     alert('Error processing files!');
                 });
             }
+        }
+
+        function updateProgress(value) {
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = value + '%';
+            progressBar.setAttribute('aria-valuenow', value);
         }
 
         function setupFieldsSelection(fields) {
@@ -285,6 +330,11 @@
                     </label>
                 `;
                 fieldsCheckboxes.appendChild(checkbox);
+            });
+
+            document.getElementById('selectAllFields').addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('#fieldsCheckboxes input');
+                checkboxes.forEach(checkbox => checkbox.checked = this.checked);
             });
         }
 
@@ -311,10 +361,15 @@
 
             const tableBody = document.getElementById('tableBody');
             tableBody.innerHTML = '';
-            data.forEach(([id, row], index) => {
+
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const currentData = data.slice(start, end);
+
+            currentData.forEach(([id, row], index) => {
                 const tr = document.createElement('tr');
                 const sequenceCell = document.createElement('td');
-                sequenceCell.textContent = index + 1;
+                sequenceCell.textContent = start + index + 1;
                 tr.appendChild(sequenceCell);
                 selectedFields.forEach(field => {
                     const td = document.createElement('td');
@@ -325,7 +380,49 @@
                 tableBody.appendChild(tr);
             });
 
-            document.getElementById('dataTable').style.display = 'table';
+            updatePagination(data.length);
+        }
+
+        function updatePagination(totalItems) {
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+
+            for (let i = 1; i <= totalPages; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                li.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    currentPage = i;
+                    const selectedFields = getSelectedFields();
+                    displayTable(selectedFields, matchedData, header1);
+                });
+                pagination.appendChild(li);
+            }
+        }
+
+        function downloadTableAsCsv() {
+            const rows = Array.from(document.querySelectorAll('#dataTable tr')).map(row => {
+                return Array.from(row.querySelectorAll('th, td')).map(cell => cell.textContent);
+            });
+
+            const csvContent = rows.map(e => e.join(",")).join("\n");
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", "data.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function downloadTableAsXlsx() {
+            const ws = XLSX.utils.table_to_sheet(document.getElementById('dataTable'));
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Data");
+            XLSX.writeFile(wb, "data.xlsx");
         }
 
     </script>
