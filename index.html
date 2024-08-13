@@ -1,4 +1,4 @@
-<!DOCTYPE  html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -184,11 +184,11 @@
             const additionalFilesDiv = document.getElementById('additionalFiles');
             const newFileInput = document.createElement('div');
             newFileInput.className = 'custom-file mt-3';
-            newFileInput.innerHTML = 
+            newFileInput.innerHTML = `
                 <input type="file" class="custom-file-input" accept=".csv, .xlsx" required>
                 <label class="custom-file-label">اختر الملف...</label>
                 <div class="invalid-feedback">يرجى اختيار ملف.</div>
-            ;
+            `;
             additionalFilesDiv.appendChild(newFileInput);
 
             // إعادة تعيين الحدث لتحديث تسمية الملف الجديد
@@ -281,7 +281,7 @@
 
                     const mergeFieldIndices = headers.map(header => header.indexOf(mergeField));
                     if (mergeFieldIndices.some(index => index === -1)) {
-                        alert(No "${mergeField}" column found in one or more headers!);
+                        alert(`No "${mergeField}" column found in one or more headers!`);
                         return;
                     }
 
@@ -347,12 +347,12 @@
             fields.forEach(field => {
                 const checkbox = document.createElement('div');
                 checkbox.className = 'form-check';
-                checkbox.innerHTML = 
+                checkbox.innerHTML = `
                     <input class="form-check-input" type="checkbox" value="${field}" id="${field}">
                     <label class="form-check-label" for="${field}">
                         ${field}
                     </label>
-                ;
+                `;
                 fieldsCheckboxes.appendChild(checkbox);
             });
 
@@ -414,8 +414,8 @@
 
             for (let i = 1; i <= totalPages; i++) {
                 const li = document.createElement('li');
-                li.className = page-item ${i === currentPage ? 'active' : ''};
-                li.innerHTML = <a class="page-link" href="#">${i}</a>;
+                li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
                 li.addEventListener('click', function(e) {
                     e.preventDefault();
                     currentPage = i;
@@ -430,7 +430,7 @@
         function downloadTableAsCsv() {
             const selectedFields = getSelectedFields();
             const rows = Array.from(document.querySelectorAll('#dataTable tr')).map(row => {
-                return Array.from(row.querySelectorAll('th, td')).map(cell => "${cell.textContent}");
+                return Array.from(row.querySelectorAll('th, td')).map(cell => `"${cell.textContent}"`);
             });
 
             const csvContent = rows.map(e => e.join(",")).join("\n");
