@@ -214,19 +214,16 @@
                     const header1 = csv1.shift();
                     const header2 = csv2.shift();
 
-                    if (JSON.stringify(header1) !== JSON.stringify(header2)) {
-                        alert('Files have different headers!');
+                    const idIndex1 = header1.indexOf(mergeField);
+                    const idIndex2 = header2.indexOf(mergeField);
+
+                    if (idIndex1 === -1 || idIndex2 === -1) {
+                        alert(`No "${mergeField}" column found in one or both headers!`);
                         return;
                     }
 
-                    const idIndex = header1.indexOf(mergeField);
-                    if (idIndex === -1) {
-                        alert(`No "${mergeField}" column found in the headers!`);
-                        return;
-                    }
-
-                    const data1 = new Map(csv1.map(row => [row[idIndex], row]));
-                    const data2 = new Map(csv2.map(row => [row[idIndex], row]));
+                    const data1 = new Map(csv1.map(row => [row[idIndex1], row]));
+                    const data2 = new Map(csv2.map(row => [row[idIndex2], row]));
 
                     const unmatchedData1 = [...data1].filter(([id]) => !data2.has(id));
                     const unmatchedData2 = [...data2].filter(([id]) => !data1.has(id));
