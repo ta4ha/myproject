@@ -152,7 +152,10 @@
     <!-- إضافة مرجع لملف JavaScript -->
     <script>
         let selectedHeader1;
-        let matchedData, unmatchedData, header1;
+        let matchedData = [];
+        let unmatchedData = [];
+        let allData = new Map();
+        let header1;
         const itemsPerPage = 50;
         let currentPage = 1;
 
@@ -245,7 +248,7 @@
                     const csvArrays = contents.map(content => content.split('\n').map(row => row.split(',')));
                     const headers = csvArrays.map(csv => csv.shift());
 
-                    const allData = new Map();
+                    allData = new Map();
 
                     csvArrays.forEach((csv, index) => {
                         const idIndex = headers[index].indexOf(mergeField);
@@ -260,8 +263,8 @@
                         });
                     });
 
-                    matchedData = Array.from(allData.values()).filter(row => !row.includes(''));
-                    unmatchedData = Array.from(allData.values()).filter(row => row.includes(''));
+                    matchedData = Array.from(allData.values()).filter(row => row.every(value => value !== ''));
+                    unmatchedData = Array.from(allData.values()).filter(row => row.some(value => value === ''));
 
                     setupFieldsSelection(header1);
 
