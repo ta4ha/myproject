@@ -27,7 +27,7 @@
             width: 100%;
         }
         #dataCard, #fieldsSelectionCard, #progressCard {
-            display: none; /* إخفاء الجدول واختيار الحقول وشريط التقدم في البداية */
+            display: none;
         }
         .pagination {
             justify-content: center;
@@ -38,7 +38,6 @@
     <header class="bg-info text-white text-center py-3">
         <h1>Welcome World!</h1>
     </header>
-    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
@@ -46,13 +45,13 @@
                     <a class="nav-link" href="#">جديد</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">جديد </a>
+                    <a class="nav-link" href="#">جديد</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="connect.html"> دمج البيانات</a>
+                    <a class="nav-link" href="connect.html">دمج البيانات</a>
                 </li>
                 <li class="nav-item active">
-                    <a class="nav-link" href="index.html"> المطابقة والغير مطابقة</a>
+                    <a class="nav-link" href="index.html">المطابقة والغير مطابقة</a>
                 </li>
             </ul>
         </div>
@@ -74,7 +73,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- حقل اختيار للعمود المستخدم في المطابقة -->
                     <div class="form-group">
                         <label for="mergeField">اختر حقل الدمج:</label>
                         <select class="form-control" id="mergeField" required>
@@ -107,7 +105,6 @@
                         <label class="form-check-label" for="selectAllFields">تحديد الكل</label>
                     </div>
                     <div id="fieldsCheckboxes" class="form-group">
-                        <!-- سيتم ملء الحقول ديناميكياً -->
                     </div>
                     <button type="button" id="displayDataBtn" class="btn btn-success">عرض البيانات</button>
                 </form>
@@ -149,30 +146,25 @@
         </div>
     </footer>
 
-    <!-- إضافة مرجع لملف JavaScript -->
     <script>
-        let selectedHeader1;
+        let header1;
         let matchedData = [];
         let unmatchedData = [];
-        let allData = new Map();
-        let header1;
         const itemsPerPage = 50;
         let currentPage = 1;
 
-        // تحديث تسمية ملف الإدخال لعرض اسم الملفات
         document.getElementById('files').addEventListener('change', function (e) {
             const fileNames = Array.from(e.target.files).map(file => file.name).join(', ');
             e.target.nextElementSibling.innerText = fileNames;
-            populateMergeFieldDropdown(); // تعبئة القائمة المنسدلة عند اختيار ملفات
+            populateMergeFieldDropdown();
         });
 
-        // تعبئة القائمة المنسدلة بحقول الدمج من الملفات
         function populateMergeFieldDropdown() {
             const files = document.getElementById('files').files;
             if (files.length > 0) {
                 readFiles(files).then(contents => {
                     const headers = contents.map(content => content.split('\n')[0].split(','));
-                    header1 = Array.from(new Set(headers.flat())); // دمج كل الحقول من كل الملفات
+                    header1 = Array.from(new Set(headers.flat()));
                     const mergeFieldDropdown = document.getElementById('mergeField');
                     mergeFieldDropdown.innerHTML = '<option value="" disabled selected>اختر الحقل...</option>';
                     header1.forEach(headerItem => {
@@ -181,7 +173,6 @@
                         option.textContent = headerItem;
                         mergeFieldDropdown.appendChild(option);
                     });
-                    localStorage.setItem('header1', JSON.stringify(header1)); // حفظ في المتصفح
                 }).catch(error => {
                     console.error('Error reading files:', error);
                     alert('Error processing files!');
@@ -216,7 +207,6 @@
             });
         }
 
-        // التحقق من صحة النموذج
         (function() {
             'use strict';
             window.addEventListener('load', function() {
@@ -227,9 +217,9 @@
                             event.preventDefault();
                             event.stopPropagation();
                         } else {
-                            event.preventDefault(); // منع الإرسال الافتراضي للنموذج
+                            event.preventDefault();
                             form.classList.add('was-validated');
-                            processFiles(); // معالجة الملفات بعد التحقق
+                            processFiles();
                         }
                     }, false);
                 });
@@ -243,12 +233,13 @@
             if (files.length > 0 && mergeField) {
                 document.getElementById('progressCard').style.display = 'block';
                 updateProgress(0);
+
                 readFiles(files).then(contents => {
                     updateProgress(30);
                     const csvArrays = contents.map(content => content.split('\n').map(row => row.split(',')));
                     const headers = csvArrays.map(csv => csv.shift());
 
-                    allData = new Map();
+                    const allData = new Map();
 
                     csvArrays.forEach((csv, index) => {
                         const idIndex = headers[index].indexOf(mergeField);
@@ -258,13 +249,22 @@
                                 allData.set(id, new Array(header1.length).fill(''));
                             }
                             row.forEach((value, i) => {
-                                allData.get(id)[header1.indexOf(headers[index][i])] = value;
+                                const headerIndex = header1.indexOf(headers[index][i]);
+                                allData.get(id)[headerIndex] = value;
                             });
                         });
                     });
 
-                    matchedData = Array.from(allData.values()).filter(row => row.every(value => value !== ''));
-                    unmatchedData = Array.from(allData.values()).filter(row => row.some(value => value === ''));
+                    matchedData = [];
+                    unmatchedData = [];
+
+                    allData.forEach(row => {
+                        if (row.every(value => value !== '')) {
+                            matchedData.push(row);
+                        } else {
+                            unmatchedData.push(row);
+                        }
+                    });
 
                     setupFieldsSelection(header1);
 
@@ -367,7 +367,7 @@
                 tr.appendChild(sequenceCell);
                 selectedFields.forEach(field => {
                     const td = document.createElement('td');
-                    td.textContent = row[header1.indexOf(field)] || ''; // التأكد من وجود البيانات
+                    td.textContent = row[header1.indexOf(field)] || '';
                     tr.appendChild(td);
                 });
                 tableBody.appendChild(tr);
