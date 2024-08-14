@@ -4,47 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Display Data</title>
-    <script>
-        async function fetchData(recordId) {
-            try {
-                const response = await fetch(`http://localhost:3000/data/${recordId}`);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch data');
-                }
-                const data = await response.json();
-                displayData(data);
-            } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('data').innerText = 'Error fetching data';
-            }
-        }
-
-        function displayData(data) {
-            const dataElement = document.getElementById('data');
-            dataElement.innerHTML = JSON.stringify(data, null, 2);
-        }
-
-        window.onload = function() {
-            const recordId = 'YOUR_RECORD_ID'; // Replace with your actual RECORD_ID
-            fetchData(recordId);
-        }
-
-        app.get('/data/:recordId', async (req, res) => {
-    try {
-        const recordId = req.params.recordId;
-        const record = await pb.collection('mearg').getOne(recordId, {
-            expand: 'relField1,relField2.subRelField',
-        });
-        res.json(record);
-    } catch (error) {
-        console.error('Error fetching record:', error);
-        res.status(500).json({ error: error.message, details: error.data });
-    }
-});
-    </script>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <h1>Data from PocketBase</h1>
-    <pre id="data">Loading data...</pre>
+    <div class="container mt-5">
+        <h1 class="mb-4">User Data</h1>
+        <div id="user-data" class="card">
+            <div class="card-body">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/pocketbase@latest/dist/pocketbase.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const pb = new PocketBase('https://base.ta4ha.com');
+            const recordId = 'RECORD_ID'; // Replace with actual record ID
+            
+            try {
+                const record = await pb.collection('users').getOne(recordId, {
+                    expand: 'relField1,relField2.subRelField',
+                });
+
+                const userDataContainer = document.getElementById('user-data');
+                const userDataHtml = `
+                    <h5>User ID: ${record.id}</h5>
+                    <p>Name: ${record.name}</p>
+                    <p>Email: ${record.email}</p>
+                    <h6>Related Fields:</h6>
+                    <ul>
+                        <li>Field 1: ${record.expand.relField1 ? record.expand.relField1.fieldName : 'N/A'}</li>
+                        <li>Sub-Field: ${record.expand.relField2 ? record.expand.relField2.subRelField : 'N/A'}</li>
+                    </ul>
+                `;
+
+                userDataContainer.querySelector('.card-body').innerHTML = userDataHtml;
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                document.getElementById('user-data').querySelector('.card-body').innerHTML = '<p>Error loading data. Please try again later.</p>';
+            }
+        });
+    </script>
 </body>
 </html>
