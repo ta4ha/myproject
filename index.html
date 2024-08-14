@@ -7,6 +7,7 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         body {
             background-color: #f8f9fa;
@@ -31,6 +32,24 @@
         }
         .pagination {
             justify-content: center;
+        }
+        .custom-file-input {
+            cursor: pointer;
+        }
+        .custom-file-label {
+            display: flex;
+            align-items: center;
+        }
+        .custom-file-label i {
+            margin-right: 8px;
+            color: #007bff;
+        }
+        .custom-file:hover .custom-file-label {
+            background-color: #f0f8ff;
+        }
+        .custom-file-input:focus + .custom-file-label {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
         }
     </style>
 </head>
@@ -69,7 +88,7 @@
                             <label for="file1">الملف 1:</label>
                             <div class="custom-file">
                                 <input type="file" class="custom-file-input" id="file1" accept=".csv, .xlsx" required>
-                                <label class="custom-file-label" for="file1">اختر الملف...</label>
+                                <label class="custom-file-label" for="file1"><i class="fas fa-file-upload"></i> اختر الملف...</label>
                                 <div class="invalid-feedback">يرجى اختيار ملف.</div>
                             </div>
                         </div>
@@ -77,7 +96,7 @@
                             <label for="file2">الملف 2:</label>
                             <div class="custom-file">
                                 <input type="file" class="custom-file-input" id="file2" accept=".csv, .xlsx" required>
-                                <label class="custom-file-label" for="file2">اختر الملف...</label>
+                                <label class="custom-file-label" for="file2"><i class="fas fa-file-upload"></i> اختر الملف...</label>
                                 <div class="invalid-feedback">يرجى اختيار ملف.</div>
                             </div>
                         </div>
@@ -184,11 +203,11 @@
             const additionalFilesDiv = document.getElementById('additionalFiles');
             const newFileInput = document.createElement('div');
             newFileInput.className = 'custom-file mt-3';
-            newFileInput.innerHTML = `
+            newFileInput.innerHTML = 
                 <input type="file" class="custom-file-input" accept=".csv, .xlsx" required>
-                <label class="custom-file-label">اختر الملف...</label>
+                <label class="custom-file-label"><i class="fas fa-file-upload"></i> اختر الملف...</label>
                 <div class="invalid-feedback">يرجى اختيار ملف.</div>
-            `;
+            ;
             additionalFilesDiv.appendChild(newFileInput);
 
             // إعادة تعيين الحدث لتحديث تسمية الملف الجديد
@@ -281,7 +300,7 @@
 
                     const mergeFieldIndices = headers.map(header => header.indexOf(mergeField));
                     if (mergeFieldIndices.some(index => index === -1)) {
-                        alert(`No "${mergeField}" column found in one or more headers!`);
+                        alert(No "${mergeField}" column found in one or more headers!);
                         return;
                     }
 
@@ -347,12 +366,12 @@
             fields.forEach(field => {
                 const checkbox = document.createElement('div');
                 checkbox.className = 'form-check';
-                checkbox.innerHTML = `
+                checkbox.innerHTML = 
                     <input class="form-check-input" type="checkbox" value="${field}" id="${field}">
                     <label class="form-check-label" for="${field}">
                         ${field}
                     </label>
-                `;
+                ;
                 fieldsCheckboxes.appendChild(checkbox);
             });
 
@@ -414,8 +433,8 @@
 
             for (let i = 1; i <= totalPages; i++) {
                 const li = document.createElement('li');
-                li.className = `page-item ${i === currentPage ? 'active' : ''}`;
-                li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                li.className = page-item ${i === currentPage ? 'active' : ''};
+                li.innerHTML = <a class="page-link" href="#">${i}</a>;
                 li.addEventListener('click', function(e) {
                     e.preventDefault();
                     currentPage = i;
@@ -430,7 +449,7 @@
         function downloadTableAsCsv() {
             const selectedFields = getSelectedFields();
             const rows = Array.from(document.querySelectorAll('#dataTable tr')).map(row => {
-                return Array.from(row.querySelectorAll('th, td')).map(cell => `"${cell.textContent}"`);
+                return Array.from(row.querySelectorAll('th, td')).map(cell => "${cell.textContent}");
             });
 
             const csvContent = rows.map(e => e.join(",")).join("\n");
