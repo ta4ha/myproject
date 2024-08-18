@@ -14,6 +14,7 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            direction: rtl; /* تعديل اتجاه الصفحة من اليمين لليسار */
         }
         .card {
             margin-top: 20px;
@@ -33,7 +34,7 @@
             justify-content: center;
         }
         .custom-file-label::after {
-            content: "Choose"; /* تغيير النص ليتناسب مع LTR */
+            content: ; /* تغيير النص ليتناسب مع RTL */
         }
     </style>
 </head>
@@ -44,18 +45,18 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ml-auto">
+            <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="#">New</a>
+                    <a class="nav-link" href="#">جديد</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">New </a>
+                    <a class="nav-link" href="#">جديد </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="connect.html"> Data Merge</a>
+                    <a class="nav-link" href="connect.html"> دمج البيانات</a>
                 </li>
                 <li class="nav-item active">
-                    <a class="nav-link" href="index.html"> Matched and Unmatched</a>
+                    <a class="nav-link" href="index.html"> المطابقة والغير مطابقة</a>
                 </li>
             </ul>
         </div>
@@ -63,25 +64,25 @@
     <div class="container mt-5">
         <div class="card">
             <div class="card-header bg-dark text-white">
-                <h2>Upload File in xlsx or csv Format</h2>
+                <h2>ارفع الملف بصيغة xlsx او csv</h2>
             </div>
             <div class="card-body">
                 <form id="uploadForm" class="needs-validation" novalidate>
                     <div class="form-row">
                         <div class="form-group col-md-6">
-                            <label for="file1">File 1:</label>
+                            <label for="file1">الملف 1:</label>
                             <div class="custom-file">
                                 <input type="file" class="custom-file-input" id="file1" accept=".csv, .xlsx" required>
-                                <label class="custom-file-label" for="file1">Choose file...</label>
-                                <div class="invalid-feedback">Please select a file.</div>
+                                <label class="custom-file-label" for="file1">اختر الملف...</label>
+                                <div class="invalid-feedback">يرجى اختيار ملف.</div>
                             </div>
                         </div>
                         <div class="form-group col-md-6">
-                            <label for="file2">File 2:</label>
+                            <label for="file2">الملف 2:</label>
                             <div class="custom-file">
                                 <input type="file" class="custom-file-input" id="file2" accept=".csv, .xlsx" required>
-                                <label class="custom-file-label" for="file2">Choose file...</label>
-                                <div class="invalid-feedback">Please select a file.</div>
+                                <label class="custom-file-label" for="file2">اختر الملف...</label>
+                                <div class="invalid-feedback">يرجى اختيار ملف.</div>
                             </div>
                         </div>
                     </div>
@@ -89,24 +90,24 @@
                     <div id="additionalFiles" class="form-group">
                         <!-- سيتم إضافة حقول رفع ملفات إضافية هنا -->
                     </div>
-                    <button type="button" id="addFileBtn" class="btn btn-secondary">Add New File</button>
+                    <button type="button" id="addFileBtn" class="btn btn-secondary">إضافة ملف جديد</button>
 
                     <!-- حقل اختيار للعمود المستخدم في المطابقة -->
                     <div class="form-group">
-                        <label for="mergeField">Select Merge Field:</label>
+                        <label for="mergeField">اختر حقل الدمج:</label>
                         <select class="form-control" id="mergeField" required>
-                            <option value="" disabled selected>Select field...</option>
+                            <option value="" disabled selected>اختر الحقل...</option>
                         </select>
-                        <div class="invalid-feedback">Please select a merge field.</div>
+                        <div class="invalid-feedback">يرجى اختيار حقل الدمج.</div>
                     </div>
-                    <button type="submit" class="btn btn-primary">Upload and Process</button>
+                    <button type="submit" class="btn btn-primary">رفع ومعالجة</button>
                 </form>
             </div>
         </div>
 
         <div class="card mt-4" id="progressCard">
             <div class="card-body">
-                <h5>Processing...</h5>
+                <h5>جاري المعالجة...</h5>
                 <div class="progress">
                     <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
@@ -115,28 +116,28 @@
 
         <div class="card mt-4" id="fieldsSelectionCard">
             <div class="card-header bg-secondary text-white">
-                <h2>Select Fields to Display in Table</h2>
+                <h2>اختر الحقول لعرضها في الجدول</h2>
             </div>
             <div class="card-body">
                 <form id="fieldsForm">
                     <div class="form-check mb-2">
                         <input class="form-check-input" type="checkbox" id="selectAllFields">
-                        <label class="form-check-label" for="selectAllFields">Select All</label>
+                        <label class="form-check-label" for="selectAllFields">تحديد الكل</label>
                     </div>
                     <div id="fieldsCheckboxes" class="form-group">
                         <!-- سيتم ملء الحقول ديناميكياً -->
                     </div>
-                    <button type="button" id="displayDataBtn" class="btn btn-success">Display Data</button>
+                    <button type="button" id="displayDataBtn" class="btn btn-success">عرض البيانات</button>
                 </form>
             </div>
         </div>
 
         <div class="card mt-4" id="dataCard">
             <div class="card-header bg-success text-white d-flex justify-content-between">
-                <h2>Data</h2>
+                <h2>البيانات</h2>
                 <div>
-                    <button id="downloadCsvBtn" class="btn btn-info">Download CSV</button>
-                    <button id="downloadXlsxBtn" class="btn btn-info">Download XLSX</button>
+                    <button id="downloadCsvBtn" class="btn btn-info">تحميل CSV</button>
+                    <button id="downloadXlsxBtn" class="btn btn-info">تحميل XLSX</button>
                 </div>
             </div>
             <div class="card-body">
@@ -152,8 +153,8 @@
                     <ul id="pagination" class="pagination"></ul>
                 </div>
                 <div class="text-center mt-4">
-                    <button id="showUnmatchedBtn" class="btn btn-warning" style="display: none;">Show Unmatched Data</button>
-                    <button id="showMatchedBtn" class="btn btn-info" style="display: none;">Show Matched Data</button>
+                    <button id="showUnmatchedBtn" class="btn btn-warning" style="display: none;">البيانات الغير مطابقة</button>
+                    <button id="showMatchedBtn" class="btn btn-info" style="display: none;">البيانات المطابقة</button>
                 </div>
             </div>
         </div>
@@ -176,7 +177,7 @@
         // تحديث تسمية ملف الإدخال لعرض اسم الملف
         document.querySelectorAll('.custom-file-input').forEach(input => {
             input.addEventListener('change', function (e) {
-                const fileName = e.target.files[0] ? e.target.files[0].name : 'Choose file...';
+                const fileName = e.target.files[0] ? e.target.files[0].name : 'اختر ملف...';
                 e.target.nextElementSibling.innerText = fileName;
                 populateMergeFieldDropdown(); // تعبئة القائمة المنسدلة عند اختيار ملف
             });
@@ -189,13 +190,13 @@
             newFileInput.className = 'custom-file mt-3';
             newFileInput.innerHTML = `
                 <input type="file" class="custom-file-input" accept=".csv, .xlsx" required>
-                <label class="custom-file-label">Choose file...</label>
-                <div class="invalid-feedback">Please select a file.</div>
+                <label class="custom-file-label">اختر الملف...</label>
+                <div class="invalid-feedback">يرجى اختيار ملف.</div>
             `;
             additionalFilesDiv.appendChild(newFileInput);
             // تحديث تسميات الملفات الجديدة
             newFileInput.querySelector('.custom-file-input').addEventListener('change', function (e) {
-                const fileName = e.target.files[0] ? e.target.files[0].name : 'Choose file...';
+                const fileName = e.target.files[0] ? e.target.files[0].name : 'اختر ملف...';
                 e.target.nextElementSibling.innerText = fileName;
             });
         });
@@ -203,7 +204,7 @@
         // تعبئة قائمة الحقول المتاحة
         function populateMergeFieldDropdown() {
             const mergeFieldDropdown = document.getElementById('mergeField');
-            mergeFieldDropdown.innerHTML = '<option value="" disabled selected>Select field...</option>';
+            mergeFieldDropdown.innerHTML = '<option value="" disabled selected>اختر الحقل...</option>';
 
             // إضافة الحقول المتاحة من الملفات المرفوعة
             // قم بإضافة المنطق لتحليل الملفات وتعبئة الحقول
