@@ -96,7 +96,6 @@
                         </select>
                         <div class="invalid-feedback">يرجى اختيار حقل الدمج.</div>
                     </div>
-                    <button type="button" id="loadDataBtn" class="btn btn-primary">تحميل البيانات</button>
                     <button type="submit" class="btn btn-primary">رفع ومعالجة</button>
                 </form>
             </div>
@@ -157,7 +156,6 @@
         </div>
 
     </div>
-<br>
     <footer class="footer">
         <div class="container">
             <p>&copy; 2024 File Uploader. All rights reserved.</p>
@@ -209,7 +207,9 @@
         }
 
         // تحميل البيانات عند النقر على الزر
-        document.getElementById('loadDataBtn').addEventListener('click', function () {
+        document.getElementById('uploadForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // منع الإرسال الافتراضي للنموذج
+
             const files = [...document.querySelectorAll('#uploadForm input[type="file"]')].map(input => input.files[0]);
             if (files.some(file => !file)) {
                 alert('يرجى اختيار جميع الملفات.');
@@ -336,5 +336,5 @@
             URL.revokeObjectURL(link.href);
         }
     </script>
-</body> 
+</body>
 </html>
