@@ -96,6 +96,7 @@
                         </select>
                         <div class="invalid-feedback">يرجى اختيار حقل الدمج.</div>
                     </div>
+                    <button type="button" id="loadDataBtn" class="btn btn-primary">تحميل البيانات</button>
                     <button type="submit" class="btn btn-primary">رفع ومعالجة</button>
                 </form>
             </div>
@@ -186,280 +187,154 @@
             newFileInput.className = 'custom-file mt-3';
             newFileInput.innerHTML = `
                 <input type="file" class="custom-file-input" accept=".csv, .xlsx" required>
-                <label class="custom-file-label">اختر الملف...</label>
-                <div class="invalid-feedback">يرجى اختيار ملف.</div>
+                <label class="custom-file-label">اختر ملف...</label>
             `;
             additionalFilesDiv.appendChild(newFileInput);
-
-            // إعادة تعيين الحدث لتحديث تسمية الملف الجديد
             newFileInput.querySelector('.custom-file-input').addEventListener('change', function (e) {
                 const fileName = e.target.files[0] ? e.target.files[0].name : 'Choose file...';
                 e.target.nextElementSibling.innerText = fileName;
-                populateMergeFieldDropdown(); // تعبئة القائمة المنسدلة عند اختيار ملف جديد
             });
         });
 
-        // تعبئة القائمة المنسدلة بحقول الدمج من الملف الأول
+        // تعبئة القائمة المنسدلة بالحقول من الملفات المحددة
         function populateMergeFieldDropdown() {
-            const file1 = document.getElementById('file1').files[0];
-            if (file1) {
-                readFile(file1).then(contents => {
-                    const csv1 = contents.split('\n').map(row => row.split(','));
-                    header1 = csv1.shift(); // استخراج الصف العلوي
-                    selectedHeader1 = header1;
-                    const mergeFieldDropdown = document.getElementById('mergeField');
-                    mergeFieldDropdown.innerHTML = '<option value="" disabled selected>اختر الحقل...</option>';
-                    header1.forEach(headerItem => {
-                        const option = document.createElement('option');
-                        option.value = headerItem;
-                        option.textContent = headerItem;
-                        mergeFieldDropdown.appendChild(option);
-                    });
-                    localStorage.setItem('header1', JSON.stringify(header1)); // حفظ في المتصفح
-                }).catch(error => {
-                    console.error('Error reading file:', error);
-                    alert('Error processing file!');
-                });
+            const mergeFieldDropdown = document.getElementById('mergeField');
+            // إضافة الحقول من الملفات هنا (يجب تنفيذ منطق القراءة الفعلي)
+            // مثال:
+            mergeFieldDropdown.innerHTML = `
+                <option value="field1">حقل 1</option>
+                <option value="field2">حقل 2</option>
+                <option value="field3">حقل 3</option>
+            `;
+        }
+
+        // تحميل البيانات عند النقر على الزر
+        document.getElementById('loadDataBtn').addEventListener('click', function () {
+            const files = [...document.querySelectorAll('#uploadForm input[type="file"]')].map(input => input.files[0]);
+            if (files.some(file => !file)) {
+                alert('يرجى اختيار جميع الملفات.');
+                return;
             }
-        }
 
-        function readFile(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const data = new Uint8Array(event.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const sheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[sheetName];
-                    const csv = XLSX.utils.sheet_to_csv(worksheet);
-                    resolve(csv);
-                };
-                reader.onerror = function(event) {
-                    reject(event);
-                };
-                if (file.name.endsWith('.csv')) {
-                    reader.readAsText(file);
-                } else if (file.name.endsWith('.xlsx')) {
-                    reader.readAsArrayBuffer(file);
-                }
-            });
-        }
+            const formData = new FormData();
+            files.forEach(file => formData.append('files[]', file));
+            formData.append('mergeField', document.getElementById('mergeField').value);
 
-        // التحقق من صحة النموذج
-        (function() {
-            'use strict';
-            window.addEventListener('load', function() {
-                const forms = document.getElementsByClassName('needs-validation');
-                Array.prototype.filter.call(forms, function(form) {
-                    form.addEventListener('submit', function(event) {
-                        if (form.checkValidity() === false) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                        } else {
-                            event.preventDefault(); // منع الإرسال الافتراضي للنموذج
-                            form.classList.add('was-validated');
-                            processFiles(); // معالجة الملفات بعد التحقق
-                        }
-                    }, false);
-                });
-            }, false);
-        })();
-
-        function processFiles() {
-            const files = Array.from(document.querySelectorAll('.custom-file-input')).map(input => input.files[0]);
-            const mergeField = document.getElementById('mergeField').value;
-
-            if (files.every(file => file) && mergeField) {
-                document.getElementById('progressCard').style.display = 'block';
-                updateProgress(0);
-
-                Promise.all(files.map(file => readFile(file))).then(contents => {
-                    updateProgress(30);
-
-                    const csvs = contents.map(content => content.split('\n').map(row => row.split(',')));
-                    const headers = csvs.map(csv => csv.shift());
-
-                    const mergeFieldIndices = headers.map(header => header.indexOf(mergeField));
-                    if (mergeFieldIndices.some(index => index === -1)) {
-                        alert(`No "${mergeField}" column found in one or more headers!`);
-                        return;
-                    }
-
-                    const dataMaps = csvs.map((csv, i) => new Map(csv.map(row => [row[mergeFieldIndices[i]], row])));
-
-                    const allFields = Array.from(new Set(headers.flat()));
-                    setupFieldsSelection(allFields);
-
-                    matchedData = dataMaps.reduce((acc, dataMap) => {
-                        return acc.filter(([id]) => dataMap.has(id));
-                    }, [...dataMaps[0]]);
-
-                    unmatchedData = dataMaps.reduce((acc, dataMap) => {
-                        return acc.concat([...dataMap].filter(([id]) => !matchedData.find(matchedRow => matchedRow[0] === id)));
-                    }, []);
-
-                    updateProgress(70);
-                    document.getElementById('fieldsSelectionCard').style.display = 'block';
-
-                    document.getElementById('displayDataBtn').addEventListener('click', () => {
-                        const selectedFields = getSelectedFields();
-                        displayTable(selectedFields, matchedData, headers[0]);
-                        document.getElementById('dataCard').style.display = 'block';
-                        document.getElementById('showUnmatchedBtn').style.display = 'inline-block';
-                        document.getElementById('showMatchedBtn').style.display = 'inline-block';
-                        updateProgress(100);
-                    });
-
-                    document.getElementById('showUnmatchedBtn').addEventListener('click', () => {
-                        const selectedFields = getSelectedFields();
-                        displayTable(selectedFields, unmatchedData, headers[0]);
-                    });
-
-                    document.getElementById('showMatchedBtn').addEventListener('click', () => {
-                        const selectedFields = getSelectedFields();
-                        displayTable(selectedFields, matchedData, headers[0]);
-                    });
-
-                    document.getElementById('downloadCsvBtn').addEventListener('click', () => {
-                        downloadTableAsCsv();
-                    });
-
-                    document.getElementById('downloadXlsxBtn').addEventListener('click', () => {
-                        downloadTableAsXlsx();
-                    });
-
-                }).catch(error => {
-                    console.error('Error reading files:', error);
-                    alert('Error processing files!');
-                });
-            }
-        }
-
-        function updateProgress(value) {
+            // إظهار شريط التقدم
+            document.getElementById('progressCard').style.display = 'block';
             const progressBar = document.getElementById('progressBar');
-            progressBar.style.width = value + '%';
-            progressBar.setAttribute('aria-valuenow', value);
-        }
+            progressBar.style.width = '0%';
+            progressBar.setAttribute('aria-valuenow', 0);
 
-        function setupFieldsSelection(fields) {
-            const fieldsCheckboxes = document.getElementById('fieldsCheckboxes');
-            fieldsCheckboxes.innerHTML = '';
-            fields.forEach(field => {
-                const checkbox = document.createElement('div');
-                checkbox.className = 'form-check';
-                checkbox.innerHTML = `
-                    <input class="form-check-input" type="checkbox" value="${field}" id="${field}">
-                    <label class="form-check-label" for="${field}">
-                        ${field}
-                    </label>
-                `;
-                fieldsCheckboxes.appendChild(checkbox);
+            fetch('your-upload-endpoint', {
+                method: 'POST',
+                body: formData,
+            }).then(response => response.json()).then(data => {
+                // معالجة البيانات المستلمة هنا
+                matchedData = data.matchedData;
+                unmatchedData = data.unmatchedData;
+                header1 = data.header1;
+
+                // إخفاء شريط التقدم
+                document.getElementById('progressCard').style.display = 'none';
+
+                // عرض خيارات الحقول
+                document.getElementById('fieldsSelectionCard').style.display = 'block';
+                const fieldsCheckboxes = document.getElementById('fieldsCheckboxes');
+                fieldsCheckboxes.innerHTML = header1.map(field => `
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="${field}" value="${field}" checked>
+                        <label class="form-check-label" for="${field}">${field}</label>
+                    </div>
+                `).join('');
+            }).catch(error => {
+                console.error('Error:', error);
+                alert('حدث خطأ أثناء تحميل البيانات.');
             });
+        });
 
-            document.getElementById('selectAllFields').addEventListener('change', function() {
-                const checkboxes = document.querySelectorAll('#fieldsCheckboxes input');
-                checkboxes.forEach(checkbox => checkbox.checked = this.checked);
-            });
-        }
+        // عرض البيانات عند النقر على زر العرض
+        document.getElementById('displayDataBtn').addEventListener('click', function () {
+            const selectedFields = Array.from(document.querySelectorAll('#fieldsForm input[type="checkbox"]:checked')).map(cb => cb.value);
+            displayData(selectedFields);
+        });
 
-        function getSelectedFields() {
-            const selectedFields = [];
-            document.querySelectorAll('#fieldsCheckboxes input:checked').forEach(checkbox => {
-                selectedFields.push(checkbox.value);
-            });
-            return selectedFields;
-        }
-
-        function displayTable(selectedFields, data, header) {
+        // عرض البيانات في الجدول
+        function displayData(fields) {
+            document.getElementById('dataCard').style.display = 'block';
             const tableHeader = document.getElementById('tableHeader');
-            tableHeader.innerHTML = '';
-            const sequenceHeader = document.createElement('th');
-            sequenceHeader.textContent = '#';
-            tableHeader.appendChild(sequenceHeader);
-
-            selectedFields.forEach(field => {
-                const th = document.createElement('th');
-                th.textContent = field;
-                tableHeader.appendChild(th);
-            });
-
             const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = '';
-
-            const start = (currentPage - 1) * itemsPerPage;
-            const end = start + itemsPerPage;
-            const currentData = data.slice(start, end);
-
-            currentData.forEach(([id, row], index) => {
-                const tr = document.createElement('tr');
-                const sequenceCell = document.createElement('td');
-                sequenceCell.textContent = start + index + 1;
-                tr.appendChild(sequenceCell);
-                selectedFields.forEach(field => {
-                    const td = document.createElement('td');
-                    const fieldIndex = header.indexOf(field);
-                    td.textContent = row[fieldIndex] || ''; // التأكد من وجود البيانات
-                    tr.appendChild(td);
-                });
-                tableBody.appendChild(tr);
-            });
-
-            updatePagination(data.length);
+            tableHeader.innerHTML = fields.map(field => `<th>${field}</th>`).join('');
+            tableBody.innerHTML = matchedData.map(row => `
+                <tr>${fields.map(field => `<td>${row[field] || ''}</td>`).join('')}</tr>
+            `).join('');
+            setupPagination();
         }
 
-        function updatePagination(totalItems) {
-            const totalPages = Math.ceil(totalItems / itemsPerPage);
+        // إعداد الترقيم للبيانات
+        function setupPagination() {
+            const totalPages = Math.ceil(matchedData.length / itemsPerPage);
             const pagination = document.getElementById('pagination');
             pagination.innerHTML = '';
-
             for (let i = 1; i <= totalPages; i++) {
                 const li = document.createElement('li');
-                li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                li.className = 'page-item';
                 li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
-                li.addEventListener('click', function(e) {
+                li.addEventListener('click', function (e) {
                     e.preventDefault();
                     currentPage = i;
-                    const selectedFields = getSelectedFields();
-                    const dataToDisplay = document.getElementById('showMatchedBtn').style.display === 'inline-block' ? matchedData : unmatchedData;
-                    displayTable(selectedFields, dataToDisplay, header1);
+                    displayPage();
                 });
                 pagination.appendChild(li);
             }
+            displayPage();
         }
 
-        function downloadTableAsCsv() {
-            const selectedFields = getSelectedFields();
-            const rows = Array.from(document.querySelectorAll('#dataTable tr')).map(row => {
-                return Array.from(row.querySelectorAll('th, td')).map(cell => `"${cell.textContent}"`);
-            });
-
-            const csvContent = rows.map(e => e.join(",")).join("\n");
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.setAttribute("href", url);
-            link.setAttribute("download", "data.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+        // عرض البيانات الخاصة بالصفحة الحالية
+        function displayPage() {
+            const tableBody = document.getElementById('tableBody');
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageData = matchedData.slice(start, end);
+            tableBody.innerHTML = pageData.map(row => `
+                <tr>${Array.from(document.querySelectorAll('#fieldsForm input[type="checkbox"]:checked')).map(cb => `<td>${row[cb.value] || ''}</td>`).join('')}</tr>
+            `).join('');
         }
 
-        function downloadTableAsXlsx() {
-            const selectedFields = getSelectedFields();
-            const rows = Array.from(document.querySelectorAll('#dataTable tr')).map(row => {
-                return Array.from(row.querySelectorAll('th, td')).map(cell => cell.textContent);
-            });
+        // إظهار/إخفاء البيانات غير المطابقة عند النقر على الزر المناسب
+        document.getElementById('showUnmatchedBtn').addEventListener('click', function () {
+            document.getElementById('dataCard').style.display = 'none';
+            document.getElementById('unmatchedDataCard').style.display = 'block';
+        });
 
-            const ws = XLSX.utils.aoa_to_sheet(rows);
+        document.getElementById('showMatchedBtn').addEventListener('click', function () {
+            document.getElementById('unmatchedDataCard').style.display = 'none';
+            document.getElementById('dataCard').style.display = 'block';
+        });
+
+        // تحميل البيانات إلى ملف CSV
+        document.getElementById('downloadCsvBtn').addEventListener('click', function () {
+            const csv = matchedData.map(row => header1.map(field => row[field] || '').join(',')).join('\n');
+            downloadFile('matchedData.csv', 'text/csv', csv);
+        });
+
+        // تحميل البيانات إلى ملف XLSX
+        document.getElementById('downloadXlsxBtn').addEventListener('click', function () {
+            const ws = XLSX.utils.json_to_sheet(matchedData, { header: header1 });
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Data");
-            XLSX.writeFile(wb, "data.xlsx");
+            XLSX.utils.book_append_sheet(wb, ws, 'MatchedData');
+            XLSX.writeFile(wb, 'matchedData.xlsx');
+        });
+
+        // تحميل الملفات
+        function downloadFile(filename, mimeType, content) {
+            const blob = new Blob([content], { type: mimeType });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+            URL.revokeObjectURL(link.href);
         }
-
     </script>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
 </body>
 </html>
