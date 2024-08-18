@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>رفع الملفات</title>
+    <title>File Uploader</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
@@ -36,9 +36,9 @@
 </head>
 <body>
     <header class="bg-info text-white text-center py-3">
-        <h1>مرحبا بكم!</h1>
+        <h1>Welcome World!</h1>
     </header>
-    <!-- شريط التنقل -->
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
@@ -46,13 +46,13 @@
                     <a class="nav-link" href="#">جديد</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">جديد</a>
+                    <a class="nav-link" href="#">جديد </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="connect.html">دمج البيانات</a>
+                    <a class="nav-link" href="connect.html"> دمج البيانات</a>
                 </li>
                 <li class="nav-item active">
-                    <a class="nav-link" href="index.html">المطابقة والغير مطابقة</a>
+                    <a class="nav-link" href="index.html"> المطابقة والغير مطابقة</a>
                 </li>
             </ul>
         </div>
@@ -60,7 +60,7 @@
     <div class="container mt-5">
         <div class="card">
             <div class="card-header bg-dark text-white">
-                <h2>ارفع الملف بصيغة xlsx أو csv</h2>
+                <h2>ارفع الملف بصيغة xlsx او csv</h2>
             </div>
             <div class="card-body">
                 <form id="uploadForm" class="needs-validation" novalidate>
@@ -149,7 +149,7 @@
                     <ul id="pagination" class="pagination"></ul>
                 </div>
                 <div class="text-center mt-4">
-                    <button id="showUnmatchedBtn" class="btn btn-warning" style="display: none;">البيانات غير المطابقة</button>
+                    <button id="showUnmatchedBtn" class="btn btn-warning" style="display: none;">البيانات الغير مطابقة</button>
                     <button id="showMatchedBtn" class="btn btn-info" style="display: none;">البيانات المطابقة</button>
                 </div>
             </div>
@@ -159,7 +159,7 @@
     <br>
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2024 رفع الملفات. جميع الحقوق محفوظة.</p>
+            <p>&copy; 2024 File Uploader. All rights reserved.</p>
         </div>
     </footer>
 
