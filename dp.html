@@ -130,10 +130,7 @@
                         // حساب النسبة المئوية للأصفار بناءً على عدد الأعمدة التي تحتوي على بيانات فقط
                         const zeroPercentage = dataColumnCount > 0 ? (zeroCount / dataColumnCount) * 100 : 0;
 
-                        // تجاهل الصف إذا كانت النسبة المئوية للأصفار 0%
-                        if (zeroPercentage === 0) return;
-
-                        // إنشاء الصف وعرضه فقط إذا كانت النسبة المئوية أكبر من 0%
+                        // إنشاء الصف وعرضه في الجدول
                         const row = document.createElement('tr');
 
                         // إضافة بيانات الصف للعرض
