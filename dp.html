@@ -93,13 +93,13 @@
                         zeroPercentageCell.textContent = zeroPercentage.toFixed(2) + '%';
                         row.appendChild(zeroPercentageCell);
 
-                        // 4. تظليل الصف إذا كانت النسبة المئوية للأصفار أقل من 30%
-                        if (zeroPercentage < 30) {
+                        // 4. تظليل الصف إذا كانت النسبة المئوية للأصفار أعلى من 30%
+                        if (zeroPercentage > 30) {
                             row.classList.add('highlight-row');
+                            // إضافة البيانات المظللة فقط إلى ملف التحميل النهائي
+                            finalData.push([rowData[0], rowData[1], zeroPercentage.toFixed(2) + '%']);
                         }
 
-                        // تخزين البيانات النهائية لتحميل الملف (العمود الأول والثاني والنسبة المئوية فقط)
-                        finalData.push([rowData[0], rowData[1], zeroPercentage.toFixed(2) + '%']);
                         table.appendChild(row);
                     });
                     
