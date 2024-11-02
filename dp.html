@@ -83,7 +83,7 @@
     </div>
 
     <script>
-        let finalData = []; // لتخزين البيانات النهائية للتحميل
+        let finalData = {}; // تخزين البيانات النهائية لكل الاسماء والملفات
         let fileContainers = []; // لتخزين الحاويات لكل ملف
 
         function displayExcel() {
@@ -93,7 +93,7 @@
 
             const resultDiv = document.getElementById('result');
             resultDiv.innerHTML = ''; // تفريغ النتائج في كل مرة
-            finalData = []; // إعادة تعيين البيانات النهائية
+            finalData = {}; // إعادة تعيين البيانات النهائية
             fileContainers = []; // إعادة تعيين الحاويات
 
             Array.from(files).forEach((file, fileIndex) => {
@@ -170,6 +170,12 @@
 
                         const zeroPercentage = dataColumnCount > 0 ? Math.round((zeroCount / dataColumnCount) * 100) : 0;
 
+                        const name = rowData[1];
+                        if (!finalData[name]) {
+                            finalData[name] = { "رقم تسلسل": serialNumber, "العمود الأول": rowData[0], "العمود الثاني": name, "عدد الأصفار": zeroCount };
+                        }
+                        finalData[name][`النسبة المئوية للملف ${fileIndex}`] = zeroPercentage + '%';
+
                         const row = document.createElement('tr');
                         const serialNumberCell = document.createElement('td');
                         serialNumberCell.textContent = serialNumber;
@@ -189,9 +195,6 @@
                         zeroPercentageCell.textContent = zeroPercentage + '%';
                         row.appendChild(zeroPercentageCell);
 
-                        if (!finalData[rowIndex]) finalData[rowIndex] = [serialNumber, rowData[0], rowData[1], zeroCount];
-                        finalData[rowIndex][fileIndex + 3] = zeroPercentage + '%';
-
                         serialNumber++;
                         table.appendChild(row);
                     });
@@ -210,9 +213,20 @@
 
             worksheet.addRow(["رقم تسلسل", "العمود الأول", "العمود الثاني", "عدد الأصفار", "النسبة المئوية للملف الأول", "النسبة المئوية للملف الثاني", "النسبة المئوية للملف الثالث"]);
 
-            finalData.forEach(row => {
-                const excelRow = worksheet.addRow(row);
-                row.slice(4).forEach((percentage, idx) => {
+            Object.values(finalData).forEach(row => {
+                const dataRow = [
+                    row["رقم تسلسل"],
+                    row["العمود الأول"],
+                    row["العمود الثاني"],
+                    row["عدد الأصفار"],
+                    row["النسبة المئوية للملف 1"] || "",
+                    row["النسبة المئوية للملف 2"] || "",
+                    row["النسبة المئوية للملف 3"] || ""
+                ];
+
+                const excelRow = worksheet.addRow(dataRow);
+
+                dataRow.slice(4).forEach((percentage, idx) => {
                     if (parseFloat(percentage) > 30) {
                         excelRow.getCell(5 + idx).fill = {
                             type: 'pattern',
