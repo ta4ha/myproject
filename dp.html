@@ -90,11 +90,11 @@
             finalData = []; // إعادة تعيين البيانات النهائية
 
             Array.from(files).forEach((file, fileIndex) => {
-                processFile(file, fileIndex + 1); // معالجة كل ملف وإضافة جدول له
+                processFile(file, fileIndex + 1, resultDiv); // معالجة كل ملف وإضافة جدول له
             });
         }
 
-        function processFile(file, fileIndex) {
+        function processFile(file, fileIndex, resultDiv) {
             const reader = new FileReader();
             reader.onload = function(event) {
                 const data = new Uint8Array(event.target.result);
@@ -228,4 +228,3 @@
     </script>
 </body>
 </html>
- 
