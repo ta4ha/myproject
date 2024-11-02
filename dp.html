@@ -65,10 +65,8 @@
         <h2 class="text-center">تحليل ملفات إكسل</h2>
         <form id="uploadForm" class="d-flex flex-column align-items-center">
             <div class="form-group w-75">
-                <input type="file" class="form-control file-input" accept=".xlsx" required onchange="handleFileInput(this)">
+                <input type="file" class="form-control file-input" accept=".xlsx" multiple required onchange="displayExcel()">
             </div>
-            <button type="button" onclick="addFileInput()" class="btn btn-secondary mt-2">إضافة ملف آخر</button>
-            <button type="button" onclick="displayExcel()" class="btn btn-primary mt-2">عرض جميع الملفات</button>
             <button id="downloadButton" onclick="downloadExcel()" class="btn btn-success mt-2" style="display: none;">تحميل ملف التحليل</button>
         </form>
         
@@ -77,38 +75,18 @@
 
     <script>
         let finalData = []; // لتخزين البيانات النهائية للتحميل
-        let fileInputs = []; // لتخزين مراجع عناصر الإدخال للملفات
-        let fileCount = 0; // عدد الملفات
-
-        function addFileInput() {
-            const fileInputDiv = document.createElement("div");
-            fileInputDiv.className = "form-group w-75 mt-2";
-            const fileInput = document.createElement("input");
-            fileInput.type = "file";
-            fileInput.className = "form-control file-input";
-            fileInput.accept = ".xlsx";
-            fileInput.required = true;
-            fileInput.onchange = function() { handleFileInput(fileInput); };
-            fileInputDiv.appendChild(fileInput);
-            document.getElementById("uploadForm").insertBefore(fileInputDiv, document.getElementById("uploadForm").children[document.getElementById("uploadForm").children.length - 3]);
-        }
-
-        function handleFileInput(input) {
-            if (!fileInputs.includes(input)) {
-                fileInputs.push(input);
-            }
-        }
 
         function displayExcel() {
+            const fileInput = document.querySelector('.file-input');
+            const files = fileInput.files;
+            if (!files.length) return;
+
             finalData = []; // تفريغ البيانات النهائية في كل عملية رفع جديدة
             const resultDiv = document.getElementById('result');
             resultDiv.innerHTML = ''; // تفريغ النتائج في كل مرة
-            fileCount = fileInputs.length;
 
-            fileInputs.forEach((fileInput, index) => {
-                if (fileInput.files.length > 0) {
-                    processFile(fileInput.files[0], index + 1);
-                }
+            Array.from(files).forEach((file, index) => {
+                processFile(file, index + 1);
             });
         }
 
@@ -150,7 +128,7 @@
                             finalData[rowIndex] = [...rowData.slice(0, 2)];
                         }
                         finalData[rowIndex].push(zeroPercentage + '%');
-                        updateTableRow(rowIndex, zeroPercentage, percentageColumnName);
+                        addPercentageToTable(rowIndex, zeroPercentage, percentageColumnName);
                     });
                 });
             };
@@ -173,7 +151,7 @@
             resultDiv.appendChild(table);
         }
 
-        function updateTableRow(rowIndex, zeroPercentage, percentageColumnName) {
+        function addPercentageToTable(rowIndex, zeroPercentage, percentageColumnName) {
             const table = document.querySelector('#result table');
             const headerRow = table.rows[0];
 
@@ -187,7 +165,7 @@
             let row = table.rows[rowIndex + 1];
             if (!row) {
                 row = document.createElement('tr');
-                finalData[rowIndex].forEach((cellData, idx) => {
+                finalData[rowIndex].forEach((cellData) => {
                     const cell = document.createElement('td');
                     cell.textContent = cellData !== undefined ? cellData : '';
                     row.appendChild(cell);
