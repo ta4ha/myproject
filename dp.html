@@ -22,9 +22,12 @@
             <button type="button" onclick="displayExcel()" class="btn btn-primary btn-block">رفع الملف وعرضه</button>
         </form>
         <div id="result" class="mt-4"></div>
+        <button id="downloadButton" onclick="downloadExcel()" class="btn btn-success mt-3" style="display: none;">تحميل ملف Excel بعد التحليل</button>
     </div>
 
     <script>
+        let finalData = []; // لتخزين البيانات النهائية للتحميل
+
         function displayExcel() {
             const fileInput = document.getElementById('fileInput');
             const file = fileInput.files[0];
@@ -38,6 +41,7 @@
                 // تفريغ حاوية النتائج
                 const resultDiv = document.getElementById('result');
                 resultDiv.innerHTML = '';
+                finalData = []; // تفريغ البيانات النهائية في كل عملية رفع جديدة
 
                 workbook.SheetNames.forEach(sheetName => {
                     const sheet = workbook.Sheets[sheetName];
@@ -94,13 +98,27 @@
                             row.classList.add('highlight-row');
                         }
 
+                        // تخزين البيانات النهائية لتحميل الملف (العمود الأول والثاني والنسبة المئوية فقط)
+                        finalData.push([rowData[0], rowData[1], zeroPercentage.toFixed(2) + '%']);
                         table.appendChild(row);
                     });
                     
                     resultDiv.appendChild(table);
                 });
+
+                // عرض زر التحميل
+                document.getElementById('downloadButton').style.display = 'block';
             };
             reader.readAsArrayBuffer(file);
+        }
+
+        function downloadExcel() {
+            const ws = XLSX.utils.aoa_to_sheet([["العمود الأول", "العمود الثاني", "النسبة المئوية"]].concat(finalData));
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "النتائج النهائية");
+
+            // تحميل الملف
+            XLSX.writeFile(wb, 'النتائج_النهائية.xlsx');
         }
     </script>
 </body>
