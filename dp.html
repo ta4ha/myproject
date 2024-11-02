@@ -68,9 +68,9 @@
         <h2 class="text-center">تحليل ملفات إكسل</h2>
         <form id="uploadForm" class="d-flex justify-content-between align-items-center">
             <div class="form-group w-75">
-                <input type="file" id="fileInput" class="form-control" accept=".xlsx" required>
+                <input type="file" id="fileInput" class="form-control" accept=".xlsx" multiple required>
             </div>
-            <button type="button" onclick="displayExcel()" class="btn btn-primary">رفع الملف وعرضه</button>
+            <button type="button" onclick="displayExcel()" class="btn btn-primary">رفع الملفات وعرضها</button>
             <button id="downloadButton" onclick="downloadExcel()" class="btn btn-success" style="display: none;">تحميل ملف التحليل</button>
         </form>
         
@@ -82,18 +82,23 @@
 
         function displayExcel() {
             const fileInput = document.getElementById('fileInput');
-            const file = fileInput.files[0];
-            if (!file) return;
+            const files = fileInput.files;
+            if (!files.length) return;
 
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = ''; // تفريغ النتائج في كل مرة
+            finalData = []; // إعادة تعيين البيانات النهائية
+
+            Array.from(files).forEach((file, fileIndex) => {
+                processFile(file, fileIndex + 1); // معالجة كل ملف وإضافة جدول له
+            });
+        }
+
+        function processFile(file, fileIndex) {
             const reader = new FileReader();
             reader.onload = function(event) {
                 const data = new Uint8Array(event.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
-                
-                // تفريغ حاوية النتائج
-                const resultDiv = document.getElementById('result');
-                resultDiv.innerHTML = '';
-                finalData = []; // تفريغ البيانات النهائية في كل عملية رفع جديدة
 
                 workbook.SheetNames.forEach(sheetName => {
                     const sheet = workbook.Sheets[sheetName];
@@ -103,9 +108,9 @@
                     const table = document.createElement('table');
                     table.className = 'table table-bordered table-striped mt-4';
                     
-                    // إضافة عنوان للورقة
+                    // إضافة عنوان للورقة والملف
                     const sheetTitle = document.createElement('h4');
-                    sheetTitle.textContent = `الورقة: ${sheetName}`;
+                    sheetTitle.textContent = `الملف ${fileIndex} - الورقة: ${sheetName}`;
                     sheetTitle.className = 'text-center text-info';
                     resultDiv.appendChild(sheetTitle);
                     
@@ -179,8 +184,6 @@
                     
                     resultDiv.appendChild(table);
                 });
-
-                document.getElementById('downloadButton').style.display = 'block';
             };
             reader.readAsArrayBuffer(file);
         }
