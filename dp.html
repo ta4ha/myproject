@@ -209,7 +209,10 @@
 
         async function downloadExcel() {
             const workbook = new ExcelJS.Workbook();
-            const worksheet = workbook.addWorksheet('النتائج النهائية', { properties: { rtl: true } });
+            const worksheet = workbook.addWorksheet('النتائج النهائية');
+
+            // إعداد اتجاه الورقة من اليمين إلى اليسار
+            worksheet.views = [{ rightToLeft: true }];
 
             worksheet.addRow(["رقم تسلسل", "العمود الأول", "العمود الثاني", "عدد الأصفار", "النسبة المئوية للملف الأول", "النسبة المئوية للملف الثاني", "النسبة المئوية للملف الثالث"]);
 
