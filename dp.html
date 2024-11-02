@@ -58,8 +58,10 @@
                     sheetTitle.textContent = `الورقة: ${sheetName}`;
                     resultDiv.appendChild(sheetTitle);
                     
-                    // إنشاء الصفوف والأعمدة مع حساب عدد الأصفار ونسبة الأصفار لكل صف
-                    sheetData.forEach(rowData => {
+                    // بدء الحساب من الصف الثامن فقط
+                    sheetData.forEach((rowData, rowIndex) => {
+                        if (rowIndex < 7) return; // تجاهل أول 7 صفوف
+
                         const row = document.createElement('tr');
                         let zeroCount = 0; // متغير لحساب عدد الأصفار في الصف
                         let dataColumnCount = 0; // متغير لحساب عدد الأعمدة التي تحتوي على بيانات
@@ -88,20 +90,20 @@
                         row.appendChild(zeroCountCell);
 
                         // 2. حساب النسبة المئوية للأصفار بناءً على عدد الأعمدة التي تحتوي على بيانات فقط
-                        const zeroPercentage = dataColumnCount > 0 ? Math.round((zeroCount / dataColumnCount) * 100) : 0;
+                        const zeroPercentage = dataColumnCount > 0 ? (zeroCount / dataColumnCount) * 100 : 0;
 
                         // 3. إضافة النسبة المئوية كعمود جديد بجانب عمود عدد الأصفار
                         const zeroPercentageCell = document.createElement('td');
-                        zeroPercentageCell.textContent = zeroPercentage + '%';
+                        zeroPercentageCell.textContent = zeroPercentage.toFixed(2) + '%';
                         row.appendChild(zeroPercentageCell);
 
                         // 4. تظليل الصف إذا كانت النسبة المئوية للأصفار أعلى من 30%
                         if (zeroPercentage > 30) {
                             row.classList.add('highlight-row');
                             // إضافة البيانات المظللة فقط إلى ملف التحميل النهائي
-                            finalData.push([rowData[0], rowData[1], zeroPercentage + '%', true]);
+                            finalData.push([rowData[0], rowData[1], zeroPercentage.toFixed(2) + '%', true]);
                         } else {
-                            finalData.push([rowData[0], rowData[1], zeroPercentage + '%', false]);
+                            finalData.push([rowData[0], rowData[1], zeroPercentage.toFixed(2) + '%', false]);
                         }
 
                         table.appendChild(row);
