@@ -35,8 +35,12 @@
             border-radius: 50px;
             padding: 10px;
         }
-        #result {
-            overflow-x: auto;
+        .table-container {
+            margin-top: 20px;
+            display: none;
+        }
+        .table-container.active {
+            display: block;
         }
         table {
             width: 100%;
@@ -58,13 +62,6 @@
         .mismatch-row {
             background-color: #fff3cd; /* لون أصفر فاتح */
         }
-        .table-container {
-            margin-top: 20px;
-            display: none;
-        }
-        .table-container.active {
-            display: block;
-        }
     </style>
 </head>
 <body>
@@ -79,12 +76,13 @@
         </form>
         
         <div id="fileButtons" class="my-3 text-center"></div>
-        <div id="result"></div>
+        <div id="result" class="table-container"></div>
     </div>
 
     <script>
         let finalData = []; // لتخزين البيانات النهائية للتحميل
         let fileContainers = []; // لتخزين الحاويات لكل ملف
+        let mismatchRows = []; // لتخزين الصفوف غير المطابقة
 
         function displayExcel() {
             const fileInput = document.getElementById('fileInput');
@@ -95,6 +93,7 @@
             resultDiv.innerHTML = ''; // تفريغ النتائج في كل مرة
             finalData = []; // إعادة تعيين البيانات النهائية
             fileContainers = []; // إعادة تعيين الحاويات
+            mismatchRows = []; // إعادة تعيين الصفوف غير المطابقة
 
             Array.from(files).forEach((file, fileIndex) => {
                 const container = document.createElement('div');
@@ -151,7 +150,7 @@
                     
                     // إنشاء صف العناوين مع "رقم تسلسل"
                     const headerRow = document.createElement('tr');
-                    ["رقم تسلسل", "العمود الأول", "العمود الثاني", "عدد الأصفار", "النسبة المئوية"].forEach(header => {
+                    ["رقم تسلسل", "العمود الأول", "العمود الثاني", "عدد الأصفار", `النسبة المئوية للملف ${fileIndex}`].forEach(header => {
                         const th = document.createElement('th');
                         th.textContent = header;
                         headerRow.appendChild(th);
@@ -206,6 +205,7 @@
                         // تحقق من التباين بين "رقم التسلسل" و"العمود الأول" ولون الصف إذا كان مختلفًا
                         if (serialNumber !== parseInt(rowData[0])) {
                             row.classList.add('mismatch-row'); // لون أصفر إذا كان هناك تباين
+                            mismatchRows.push([serialNumber, rowData[0], rowData[1], zeroCount, zeroPercentage + '%']); // إضافة الصف غير المطابق إلى القائمة
                         } else if (zeroPercentage > 30) {
                             row.classList.add('highlight-row'); // لون أحمر إذا كانت النسبة أعلى من 30%
                         }
@@ -255,6 +255,14 @@
                     });
                 }
             });
+
+            // إضافة الصفوف غير المطابقة في نهاية الملف
+            if (mismatchRows.length > 0) {
+                worksheet.addRow([]); // صف فارغ قبل الإضافة
+                mismatchRows.forEach(row => {
+                    worksheet.addRow(row);
+                });
+            }
 
             const buffer = await workbook.xlsx.writeBuffer();
             const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
