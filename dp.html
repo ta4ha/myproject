@@ -125,7 +125,7 @@
                     let percentageColumnName = `النسبة المئوية (${file.name})`;
 
                     if (finalData.length === 0) {
-                        initializeTable(sheetData, percentageColumnName);
+                        initializeTable(sheetData);
                     }
 
                     sheetData.forEach((rowData, rowIndex) => {
@@ -150,21 +150,20 @@
                             finalData[rowIndex] = [...rowData.slice(0, 2)];
                         }
                         finalData[rowIndex].push(zeroPercentage + '%');
-                        updateTableRow(rowIndex, rowData, zeroPercentage, percentageColumnName);
+                        updateTableRow(rowIndex, zeroPercentage, percentageColumnName);
                     });
                 });
             };
             reader.readAsArrayBuffer(file);
         }
 
-        function initializeTable(sheetData, percentageColumnName) {
+        function initializeTable(sheetData) {
             const resultDiv = document.getElementById('result');
             const table = document.createElement('table');
             table.className = 'table table-bordered table-striped mt-4';
             
             const headerRow = document.createElement('tr');
             const headers = ["العمود الأول", "العمود الثاني"];
-            fileInputs.forEach((_, index) => headers.push(`النسبة المئوية للملف ${index + 1}`));
             headers.forEach(header => {
                 const th = document.createElement('th');
                 th.textContent = header;
@@ -174,12 +173,21 @@
             resultDiv.appendChild(table);
         }
 
-        function updateTableRow(rowIndex, rowData, zeroPercentage, percentageColumnName) {
+        function updateTableRow(rowIndex, zeroPercentage, percentageColumnName) {
             const table = document.querySelector('#result table');
+            const headerRow = table.rows[0];
+
+            // إضافة عمود جديد في صف العنوان إذا لم يكن موجودًا
+            if (!Array.from(headerRow.cells).some(cell => cell.textContent === percentageColumnName)) {
+                const newHeader = document.createElement('th');
+                newHeader.textContent = percentageColumnName;
+                headerRow.appendChild(newHeader);
+            }
+
             let row = table.rows[rowIndex + 1];
             if (!row) {
                 row = document.createElement('tr');
-                rowData.slice(0, 2).forEach(cellData => {
+                finalData[rowIndex].forEach((cellData, idx) => {
                     const cell = document.createElement('td');
                     cell.textContent = cellData !== undefined ? cellData : '';
                     row.appendChild(cell);
