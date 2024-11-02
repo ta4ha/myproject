@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>عرض ملفات إكسل في المتصفح مع حساب نسبة الأصفار لكل صف</title>
+    <title>عرض ملفات إكسل في المتصفح مع حساب نسبة الأصفار بالنسبة لعدد الأعمدة</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 </head>
@@ -38,22 +38,20 @@
                     const sheet = workbook.Sheets[sheetName];
                     const sheetData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-                    // حساب عدد الصفوف غير الفارغة
-                    const nonEmptyRowCount = sheetData.filter(row => row.some(cell => cell !== undefined && cell !== null && cell !== '')).length;
-
                     // عرض النتائج في جدول
                     const table = document.createElement('table');
                     table.className = 'table table-bordered mt-4';
                     
-                    // إنشاء عنوان للورقة
+                    // إضافة عنوان للورقة
                     const sheetTitle = document.createElement('h4');
                     sheetTitle.textContent = `الورقة: ${sheetName}`;
                     resultDiv.appendChild(sheetTitle);
 
-                    // إنشاء الصفوف والأعمدة مع حساب عدد الأصفار ونسبة الأصفار لكل صف
+                    // إنشاء الصفوف والأعمدة مع حساب نسبة الأصفار لكل صف بناءً على عدد الأعمدة
                     sheetData.forEach(rowData => {
                         const row = document.createElement('tr');
                         let zeroCount = 0;
+                        const columnCount = rowData.length;
 
                         rowData.forEach(cellData => {
                             const cell = document.createElement('td');
@@ -66,18 +64,13 @@
                             row.appendChild(cell);
                         });
 
-                        // إضافة عمود جديد يحتوي على عدد الأصفار في نهاية الصف
-                        const zeroCountCell = document.createElement('td');
-                        zeroCountCell.textContent = zeroCount;
-                        row.appendChild(zeroCountCell);
+                        // حساب النسبة بين عدد الأصفار وعدد الأعمدة
+                        const zeroRatio = columnCount > 0 ? (zeroCount / columnCount) : 0;
 
-                        // حساب النسبة المئوية للأصفار لكل صف
-                        const zeroPercentage = nonEmptyRowCount > 0 ? (zeroCount / nonEmptyRowCount) * 100 : 0;
-
-                        // إضافة النسبة المئوية كعمود جديد بجانب عمود عدد الأصفار
-                        const zeroPercentageCell = document.createElement('td');
-                        zeroPercentageCell.textContent = zeroPercentage.toFixed(2) + '%';
-                        row.appendChild(zeroPercentageCell);
+                        // إضافة النسبة كعمود جديد في نهاية الصف
+                        const zeroRatioCell = document.createElement('td');
+                        zeroRatioCell.textContent = zeroRatio.toFixed(2);
+                        row.appendChild(zeroRatioCell);
 
                         table.appendChild(row);
                     });
