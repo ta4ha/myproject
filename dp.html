@@ -65,9 +65,9 @@
         <h2 class="text-center">تحليل ملفات إكسل</h2>
         <form id="uploadForm" class="d-flex justify-content-between align-items-center">
             <div class="form-group w-75">
-                <input type="file" id="fileInput" class="form-control" accept=".xlsx" required>
+                <input type="file" id="fileInput" class="form-control" accept=".xlsx" multiple required>
             </div>
-            <button type="button" onclick="displayExcel()" class="btn btn-primary">رفع الملف وعرضه</button>
+            <button type="button" onclick="displayExcel()" class="btn btn-primary">رفع الملفات وعرضها</button>
             <button id="downloadButton" onclick="downloadExcel()" class="btn btn-success" style="display: none;">تحميل ملف التحليل</button>
         </form>
         
@@ -79,126 +79,132 @@
 
         function displayExcel() {
             const fileInput = document.getElementById('fileInput');
-            const file = fileInput.files[0];
-            if (!file) return;
+            const files = fileInput.files;
+            if (!files.length) return;
 
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = ''; // تفريغ حاوية النتائج في كل مرة
+
+            finalData = []; // إعادة تعيين البيانات النهائية
+
+            Array.from(files).forEach((file, fileIndex) => {
+                processFile(file, fileIndex + 1); // معالجة كل ملف وإضافة العمود للنسبة المئوية
+            });
+        }
+
+        function processFile(file, fileIndex) {
             const reader = new FileReader();
             reader.onload = function(event) {
                 const data = new Uint8Array(event.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
-                
-                // تفريغ حاوية النتائج
-                const resultDiv = document.getElementById('result');
-                resultDiv.innerHTML = '';
-                finalData = []; // تفريغ البيانات النهائية في كل عملية رفع جديدة
 
                 workbook.SheetNames.forEach(sheetName => {
                     const sheet = workbook.Sheets[sheetName];
                     const sheetData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-                    // إنشاء الجدول وعرض النتائج
-                    const table = document.createElement('table');
-                    table.className = 'table table-bordered table-striped mt-4';
-                    
-                    // إضافة عنوان للورقة
-                    const sheetTitle = document.createElement('h4');
-                    sheetTitle.textContent = `الورقة: ${sheetName}`;
-                    sheetTitle.className = 'text-center text-info';
-                    resultDiv.appendChild(sheetTitle);
-                    
-                    // بدء الحساب من الصف الثامن فقط
+                    let percentageColumnName = `النسبة المئوية (${file.name})`;
+
+                    if (finalData.length === 0) {
+                        initializeTable(sheetData, percentageColumnName);
+                    }
+
                     sheetData.forEach((rowData, rowIndex) => {
                         if (rowIndex < 7) return; // تجاهل أول 7 صفوف
 
-                        let zeroCount = 0; // متغير لحساب عدد الأصفار في الصف
-                        let dataColumnCount = 0; // متغير لحساب عدد الأعمدة التي تحتوي على بيانات
+                        let zeroCount = 0;
+                        let dataColumnCount = 0;
 
                         rowData.forEach((cellData, index) => {
-                            // تجاهل أول عمودين في الحساب
-                            if (index < 2) return;
-
-                            // حساب عدد الأصفار من العمود الثالث فصاعداً
-                            if (cellData === 0) {
-                                zeroCount++;
-                            }
-                            // حساب عدد الأعمدة التي تحتوي على بيانات (غير فارغة) بدءاً من العمود الثالث
-                            if (cellData !== undefined && cellData !== null && cellData !== '') {
-                                dataColumnCount++;
-                            }
+                            if (index < 2) return; // تجاهل أول عمودين
+                            if (cellData === 0) zeroCount++;
+                            if (cellData !== undefined && cellData !== null && cellData !== '') dataColumnCount++;
                         });
 
-                        // حساب النسبة المئوية للأصفار بناءً على عدد الأعمدة التي تحتوي على بيانات فقط
                         const zeroPercentage = dataColumnCount > 0 ? Math.round((zeroCount / dataColumnCount) * 100) : 0;
 
-                        // حذف الصف إذا كانت النسبة المئوية للأصفار 0% والعمودين الأول والثاني فارغين
                         if (zeroPercentage === 0 && (!rowData[0] || rowData[0] === '') && (!rowData[1] || rowData[1] === '')) {
                             return;
                         }
 
-                        // إنشاء الصف وعرضه في الجدول
-                        const row = document.createElement('tr');
-
-                        // إضافة بيانات الصف للعرض
-                        rowData.forEach((cellData) => {
-                            const cell = document.createElement('td');
-                            cell.textContent = cellData !== undefined ? cellData : '';
-                            row.appendChild(cell);
-                        });
-
-                        // 1. إضافة عدد الأصفار كعمود منفصل
-                        const zeroCountCell = document.createElement('td');
-                        zeroCountCell.textContent = zeroCount;
-                        row.appendChild(zeroCountCell);
-
-                        // 2. إضافة النسبة المئوية كعمود جديد بجانب عمود عدد الأصفار (بدون أرقام بعد الفاصلة)
-                        const zeroPercentageCell = document.createElement('td');
-                        zeroPercentageCell.textContent = zeroPercentage + '%';
-                        row.appendChild(zeroPercentageCell);
-
-                        // 3. تظليل الصف إذا كانت النسبة المئوية للأصفار أعلى من 30%
-                        if (zeroPercentage > 30) {
-                            row.classList.add('highlight-row');
+                        if (!finalData[rowIndex]) {
+                            finalData[rowIndex] = [rowIndex - 6, ...rowData.slice(0, 2)]; // إضافة رقم تسلسل في بداية الصف
                         }
-
-                        // إضافة الصف إلى الجدول
-                        table.appendChild(row);
-
-                        // إضافة البيانات إلى ملف التحميل النهائي
-                        finalData.push([rowData[0], rowData[1], zeroPercentage + '%']);
+                        finalData[rowIndex].push(zeroPercentage + '%');
+                        addPercentageToTable(rowIndex, zeroPercentage, percentageColumnName);
                     });
-                    
-                    resultDiv.appendChild(table);
                 });
-
-                // عرض زر التحميل
-                document.getElementById('downloadButton').style.display = 'block';
             };
             reader.readAsArrayBuffer(file);
+        }
+
+        function initializeTable(sheetData, percentageColumnName) {
+            const resultDiv = document.getElementById('result');
+            const table = document.createElement('table');
+            table.className = 'table table-bordered table-striped mt-4';
+            
+            const headerRow = document.createElement('tr');
+            const headers = ["رقم تسلسل", "العمود الأول", "العمود الثاني"];
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header;
+                headerRow.appendChild(th);
+            });
+            table.appendChild(headerRow);
+            resultDiv.appendChild(table);
+        }
+
+        function addPercentageToTable(rowIndex, zeroPercentage, percentageColumnName) {
+            const table = document.querySelector('#result table');
+            const headerRow = table.rows[0];
+
+            // إضافة عمود جديد في صف العنوان إذا لم يكن موجودًا
+            if (!Array.from(headerRow.cells).some(cell => cell.textContent === percentageColumnName)) {
+                const newHeader = document.createElement('th');
+                newHeader.textContent = percentageColumnName;
+                headerRow.appendChild(newHeader);
+            }
+
+            let row = table.rows[rowIndex + 1];
+            if (!row) {
+                row = document.createElement('tr');
+                finalData[rowIndex].forEach((cellData) => {
+                    const cell = document.createElement('td');
+                    cell.textContent = cellData !== undefined ? cellData : '';
+                    row.appendChild(cell);
+                });
+                table.appendChild(row);
+            }
+
+            const percentageCell = document.createElement('td');
+            percentageCell.textContent = zeroPercentage + '%';
+            if (zeroPercentage > 30) percentageCell.classList.add('highlight-row');
+            row.appendChild(percentageCell);
         }
 
         async function downloadExcel() {
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('النتائج النهائية');
-            
-            // إضافة العناوين
-            worksheet.addRow(["العمود الأول", "العمود الثاني", "النسبة المئوية"]);
 
-            // إضافة البيانات مع التنسيق
+            const headerRow = ["رقم تسلسل", "العمود الأول", "العمود الثاني"];
+            for (let i = 0; i < document.getElementById('fileInput').files.length; i++) {
+                headerRow.push(`النسبة المئوية للملف ${i + 1}`);
+            }
+            worksheet.addRow(headerRow);
+
             finalData.forEach(row => {
-                const excelRow = worksheet.addRow([row[0], row[1], row[2]]);
-                const zeroPercentage = parseFloat(row[2]); // تحويل النسبة إلى رقم للتحقق
-                if (zeroPercentage > 30) { // إذا كانت النسبة أعلى من 30%، يتم تظليل الصف
-                    excelRow.eachCell((cell) => {
-                        cell.fill = {
+                const excelRow = worksheet.addRow(row);
+                row.slice(3).forEach((percentage, index) => {
+                    const zeroPercentage = parseFloat(percentage);
+                    if (zeroPercentage > 30) {
+                        excelRow.getCell(index + 4).fill = {
                             type: 'pattern',
                             pattern: 'solid',
-                            fgColor: { argb: 'FFF8D7DA' } // لون أحمر فاتح
+                            fgColor: { argb: 'FFF8D7DA' }
                         };
-                    });
-                }
+                    }
+                });
             });
 
-            // تحميل الملف
             const buffer = await workbook.xlsx.writeBuffer();
             const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
             saveAs(blob, 'النتائج_النهائية.xlsx');
