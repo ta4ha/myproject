@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>عرض ملفات إكسل في المتصفح بدون تعديلات</title>
+    <title>عرض ملفات إكسل في المتصفح مع حساب عدد الأصفار لكل صف</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 </head>
@@ -47,14 +47,27 @@
                     sheetTitle.textContent = `الورقة: ${sheetName}`;
                     resultDiv.appendChild(sheetTitle);
                     
-                    // إنشاء الصفوف والأعمدة كما هي
+                    // إنشاء الصفوف والأعمدة مع حساب عدد الأصفار لكل صف
                     sheetData.forEach(rowData => {
                         const row = document.createElement('tr');
+                        let zeroCount = 0; // متغير لحساب عدد الأصفار في الصف
+
                         rowData.forEach(cellData => {
                             const cell = document.createElement('td');
                             cell.textContent = cellData !== undefined ? cellData : '';
+
+                            // حساب عدد الأصفار
+                            if (cellData === 0) {
+                                zeroCount++;
+                            }
                             row.appendChild(cell);
                         });
+
+                        // إضافة عدد الأصفار كعمود جديد في نهاية الصف
+                        const zeroCountCell = document.createElement('td');
+                        zeroCountCell.textContent = zeroCount;
+                        row.appendChild(zeroCountCell);
+
                         table.appendChild(row);
                     });
                     
