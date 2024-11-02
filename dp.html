@@ -66,18 +66,22 @@
                             row.appendChild(cell);
                         });
 
-                        // إضافة عمود جديد يحتوي على عدد الأصفار في نهاية الصف
+                        // 1. إضافة عدد الأصفار كعمود منفصل
                         const zeroCountCell = document.createElement('td');
                         zeroCountCell.textContent = zeroCount;
                         row.appendChild(zeroCountCell);
 
-                        // حساب نسبة الأصفار بالنسبة لعدد الصفوف غير الفارغة
-                        const zeroPercentage = nonEmptyRowCount > 0 ? (zeroCount / nonEmptyRowCount) * 100 : 0;
+                        // 2. حساب نسبة الأصفار إلى عدد الصفوف الكلية
+                        const zeroPerRow = nonEmptyRowCount > 0 ? zeroCount / nonEmptyRowCount : 0;
+                        const zeroPerRowCell = document.createElement('td');
+                        zeroPerRowCell.textContent = zeroPerRow.toFixed(2);
+                        row.appendChild(zeroPerRowCell);
 
-                        // إضافة النسبة كعمود جديد بجانب عمود عدد الأصفار
-                        const zeroPercentageCell = document.createElement('td');
-                        zeroPercentageCell.textContent = zeroPercentage.toFixed(2) + '%';
-                        row.appendChild(zeroPercentageCell);
+                        // 3. حساب النسبة المئوية النهائية عبر تقسيم النسبة على 100
+                        const finalPercentage = zeroPerRow / 100;
+                        const finalPercentageCell = document.createElement('td');
+                        finalPercentageCell.textContent = finalPercentage.toFixed(4);
+                        row.appendChild(finalPercentageCell);
 
                         table.appendChild(row);
                     });
