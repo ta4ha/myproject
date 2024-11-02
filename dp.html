@@ -184,6 +184,9 @@
                     
                     resultDiv.appendChild(table);
                 });
+
+                // عرض زر التحميل بعد معالجة كل الملفات
+                document.getElementById('downloadButton').style.display = 'block';
             };
             reader.readAsArrayBuffer(file);
         }
@@ -225,4 +228,3 @@
     </script>
 </body>
 </html>
-   
