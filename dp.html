@@ -6,6 +6,11 @@
     <title>عرض ملفات إكسل في المتصفح مع حساب عدد الأصفار ونسبتها لكل صف</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <style>
+        .highlight-row {
+            background-color: #f8d7da; /* لون أحمر فاتح */
+        }
+    </style>
 </head>
 <body>
     <div class="container mt-5">
@@ -83,6 +88,11 @@
                         const zeroPercentageCell = document.createElement('td');
                         zeroPercentageCell.textContent = zeroPercentage.toFixed(2) + '%';
                         row.appendChild(zeroPercentageCell);
+
+                        // 4. تظليل الصف إذا كانت النسبة المئوية للأصفار أكبر من 30%
+                        if (zeroPercentage > 30) {
+                            row.classList.add('highlight-row');
+                        }
 
                         table.appendChild(row);
                     });
