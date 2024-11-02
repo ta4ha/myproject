@@ -15,14 +15,14 @@
 <body>
     <div class="container mt-5">
         <h2 class="text-center">رفع ملف الإكسل وعرضه في جدول</h2>
-        <form id="uploadForm">
-            <div class="form-group">
+        <form id="uploadForm" class="d-flex justify-content-between">
+            <div class="form-group w-75">
                 <input type="file" id="fileInput" class="form-control" accept=".xlsx" required>
             </div>
-            <button type="button" onclick="displayExcel()" class="btn btn-primary btn-block">رفع الملف وعرضه</button>
+            <button type="button" onclick="displayExcel()" class="btn btn-primary">رفع الملف وعرضه</button>
+            <button id="downloadButton" onclick="downloadExcel()" class="btn btn-success" style="display: none;">تحميل ملف Excel بعد التحليل</button>
         </form>
         <div id="result" class="mt-4"></div>
-        <button id="downloadButton" onclick="downloadExcel()" class="btn btn-success mt-3" style="display: none;">تحميل ملف Excel بعد التحليل</button>
     </div>
 
     <script>
