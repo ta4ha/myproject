@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>عرض ملفات إكسل في المتصفح مع حساب عدد الأصفار لكل صف</title>
+    <title>عرض ملفات إكسل في المتصفح مع حساب نسبة الأصفار لكل صف</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 </head>
@@ -47,10 +47,11 @@
                     sheetTitle.textContent = `الورقة: ${sheetName}`;
                     resultDiv.appendChild(sheetTitle);
                     
-                    // إنشاء الصفوف والأعمدة مع حساب عدد الأصفار لكل صف
+                    // إنشاء الصفوف والأعمدة مع حساب نسبة الأصفار لكل صف
                     sheetData.forEach(rowData => {
                         const row = document.createElement('tr');
                         let zeroCount = 0; // متغير لحساب عدد الأصفار في الصف
+                        let dataColumnCount = 0; // متغير لحساب عدد الأعمدة التي تحتوي على بيانات
 
                         rowData.forEach(cellData => {
                             const cell = document.createElement('td');
@@ -60,13 +61,20 @@
                             if (cellData === 0) {
                                 zeroCount++;
                             }
+                            // حساب عدد الأعمدة التي تحتوي على بيانات
+                            if (cellData !== undefined && cellData !== null && cellData !== '') {
+                                dataColumnCount++;
+                            }
                             row.appendChild(cell);
                         });
 
-                        // إضافة عدد الأصفار كعمود جديد في نهاية الصف
-                        const zeroCountCell = document.createElement('td');
-                        zeroCountCell.textContent = zeroCount;
-                        row.appendChild(zeroCountCell);
+                        // حساب نسبة الأصفار بالنسبة لعدد الأعمدة التي تحتوي على بيانات
+                        const zeroRatio = dataColumnCount > 0 ? (zeroCount / dataColumnCount) * 100 : 0;
+
+                        // إضافة النسبة كعمود جديد في نهاية الصف
+                        const zeroRatioCell = document.createElement('td');
+                        zeroRatioCell.textContent = zeroRatio.toFixed(2) + '%';
+                        row.appendChild(zeroRatioCell);
 
                         table.appendChild(row);
                     });
