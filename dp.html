@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>معالجة ملفات إكسل في المتصفح</title>
+    <title>معالجة ملفات إكسل في المتصفح وعرضها في جدول</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 </head>
@@ -29,13 +29,16 @@
             reader.onload = function(event) {
                 const data = new Uint8Array(event.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
-                const result = {};
+                
+                // تفريغ حاوية النتائج
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = '';
 
                 workbook.SheetNames.forEach(sheetName => {
                     const sheet = workbook.Sheets[sheetName];
                     const sheetData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
                     
-                    // هنا يمكنك إجراء المعادلات على كل ورقة
+                    // معالجة البيانات وتطبيق المعادلة
                     const processedData = sheetData.map(row => row.map(cell => {
                         // مثال: معادلة بسيطة تضرب القيمة بـ 2
                         if (typeof cell === 'number') {
@@ -44,14 +47,31 @@
                         return cell;
                     }));
 
-                    result[sheetName] = processedData;
+                    // عرض النتائج في جدول
+                    const table = document.createElement('table');
+                    table.className = 'table table-bordered mt-4';
+                    
+                    // إنشاء عنوان للورقة
+                    const sheetTitle = document.createElement('h4');
+                    sheetTitle.textContent = `الورقة: ${sheetName}`;
+                    resultDiv.appendChild(sheetTitle);
+                    
+                    // إنشاء الصفوف والأعمدة
+                    processedData.forEach(rowData => {
+                        const row = document.createElement('tr');
+                        rowData.forEach(cellData => {
+                            const cell = document.createElement('td');
+                            cell.textContent = cellData !== undefined ? cellData : '';
+                            row.appendChild(cell);
+                        });
+                        table.appendChild(row);
+                    });
+                    
+                    resultDiv.appendChild(table);
                 });
-
-                document.getElementById('result').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
             };
             reader.readAsArrayBuffer(file);
         }
     </script>
 </body>
 </html>
-  
