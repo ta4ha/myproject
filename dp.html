@@ -60,6 +60,10 @@
         }
         .table-container {
             margin-top: 20px;
+            display: none;
+        }
+        .table-container.active {
+            display: block;
         }
     </style>
 </head>
@@ -74,11 +78,13 @@
             <button id="downloadButton" onclick="downloadExcel()" class="btn btn-success" style="display: none;">تحميل ملف التحليل</button>
         </form>
         
+        <div id="fileButtons" class="my-3 text-center"></div>
         <div id="result" class="table-container"></div>
     </div>
 
     <script>
         let finalData = []; // لتخزين البيانات النهائية للتحميل
+        let fileContainers = []; // لتخزين الحاويات لكل ملف
 
         function displayExcel() {
             const fileInput = document.getElementById('fileInput');
@@ -88,13 +94,42 @@
             const resultDiv = document.getElementById('result');
             resultDiv.innerHTML = ''; // تفريغ النتائج في كل مرة
             finalData = []; // إعادة تعيين البيانات النهائية
+            fileContainers = []; // إعادة تعيين الحاويات
 
             Array.from(files).forEach((file, fileIndex) => {
-                processFile(file, fileIndex + 1, resultDiv); // معالجة كل ملف وإضافة جدول له
+                const container = document.createElement('div');
+                container.className = 'table-container';
+                container.id = `fileContainer${fileIndex + 1}`;
+                resultDiv.appendChild(container);
+                fileContainers.push(container);
+                processFile(file, fileIndex + 1, container); // معالجة كل ملف وإضافة جدول له
+            });
+
+            createFileButtons();
+        }
+
+        function createFileButtons() {
+            const fileButtons = document.getElementById('fileButtons');
+            fileButtons.innerHTML = '';
+
+            fileContainers.forEach((container, index) => {
+                const button = document.createElement('button');
+                button.className = 'btn btn-info m-1';
+                button.textContent = `الملف ${index + 1}`;
+                button.onclick = () => showFileContainer(index + 1);
+                fileButtons.appendChild(button);
+            });
+
+            showFileContainer(1); // عرض أول ملف بشكل افتراضي
+        }
+
+        function showFileContainer(index) {
+            fileContainers.forEach((container, i) => {
+                container.classList.toggle('active', i + 1 === index);
             });
         }
 
-        function processFile(file, fileIndex, resultDiv) {
+        function processFile(file, fileIndex, container) {
             const reader = new FileReader();
             reader.onload = function(event) {
                 const data = new Uint8Array(event.target.result);
@@ -112,7 +147,7 @@
                     const sheetTitle = document.createElement('h4');
                     sheetTitle.textContent = `الملف ${fileIndex} - الورقة: ${sheetName}`;
                     sheetTitle.className = 'text-center text-info';
-                    resultDiv.appendChild(sheetTitle);
+                    container.appendChild(sheetTitle);
                     
                     // إنشاء صف العناوين مع "رقم تسلسل"
                     const headerRow = document.createElement('tr');
@@ -182,7 +217,7 @@
                         finalData.push([serialNumber - 1, rowData[0], rowData[1], zeroCount, zeroPercentage + '%']);
                     });
                     
-                    resultDiv.appendChild(table);
+                    container.appendChild(table);
                 });
 
                 // عرض زر التحميل بعد معالجة كل الملفات
