@@ -62,7 +62,7 @@
                                 zeroCount++;
                             }
                             // حساب عدد الأعمدة التي تحتوي على بيانات
-                            if (cellData === 0 || cellData === 1) {
+                            if (cellData !== undefined && cellData !== null && cellData !== '') {
                                 dataColumnCount++;
                             }
                             row.appendChild(cell);
@@ -73,17 +73,13 @@
                         zeroCountCell.textContent = zeroCount;
                         row.appendChild(zeroCountCell);
 
-                        // 2. حساب نسبة الأصفار إلى عدد الأعمدة التي تحتوي على بيانات
-                        const zeroPerDataColumn = dataColumnCount > 0 ? (zeroCount / dataColumnCount) : 0;
-                        const zeroPerDataColumnCell = document.createElement('td');
-                        zeroPerDataColumnCell.textContent = zeroPerDataColumn.toFixed(2);
-                        row.appendChild(zeroPerDataColumnCell);
+                        // 2. حساب نسبة الأصفار إلى عدد الأعمدة التي تحتوي على بيانات فقط
+                        const zeroPercentage = dataColumnCount > 0 ? (zeroCount / dataColumnCount) * 100 : 0;
 
-                        // 3. حساب النسبة المئوية النهائية عبر ضرب النسبة السابقة في 100
-                        const finalPercentage = zeroPerDataColumn * 100;
-                        const finalPercentageCell = document.createElement('td');
-                        finalPercentageCell.textContent = finalPercentage.toFixed(2) + '%';
-                        row.appendChild(finalPercentageCell);
+                        // 3. إضافة النسبة كعمود جديد بجانب عمود عدد الأصفار
+                        const zeroPercentageCell = document.createElement('td');
+                        zeroPercentageCell.textContent = zeroPercentage.toFixed(2) + '%';
+                        row.appendChild(zeroPercentageCell);
 
                         table.appendChild(row);
                     });
