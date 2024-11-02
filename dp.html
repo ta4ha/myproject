@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="viewport" content="width=device-width, initial-scale=1.0">
     <title>تحليل ملفات إكسل - واجهة احترافية</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
@@ -210,7 +209,11 @@
             fileNames.forEach((fileName, index) => headers.push(`النسبة المئوية للملف ${fileName}`));
             worksheet.addRow(headers);
 
-            worksheet.columns = headers.map(header => ({ header, width: header.length + 5 }));
+            // إعداد العرض التلقائي للأعمدة بناءً على طول العناوين والبيانات
+            worksheet.columns = headers.map(header => ({
+                header,
+                width: Math.max(header.length + 5, ...Object.values(finalData).map(row => String(row[header] || '').length + 5))
+            }));
 
             Object.values(finalData).forEach(row => {
                 const dataRow = [
@@ -221,7 +224,17 @@
                     row[`النسبة المئوية للملف ${fileNames[2]}`] || ""
                 ];
 
-                worksheet.addRow(dataRow);
+                const excelRow = worksheet.addRow(dataRow);
+
+                dataRow.slice(2).forEach((percentage, idx) => {
+                    if (parseFloat(percentage) > 30) {
+                        excelRow.getCell(3 + idx).fill = {
+                            type: 'pattern',
+                            pattern: 'solid',
+                            fgColor: { argb: 'FFF8D7DA' }
+                        };
+                    }
+                });
             });
 
             const buffer = await workbook.xlsx.writeBuffer();
