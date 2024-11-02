@@ -35,12 +35,8 @@
             border-radius: 50px;
             padding: 10px;
         }
-        .table-container {
-            margin-top: 20px;
-            display: none;
-        }
-        .table-container.active {
-            display: block;
+        #result {
+            overflow-x: auto;
         }
         table {
             width: 100%;
@@ -62,6 +58,13 @@
         .mismatch-row {
             background-color: #fff3cd; /* لون أصفر فاتح */
         }
+        .table-container {
+            margin-top: 20px;
+            display: none;
+        }
+        .table-container.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -76,7 +79,7 @@
         </form>
         
         <div id="fileButtons" class="my-3 text-center"></div>
-        <div id="result" class="table-container"></div>
+        <div id="result"></div>
     </div>
 
     <script>
