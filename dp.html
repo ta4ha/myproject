@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>عرض ملفات إكسل في المتصفح مع حساب نسبة الأصفار بالنسبة لعدد الأعمدة</title>
+    <title>عرض ملفات إكسل في المتصفح بدون تعديلات</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 </head>
@@ -42,36 +42,19 @@
                     const table = document.createElement('table');
                     table.className = 'table table-bordered mt-4';
                     
-                    // إضافة عنوان للورقة
+                    // إنشاء عنوان للورقة
                     const sheetTitle = document.createElement('h4');
                     sheetTitle.textContent = `الورقة: ${sheetName}`;
                     resultDiv.appendChild(sheetTitle);
-
-                    // إنشاء الصفوف والأعمدة مع حساب نسبة الأصفار لكل صف بناءً على عدد الأعمدة
+                    
+                    // إنشاء الصفوف والأعمدة كما هي
                     sheetData.forEach(rowData => {
                         const row = document.createElement('tr');
-                        let zeroCount = 0;
-                        const columnCount = rowData.length;
-
                         rowData.forEach(cellData => {
                             const cell = document.createElement('td');
                             cell.textContent = cellData !== undefined ? cellData : '';
-
-                            // حساب عدد الأصفار في الصف
-                            if (cellData === 0) {
-                                zeroCount++;
-                            }
                             row.appendChild(cell);
                         });
-
-                        // حساب النسبة بين عدد الأصفار وعدد الأعمدة
-                        const zeroRatio = columnCount > 0 ? (zeroCount / columnCount) : 0;
-
-                        // إضافة النسبة كعمود جديد في نهاية الصف
-                        const zeroRatioCell = document.createElement('td');
-                        zeroRatioCell.textContent = zeroRatio.toFixed(2);
-                        row.appendChild(zeroRatioCell);
-
                         table.appendChild(row);
                     });
                     
