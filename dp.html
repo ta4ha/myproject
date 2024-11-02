@@ -73,7 +73,7 @@
                         zeroCountCell.textContent = zeroCount;
                         row.appendChild(zeroCountCell);
 
-                        // حساب نسبة الأصفار بالنسبة لعدد الأعمدة التي تحتوي على بيانات
+                        // حساب نسبة الأصفار بالنسبة لعدد الأعمدة التي تحتوي على بيانات فقط
                         const zeroPercentage = dataColumnCount > 0 ? (zeroCount / dataColumnCount) * 100 : 0;
 
                         // إضافة النسبة كعمود جديد بجانب عمود عدد الأصفار
