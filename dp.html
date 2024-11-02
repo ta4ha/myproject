@@ -76,13 +76,11 @@
         </form>
         
         <div id="fileButtons" class="my-3 text-center"></div>
-        <div id="result" class="table-container"></div>
+        <div id="result"></div>
     </div>
 
     <script>
-        let finalData = []; // لتخزين البيانات النهائية للتحميل
-        let fileContainers = []; // لتخزين الحاويات لكل ملف
-        let mismatchRows = []; // لتخزين الصفوف غير المطابقة
+        let finalData = {}; // لتخزين البيانات النهائية لكل ملف
 
         function displayExcel() {
             const fileInput = document.getElementById('fileInput');
@@ -91,16 +89,14 @@
 
             const resultDiv = document.getElementById('result');
             resultDiv.innerHTML = ''; // تفريغ النتائج في كل مرة
-            finalData = []; // إعادة تعيين البيانات النهائية
-            fileContainers = []; // إعادة تعيين الحاويات
-            mismatchRows = []; // إعادة تعيين الصفوف غير المطابقة
+            finalData = {}; // إعادة تعيين البيانات النهائية
 
             Array.from(files).forEach((file, fileIndex) => {
                 const container = document.createElement('div');
                 container.className = 'table-container';
                 container.id = `fileContainer${fileIndex + 1}`;
                 resultDiv.appendChild(container);
-                fileContainers.push(container);
+                finalData[fileIndex + 1] = [];
                 processFile(file, fileIndex + 1, container); // معالجة كل ملف وإضافة جدول له
             });
 
@@ -111,11 +107,11 @@
             const fileButtons = document.getElementById('fileButtons');
             fileButtons.innerHTML = '';
 
-            fileContainers.forEach((container, index) => {
+            Object.keys(finalData).forEach((fileIndex) => {
                 const button = document.createElement('button');
                 button.className = 'btn btn-info m-1';
-                button.textContent = `الملف ${index + 1}`;
-                button.onclick = () => showFileContainer(index + 1);
+                button.textContent = `الملف ${fileIndex}`;
+                button.onclick = () => showFileContainer(fileIndex);
                 fileButtons.appendChild(button);
             });
 
@@ -123,8 +119,9 @@
         }
 
         function showFileContainer(index) {
-            fileContainers.forEach((container, i) => {
-                container.classList.toggle('active', i + 1 === index);
+            const containers = document.querySelectorAll('.table-container');
+            containers.forEach((container) => {
+                container.classList.toggle('active', container.id === `fileContainer${index}`);
             });
         }
 
@@ -138,17 +135,14 @@
                     const sheet = workbook.Sheets[sheetName];
                     const sheetData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-                    // إنشاء الجدول وعرض النتائج
                     const table = document.createElement('table');
                     table.className = 'table table-bordered table-striped mt-4';
                     
-                    // إضافة عنوان للورقة والملف
                     const sheetTitle = document.createElement('h4');
                     sheetTitle.textContent = `الملف ${fileIndex} - الورقة: ${sheetName}`;
                     sheetTitle.className = 'text-center text-info';
                     container.appendChild(sheetTitle);
-                    
-                    // إنشاء صف العناوين مع "رقم تسلسل"
+
                     const headerRow = document.createElement('tr');
                     ["رقم تسلسل", "العمود الأول", "العمود الثاني", "عدد الأصفار", `النسبة المئوية للملف ${fileIndex}`].forEach(header => {
                         const th = document.createElement('th');
@@ -157,70 +151,57 @@
                     });
                     table.appendChild(headerRow);
 
-                    // بدء الحساب من الصف الثامن فقط
-                    let serialNumber = 1; // بدء التسلسل من 1
+                    let serialNumber = 1;
                     sheetData.forEach((rowData, rowIndex) => {
-                        if (rowIndex < 7) return; // تجاهل أول 7 صفوف
+                        if (rowIndex < 7) return;
 
-                        let zeroCount = 0; // متغير لحساب عدد الأصفار في الصف
-                        let dataColumnCount = 0; // متغير لحساب عدد الأعمدة التي تحتوي على بيانات
+                        let zeroCount = 0;
+                        let dataColumnCount = 0;
 
                         rowData.forEach((cellData, index) => {
-                            if (index < 2) return; // تجاهل أول عمودين
+                            if (index < 2) return;
                             if (cellData === 0) zeroCount++;
                             if (cellData !== undefined && cellData !== null && cellData !== '') dataColumnCount++;
                         });
 
                         const zeroPercentage = dataColumnCount > 0 ? Math.round((zeroCount / dataColumnCount) * 100) : 0;
-
                         if (zeroPercentage === 0 && (!rowData[0] || rowData[0] === '') && (!rowData[1] || rowData[1] === '')) {
                             return;
                         }
 
-                        // إنشاء الصف وعرضه في الجدول
                         const row = document.createElement('tr');
-                        
-                        // إضافة رقم تسلسل في أول عمود
                         const serialNumberCell = document.createElement('td');
-                        serialNumberCell.textContent = serialNumber; // "رقم تسلسل" يبدأ من 1
+                        serialNumberCell.textContent = serialNumber;
                         row.appendChild(serialNumberCell);
 
-                        // إضافة بيانات الصف
                         rowData.forEach((cellData) => {
                             const cell = document.createElement('td');
                             cell.textContent = cellData !== undefined ? cellData : '';
                             row.appendChild(cell);
                         });
 
-                        // إضافة عدد الأصفار
                         const zeroCountCell = document.createElement('td');
                         zeroCountCell.textContent = zeroCount;
                         row.appendChild(zeroCountCell);
 
-                        // إضافة النسبة المئوية كعمود جديد بجانب عمود عدد الأصفار
                         const zeroPercentageCell = document.createElement('td');
                         zeroPercentageCell.textContent = zeroPercentage + '%';
                         row.appendChild(zeroPercentageCell);
 
-                        // تحقق من التباين بين "رقم التسلسل" و"العمود الأول" ولون الصف إذا كان مختلفًا
                         if (serialNumber !== parseInt(rowData[0])) {
-                            row.classList.add('mismatch-row'); // لون أصفر إذا كان هناك تباين
-                            mismatchRows.push([serialNumber, rowData[0], rowData[1], zeroCount, zeroPercentage + '%']); // إضافة الصف غير المطابق إلى القائمة
+                            row.classList.add('mismatch-row');
                         } else if (zeroPercentage > 30) {
-                            row.classList.add('highlight-row'); // لون أحمر إذا كانت النسبة أعلى من 30%
+                            row.classList.add('highlight-row');
                         }
 
-                        serialNumber++; // زيادة رقم التسلسل
+                        serialNumber++;
                         table.appendChild(row);
-
-                        // إضافة البيانات إلى ملف التحميل النهائي
-                        finalData.push([serialNumber - 1, rowData[0], rowData[1], zeroCount, zeroPercentage + '%']);
+                        finalData[fileIndex].push([serialNumber - 1, rowData[0], rowData[1], zeroCount, zeroPercentage + '%']);
                     });
                     
                     container.appendChild(table);
                 });
 
-                // عرض زر التحميل بعد معالجة كل الملفات
                 document.getElementById('downloadButton').style.display = 'block';
             };
             reader.readAsArrayBuffer(file);
@@ -230,39 +211,42 @@
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('النتائج النهائية');
             
-            // إضافة العناوين إلى Excel
             worksheet.addRow(["رقم تسلسل", "العمود الأول", "العمود الثاني", "عدد الأصفار", "النسبة المئوية"]);
 
-            finalData.forEach(row => {
-                const excelRow = worksheet.addRow(row);
-                const zeroPercentage = parseFloat(row[4]); // تحويل النسبة إلى رقم للتحقق
+            const allRows = [];
+            Object.values(finalData).forEach((fileData) => {
+                fileData.forEach(row => {
+                    const rowInAll = allRows.find(r => r[1] === row[1]);
+                    if (rowInAll) {
+                        rowInAll.push(row[4]);
+                    } else {
+                        allRows.push([...row, row[4]]);
+                    }
+                });
+            });
 
-                if (zeroPercentage > 30) { // تظليل الصف إذا كانت النسبة أعلى من 30%
+            allRows.forEach(row => {
+                const excelRow = worksheet.addRow(row);
+                const zeroPercentage = parseFloat(row[4]);
+
+                if (zeroPercentage > 30) {
                     excelRow.eachCell((cell) => {
                         cell.fill = {
                             type: 'pattern',
                             pattern: 'solid',
-                            fgColor: { argb: 'FFF8D7DA' } // لون أحمر فاتح
+                            fgColor: { argb: 'FFF8D7DA' }
                         };
                     });
-                } else if (row[0] !== parseInt(row[1])) { // تظليل الصف إذا كان هناك اختلاف بين رقم التسلسل والعمود الأول
+                } else if (row[0] !== parseInt(row[1])) {
                     excelRow.eachCell((cell) => {
                         cell.fill = {
                             type: 'pattern',
                             pattern: 'solid',
-                            fgColor: { argb: 'FFFFF3CD' } // لون أصفر فاتح
+                            fgColor: { argb: 'FFFFF3CD' }
                         };
                     });
                 }
             });
-
-            // إضافة الصفوف غير المطابقة في نهاية الملف
-            if (mismatchRows.length > 0) {
-                worksheet.addRow([]); // صف فارغ قبل الإضافة
-                mismatchRows.forEach(row => {
-                    worksheet.addRow(row);
-                });
-            }
 
             const buffer = await workbook.xlsx.writeBuffer();
             const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
