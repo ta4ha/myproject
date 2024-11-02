@@ -219,9 +219,7 @@
                 const dataRow = [
                     row["اسم الطالب"],
                     row["عدد الغيابات"],
-                    row[`النسبة المئوية للملف ${fileNames[0]}`] || "",
-                    row[`النسبة المئوية للملف ${fileNames[1]}`] || "",
-                    row[`النسبة المئوية للملف ${fileNames[2]}`] || ""
+                    ...fileNames.map((fileName) => row[`النسبة المئوية للملف ${fileName}`] || "")
                 ];
 
                 const excelRow = worksheet.addRow(dataRow);
