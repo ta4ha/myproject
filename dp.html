@@ -50,7 +50,7 @@
                     sheetTitle.textContent = `الورقة: ${sheetName}`;
                     resultDiv.appendChild(sheetTitle);
 
-                    // إنشاء الصفوف والأعمدة مع حساب نسبة الأصفار لكل صف
+                    // إنشاء الصفوف والأعمدة مع حساب عدد الأصفار ونسبة الأصفار لكل صف
                     sheetData.forEach(rowData => {
                         const row = document.createElement('tr');
                         let zeroCount = 0;
@@ -66,10 +66,15 @@
                             row.appendChild(cell);
                         });
 
+                        // إضافة عمود جديد يحتوي على عدد الأصفار في نهاية الصف
+                        const zeroCountCell = document.createElement('td');
+                        zeroCountCell.textContent = zeroCount;
+                        row.appendChild(zeroCountCell);
+
                         // حساب النسبة المئوية للأصفار لكل صف
                         const zeroPercentage = nonEmptyRowCount > 0 ? (zeroCount / nonEmptyRowCount) * 100 : 0;
 
-                        // إضافة النسبة المئوية كعمود جديد في نهاية الصف
+                        // إضافة النسبة المئوية كعمود جديد بجانب عمود عدد الأصفار
                         const zeroPercentageCell = document.createElement('td');
                         zeroPercentageCell.textContent = zeroPercentage.toFixed(2) + '%';
                         row.appendChild(zeroPercentageCell);
