@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>عرض ملفات إكسل في المتصفح ومعالجة الأصفار</title>
+    <title>عرض ملفات إكسل في المتصفح مع حساب الأصفار لكل صف</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="container mt-5">
-        <h2 class="text-center">رفع ملف الإكسل وعرض النسبة المئوية للأصفار</h2>
+        <h2 class="text-center">رفع ملف الإكسل وعرض الأصفار لكل صف</h2>
         <form id="uploadForm">
             <div class="form-group">
                 <input type="file" id="fileInput" class="form-control" accept=".xlsx" required>
@@ -38,32 +38,6 @@
                     const sheet = workbook.Sheets[sheetName];
                     const sheetData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-                    let totalZeros = 0;
-                    let nonEmptyRowCount = 0;
-
-                    // حساب عدد الأصفار
-                    sheetData.forEach(rowData => {
-                        let rowZeroCount = 0;
-                        let hasData = false;
-
-                        rowData.forEach(cellData => {
-                            if (cellData === 0) {
-                                rowZeroCount++;
-                            }
-                            if (cellData !== undefined && cellData !== null && cellData !== '') {
-                                hasData = true;
-                            }
-                        });
-
-                        if (hasData) {
-                            totalZeros += rowZeroCount;
-                            nonEmptyRowCount++;
-                        }
-                    });
-
-                    // حساب النسبة المئوية للأصفار
-                    const zeroPercentage = nonEmptyRowCount > 0 ? (totalZeros / nonEmptyRowCount) * 100 : 0;
-
                     // إنشاء جدول للعرض
                     const table = document.createElement('table');
                     table.className = 'table table-bordered mt-4';
@@ -73,23 +47,47 @@
                     sheetTitle.textContent = `الورقة: ${sheetName}`;
                     resultDiv.appendChild(sheetTitle);
 
-                    // عرض البيانات الأصلية في جدول
-                    sheetData.forEach(rowData => {
+                    // إضافة عنوان العمود الجديد
+                    const headerRow = document.createElement('tr');
+                    sheetData[0].forEach(header => {
+                        const th = document.createElement('th');
+                        th.textContent = header !== undefined ? header : '';
+                        headerRow.appendChild(th);
+                    });
+
+                    // إضافة عنوان العمود الخاص بعدد الأصفار
+                    const zeroCountHeader = document.createElement('th');
+                    zeroCountHeader.textContent = 'عدد الأصفار في الصف';
+                    headerRow.appendChild(zeroCountHeader);
+                    table.appendChild(headerRow);
+
+                    // معالجة كل صف وإضافة عدد الأصفار
+                    sheetData.forEach((rowData, rowIndex) => {
+                        if (rowIndex === 0) return; // تخطي الصف الأول (العناوين)
+
                         const row = document.createElement('tr');
+                        let rowZeroCount = 0;
+
                         rowData.forEach(cellData => {
                             const cell = document.createElement('td');
                             cell.textContent = cellData !== undefined ? cellData : '';
+
+                            // حساب عدد الأصفار
+                            if (cellData === 0) {
+                                rowZeroCount++;
+                            }
                             row.appendChild(cell);
                         });
+
+                        // إضافة عدد الأصفار كعمود جديد
+                        const zeroCountCell = document.createElement('td');
+                        zeroCountCell.textContent = rowZeroCount;
+                        row.appendChild(zeroCountCell);
+
                         table.appendChild(row);
                     });
                     
-                    // إضافة النتيجة
-                    const resultText = document.createElement('p');
-                    resultText.className = 'mt-3';
-                    resultText.textContent = `النسبة المئوية للأصفار: ${zeroPercentage.toFixed(2)}%`;
                     resultDiv.appendChild(table);
-                    resultDiv.appendChild(resultText);
                 });
             };
             reader.readAsArrayBuffer(file);
