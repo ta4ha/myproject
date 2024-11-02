@@ -38,9 +38,6 @@
                     const sheet = workbook.Sheets[sheetName];
                     const sheetData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-                    // حساب عدد الصفوف غير الفارغة
-                    const nonEmptyRowCount = sheetData.filter(row => row.some(cell => cell !== undefined && cell !== null && cell !== '')).length;
-
                     // عرض النتائج في جدول
                     const table = document.createElement('table');
                     table.className = 'table table-bordered mt-4';
@@ -54,6 +51,7 @@
                     sheetData.forEach(rowData => {
                         const row = document.createElement('tr');
                         let zeroCount = 0; // متغير لحساب عدد الأصفار في الصف
+                        let dataColumnCount = 0; // متغير لحساب عدد الأعمدة التي تحتوي على بيانات
 
                         rowData.forEach(cellData => {
                             const cell = document.createElement('td');
@@ -63,6 +61,10 @@
                             if (cellData === 0) {
                                 zeroCount++;
                             }
+                            // حساب عدد الأعمدة التي تحتوي على بيانات
+                            if (cellData === 0 || cellData === 1) {
+                                dataColumnCount++;
+                            }
                             row.appendChild(cell);
                         });
 
@@ -71,16 +73,16 @@
                         zeroCountCell.textContent = zeroCount;
                         row.appendChild(zeroCountCell);
 
-                        // 2. حساب نسبة الأصفار إلى عدد الصفوف الكلية
-                        const zeroPerRow = nonEmptyRowCount > 0 ? zeroCount / nonEmptyRowCount : 0;
-                        const zeroPerRowCell = document.createElement('td');
-                        zeroPerRowCell.textContent = zeroPerRow.toFixed(2);
-                        row.appendChild(zeroPerRowCell);
+                        // 2. حساب نسبة الأصفار إلى عدد الأعمدة التي تحتوي على بيانات
+                        const zeroPerDataColumn = dataColumnCount > 0 ? (zeroCount / dataColumnCount) : 0;
+                        const zeroPerDataColumnCell = document.createElement('td');
+                        zeroPerDataColumnCell.textContent = zeroPerDataColumn.toFixed(2);
+                        row.appendChild(zeroPerDataColumnCell);
 
-                        // 3. حساب النسبة المئوية النهائية عبر تقسيم النسبة على 100
-                        const finalPercentage = zeroPerRow / 100;
+                        // 3. حساب النسبة المئوية النهائية عبر ضرب النسبة السابقة في 100
+                        const finalPercentage = zeroPerDataColumn * 100;
                         const finalPercentageCell = document.createElement('td');
-                        finalPercentageCell.textContent = finalPercentage.toFixed(4);
+                        finalPercentageCell.textContent = finalPercentage.toFixed(2) + '%';
                         row.appendChild(finalPercentageCell);
 
                         table.appendChild(row);
