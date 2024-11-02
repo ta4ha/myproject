@@ -116,6 +116,7 @@
                     table.appendChild(headerRow);
 
                     // بدء الحساب من الصف الثامن فقط
+                    let serialNumber = 1; // بدء التسلسل من 1
                     sheetData.forEach((rowData, rowIndex) => {
                         if (rowIndex < 7) return; // تجاهل أول 7 صفوف
 
@@ -139,7 +140,7 @@
                         
                         // إضافة رقم تسلسل في أول عمود
                         const serialNumberCell = document.createElement('td');
-                        serialNumberCell.textContent = rowIndex - 6; // "رقم تسلسل" يبدأ من 1 بعد الصف السابع
+                        serialNumberCell.textContent = serialNumber++; // "رقم تسلسل" يبدأ من 1
                         row.appendChild(serialNumberCell);
 
                         // إضافة بيانات الصف
@@ -166,7 +167,7 @@
                         table.appendChild(row);
 
                         // إضافة البيانات إلى ملف التحميل النهائي
-                        finalData.push([rowIndex - 6, rowData[0], rowData[1], zeroCount, zeroPercentage + '%']);
+                        finalData.push([serialNumber - 1, rowData[0], rowData[1], zeroCount, zeroPercentage + '%']);
                     });
                     
                     resultDiv.appendChild(table);
