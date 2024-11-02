@@ -62,15 +62,10 @@
                     sheetData.forEach((rowData, rowIndex) => {
                         if (rowIndex < 7) return; // تجاهل أول 7 صفوف
 
-                        const row = document.createElement('tr');
                         let zeroCount = 0; // متغير لحساب عدد الأصفار في الصف
                         let dataColumnCount = 0; // متغير لحساب عدد الأعمدة التي تحتوي على بيانات
 
                         rowData.forEach((cellData, index) => {
-                            const cell = document.createElement('td');
-                            cell.textContent = cellData !== undefined ? cellData : '';
-                            row.appendChild(cell);
-
                             // تجاهل أول عمودين في الحساب
                             if (index < 2) return;
 
@@ -84,29 +79,42 @@
                             }
                         });
 
+                        // حساب النسبة المئوية للأصفار بناءً على عدد الأعمدة التي تحتوي على بيانات فقط
+                        const zeroPercentage = dataColumnCount > 0 ? (zeroCount / dataColumnCount) * 100 : 0;
+
+                        // تجاهل الصف إذا كانت النسبة المئوية للأصفار 0%
+                        if (zeroPercentage === 0) return;
+
+                        // إنشاء الصف وعرضه فقط إذا كانت النسبة المئوية أكبر من 0%
+                        const row = document.createElement('tr');
+
+                        // إضافة بيانات الصف للعرض
+                        rowData.forEach((cellData) => {
+                            const cell = document.createElement('td');
+                            cell.textContent = cellData !== undefined ? cellData : '';
+                            row.appendChild(cell);
+                        });
+
                         // 1. إضافة عدد الأصفار كعمود منفصل
                         const zeroCountCell = document.createElement('td');
                         zeroCountCell.textContent = zeroCount;
                         row.appendChild(zeroCountCell);
 
-                        // 2. حساب النسبة المئوية للأصفار بناءً على عدد الأعمدة التي تحتوي على بيانات فقط
-                        const zeroPercentage = dataColumnCount > 0 ? (zeroCount / dataColumnCount) * 100 : 0;
-
-                        // 3. إضافة النسبة المئوية كعمود جديد بجانب عمود عدد الأصفار
+                        // 2. إضافة النسبة المئوية كعمود جديد بجانب عمود عدد الأصفار
                         const zeroPercentageCell = document.createElement('td');
                         zeroPercentageCell.textContent = zeroPercentage.toFixed(2) + '%';
                         row.appendChild(zeroPercentageCell);
 
-                        // 4. تظليل الصف إذا كانت النسبة المئوية للأصفار أعلى من 30%
+                        // 3. تظليل الصف إذا كانت النسبة المئوية للأصفار أعلى من 30%
                         if (zeroPercentage > 30) {
                             row.classList.add('highlight-row');
-                            // إضافة البيانات المظللة فقط إلى ملف التحميل النهائي
-                            finalData.push([rowData[0], rowData[1], zeroPercentage.toFixed(2) + '%', true]);
-                        } else {
-                            finalData.push([rowData[0], rowData[1], zeroPercentage.toFixed(2) + '%', false]);
                         }
 
+                        // إضافة الصف إلى الجدول
                         table.appendChild(row);
+
+                        // إضافة البيانات إلى ملف التحميل النهائي
+                        finalData.push([rowData[0], rowData[1], zeroPercentage.toFixed(2) + '%']);
                     });
                     
                     resultDiv.appendChild(table);
@@ -128,7 +136,8 @@
             // إضافة البيانات مع التنسيق
             finalData.forEach(row => {
                 const excelRow = worksheet.addRow([row[0], row[1], row[2]]);
-                if (row[3]) { // إذا كانت النسبة أعلى من 30%، يتم تظليل الصف
+                const zeroPercentage = parseFloat(row[2]); // تحويل النسبة إلى رقم للتحقق
+                if (zeroPercentage > 30) { // إذا كانت النسبة أعلى من 30%، يتم تظليل الصف
                     excelRow.eachCell((cell) => {
                         cell.fill = {
                             type: 'pattern',
