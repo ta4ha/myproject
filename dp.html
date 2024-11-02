@@ -53,19 +53,22 @@
                         let zeroCount = 0; // متغير لحساب عدد الأصفار في الصف
                         let dataColumnCount = 0; // متغير لحساب عدد الأعمدة التي تحتوي على بيانات
 
-                        rowData.forEach(cellData => {
+                        rowData.forEach((cellData, index) => {
                             const cell = document.createElement('td');
                             cell.textContent = cellData !== undefined ? cellData : '';
+                            row.appendChild(cell);
 
-                            // حساب عدد الأصفار
+                            // تجاهل أول عمودين في الحساب
+                            if (index < 2) return;
+
+                            // حساب عدد الأصفار من العمود الثالث فصاعداً
                             if (cellData === 0) {
                                 zeroCount++;
                             }
-                            // حساب عدد الأعمدة التي تحتوي على بيانات
+                            // حساب عدد الأعمدة التي تحتوي على بيانات (غير فارغة) بدءاً من العمود الثالث
                             if (cellData !== undefined && cellData !== null && cellData !== '') {
                                 dataColumnCount++;
                             }
-                            row.appendChild(cell);
                         });
 
                         // 1. إضافة عدد الأصفار كعمود منفصل
@@ -73,10 +76,10 @@
                         zeroCountCell.textContent = zeroCount;
                         row.appendChild(zeroCountCell);
 
-                        // 2. حساب نسبة الأصفار إلى عدد الأعمدة التي تحتوي على بيانات فقط
+                        // 2. حساب النسبة المئوية للأصفار بناءً على عدد الأعمدة التي تحتوي على بيانات فقط
                         const zeroPercentage = dataColumnCount > 0 ? (zeroCount / dataColumnCount) * 100 : 0;
 
-                        // 3. إضافة النسبة كعمود جديد بجانب عمود عدد الأصفار
+                        // 3. إضافة النسبة المئوية كعمود جديد بجانب عمود عدد الأصفار
                         const zeroPercentageCell = document.createElement('td');
                         zeroPercentageCell.textContent = zeroPercentage.toFixed(2) + '%';
                         row.appendChild(zeroPercentageCell);
