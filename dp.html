@@ -74,12 +74,12 @@
                         row.appendChild(zeroCountCell);
 
                         // حساب نسبة الأصفار بالنسبة لعدد الأعمدة التي تحتوي على بيانات
-                        const zeroRatio = dataColumnCount > 0 ? (zeroCount / dataColumnCount) * 100 : 0;
+                        const zeroPercentage = dataColumnCount > 0 ? (zeroCount / dataColumnCount) * 100 : 0;
 
                         // إضافة النسبة كعمود جديد بجانب عمود عدد الأصفار
-                        const zeroRatioCell = document.createElement('td');
-                        zeroRatioCell.textContent = zeroRatio.toFixed(2) + '%';
-                        row.appendChild(zeroRatioCell);
+                        const zeroPercentageCell = document.createElement('td');
+                        zeroPercentageCell.textContent = zeroPercentage.toFixed(2) + '%';
+                        row.appendChild(zeroPercentageCell);
 
                         table.appendChild(row);
                     });
