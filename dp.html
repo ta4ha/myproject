@@ -3,28 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>عرض ملفات إكسل في المتصفح مع حساب عدد الأصفار ونسبتها لكل صف</title>
+    <title>تحليل ملفات إكسل - واجهة احترافية</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
+        body {
+            background-color: #f7f9fc;
+            font-family: 'Arial', sans-serif;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-top: 50px;
+        }
+        h2 {
+            color: #007bff;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .btn-primary, .btn-success {
+            border-radius: 50px;
+            font-weight: bold;
+            padding: 10px 20px;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+        }
+        .form-group input[type="file"] {
+            border-radius: 50px;
+            padding: 10px;
+        }
+        #result {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+        }
         .highlight-row {
-            background-color: #f8d7da; /* لون أحمر فاتح */
+            background-color: #ffe0e6; /* لون أحمر فاتح */
+        }
+        .table-container {
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h2 class="text-center">رفع ملف الإكسل وعرضه في جدول</h2>
-        <form id="uploadForm" class="d-flex justify-content-between">
+    <div class="container">
+        <h2 class="text-center">تحليل ملفات إكسل</h2>
+        <form id="uploadForm" class="d-flex justify-content-between align-items-center">
             <div class="form-group w-75">
                 <input type="file" id="fileInput" class="form-control" accept=".xlsx" required>
             </div>
             <button type="button" onclick="displayExcel()" class="btn btn-primary">رفع الملف وعرضه</button>
-            <button id="downloadButton" onclick="downloadExcel()" class="btn btn-success" style="display: none;">تحميل ملف Excel بعد التحليل</button>
+            <button id="downloadButton" onclick="downloadExcel()" class="btn btn-success" style="display: none;">تحميل ملف التحليل</button>
         </form>
-        <div id="result" class="mt-4"></div>
+        
+        <div id="result" class="table-container"></div>
     </div>
 
     <script>
@@ -49,13 +96,14 @@
                     const sheet = workbook.Sheets[sheetName];
                     const sheetData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-                    // عرض النتائج في جدول
+                    // إنشاء الجدول وعرض النتائج
                     const table = document.createElement('table');
-                    table.className = 'table table-bordered mt-4';
+                    table.className = 'table table-bordered table-striped mt-4';
                     
                     // إضافة عنوان للورقة
                     const sheetTitle = document.createElement('h4');
                     sheetTitle.textContent = `الورقة: ${sheetName}`;
+                    sheetTitle.className = 'text-center text-info';
                     resultDiv.appendChild(sheetTitle);
                     
                     // بدء الحساب من الصف الثامن فقط
