@@ -157,7 +157,8 @@
 
                     let serialNumber = 1;
                     sheetData.forEach((rowData, rowIndex) => {
-                        if (rowIndex < 7) return;
+                        // تجاهل الصفوف التي يكون فيها العمود الثاني فارغًا
+                        if (rowIndex < 7 || !rowData[1]) return;
 
                         let zeroCount = 0;
                         let dataColumnCount = 0;
