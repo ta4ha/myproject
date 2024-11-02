@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>عرض ملفات إكسل في المتصفح مع حساب نسبة الأصفار لكل صف</title>
+    <title>عرض ملفات إكسل في المتصفح مع حساب عدد الأصفار ونسبتها لكل صف</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 </head>
@@ -42,12 +42,12 @@
                     const table = document.createElement('table');
                     table.className = 'table table-bordered mt-4';
                     
-                    // إنشاء عنوان للورقة
+                    // إضافة عنوان للورقة
                     const sheetTitle = document.createElement('h4');
                     sheetTitle.textContent = `الورقة: ${sheetName}`;
                     resultDiv.appendChild(sheetTitle);
                     
-                    // إنشاء الصفوف والأعمدة مع حساب نسبة الأصفار لكل صف
+                    // إنشاء الصفوف والأعمدة مع حساب عدد الأصفار ونسبة الأصفار لكل صف
                     sheetData.forEach(rowData => {
                         const row = document.createElement('tr');
                         let zeroCount = 0; // متغير لحساب عدد الأصفار في الصف
@@ -68,10 +68,15 @@
                             row.appendChild(cell);
                         });
 
+                        // إضافة عمود جديد يحتوي على عدد الأصفار في نهاية الصف
+                        const zeroCountCell = document.createElement('td');
+                        zeroCountCell.textContent = zeroCount;
+                        row.appendChild(zeroCountCell);
+
                         // حساب نسبة الأصفار بالنسبة لعدد الأعمدة التي تحتوي على بيانات
                         const zeroRatio = dataColumnCount > 0 ? (zeroCount / dataColumnCount) * 100 : 0;
 
-                        // إضافة النسبة كعمود جديد في نهاية الصف
+                        // إضافة النسبة كعمود جديد بجانب عمود عدد الأصفار
                         const zeroRatioCell = document.createElement('td');
                         zeroRatioCell.textContent = zeroRatio.toFixed(2) + '%';
                         row.appendChild(zeroRatioCell);
