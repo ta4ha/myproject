@@ -128,7 +128,7 @@
                         });
 
                         // حساب النسبة المئوية للأصفار بناءً على عدد الأعمدة التي تحتوي على بيانات فقط
-                        const zeroPercentage = dataColumnCount > 0 ? (zeroCount / dataColumnCount) * 100 : 0;
+                        const zeroPercentage = dataColumnCount > 0 ? Math.round((zeroCount / dataColumnCount) * 100) : 0;
 
                         // حذف الصف إذا كانت النسبة المئوية للأصفار 0% والعمودين الأول والثاني فارغين
                         if (zeroPercentage === 0 && (!rowData[0] || rowData[0] === '') && (!rowData[1] || rowData[1] === '')) {
@@ -150,9 +150,9 @@
                         zeroCountCell.textContent = zeroCount;
                         row.appendChild(zeroCountCell);
 
-                        // 2. إضافة النسبة المئوية كعمود جديد بجانب عمود عدد الأصفار
+                        // 2. إضافة النسبة المئوية كعمود جديد بجانب عمود عدد الأصفار (بدون أرقام بعد الفاصلة)
                         const zeroPercentageCell = document.createElement('td');
-                        zeroPercentageCell.textContent = zeroPercentage.toFixed(2) + '%';
+                        zeroPercentageCell.textContent = zeroPercentage + '%';
                         row.appendChild(zeroPercentageCell);
 
                         // 3. تظليل الصف إذا كانت النسبة المئوية للأصفار أعلى من 30%
@@ -164,7 +164,7 @@
                         table.appendChild(row);
 
                         // إضافة البيانات إلى ملف التحميل النهائي
-                        finalData.push([rowData[0], rowData[1], zeroPercentage.toFixed(2) + '%']);
+                        finalData.push([rowData[0], rowData[1], zeroPercentage + '%']);
                     });
                     
                     resultDiv.appendChild(table);
