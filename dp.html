@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>معالجة ملفات إكسل في المتصفح وعرضها في جدول</title>
+    <title>عرض ملفات إكسل في المتصفح بدون تعديلات</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="container mt-5">
-        <h2 class="text-center">رفع ملف الإكسل وإجراء المعادلات</h2>
+        <h2 class="text-center">رفع ملف الإكسل وعرضه في جدول</h2>
         <form id="uploadForm">
             <div class="form-group">
                 <input type="file" id="fileInput" class="form-control" accept=".xlsx" required>
             </div>
-            <button type="button" onclick="processExcel()" class="btn btn-primary btn-block">رفع الملف ومعالجته</button>
+            <button type="button" onclick="displayExcel()" class="btn btn-primary btn-block">رفع الملف وعرضه</button>
         </form>
         <div id="result" class="mt-4"></div>
     </div>
 
     <script>
-        function processExcel() {
+        function displayExcel() {
             const fileInput = document.getElementById('fileInput');
             const file = fileInput.files[0];
             if (!file) return;
@@ -37,15 +37,6 @@
                 workbook.SheetNames.forEach(sheetName => {
                     const sheet = workbook.Sheets[sheetName];
                     const sheetData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-                    
-                    // معالجة البيانات وتطبيق المعادلة
-                    const processedData = sheetData.map(row => row.map(cell => {
-                        // مثال: معادلة بسيطة تضرب القيمة بـ 2
-                        if (typeof cell === 'number') {
-                            return cell * 2; // يمكنك استبدال هذا بالمعادلات المطلوبة
-                        }
-                        return cell;
-                    }));
 
                     // عرض النتائج في جدول
                     const table = document.createElement('table');
@@ -56,8 +47,8 @@
                     sheetTitle.textContent = `الورقة: ${sheetName}`;
                     resultDiv.appendChild(sheetTitle);
                     
-                    // إنشاء الصفوف والأعمدة
-                    processedData.forEach(rowData => {
+                    // إنشاء الصفوف والأعمدة كما هي
+                    sheetData.forEach(rowData => {
                         const row = document.createElement('tr');
                         rowData.forEach(cellData => {
                             const cell = document.createElement('td');
