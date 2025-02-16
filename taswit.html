@@ -150,14 +150,14 @@
         }
 
         function showUnmatched() {
-            document.getElementById('resultTable').style.display = 'none';
+            document.getElementById('resultTableContainer').style.display = 'none';
             displayResults(unmatchedData, firstFileColumns, 'unmatchedTable');
-            document.getElementById('unmatchedTable').style.display = 'block';
+            document.getElementById('unmatchedTableContainer').style.display = 'block';
         }
 
         function showMatched() {
-            document.getElementById('unmatchedTable').style.display = 'none';
-            document.getElementById('resultTable').style.display = 'block';
+            document.getElementById('unmatchedTableContainer').style.display = 'none';
+            document.getElementById('resultTableContainer').style.display = 'block';
         }
     </script>
 </head>
@@ -180,10 +180,14 @@
     <button onclick="showUnmatched()">عرض البيانات غير المطابقة</button>
     <button onclick="showMatched()">عرض البيانات المطابقة</button>
 
-    <h3>النتائج:</h3>
-    <table border="1" id="resultTable"></table>
+    <div id="resultTableContainer">
+        <h3>النتائج المطابقة:</h3>
+        <table border="1" id="resultTable"></table>
+    </div>
 
-    <h3>البيانات غير المطابقة:</h3>
-    <table border="1" id="unmatchedTable" style="display:none;"></table>
+    <div id="unmatchedTableContainer" style="display:none;">
+        <h3>البيانات غير المطابقة:</h3>
+        <table border="1" id="unmatchedTable"></table>
+    </div>
 </body>
 </html>
