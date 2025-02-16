@@ -9,7 +9,7 @@
         let firstFileData = [];
         let secondFileData = [];
         let firstFileColumns = [];
-        let unmatchedData = [];
+        let secondFileColumns = [];
 
         document.addEventListener("DOMContentLoaded", function () {
             document.getElementById('firstFileInput').addEventListener('change', handleFirstFile);
@@ -27,9 +27,6 @@
                 if (firstFileData.length > 0) {
                     firstFileColumns = Object.keys(firstFileData[0]);
                 }
-                
-                // Display the first file data as it is
-                displayResults(firstFileData, firstFileColumns, 'resultTable');
             };
             reader.readAsBinaryString(file);
         }
@@ -43,8 +40,9 @@
                 secondFileData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { raw: true });
                 
                 if (secondFileData.length > 0) {
-                    populateColumnSelect(Object.keys(secondFileData[0]));
-                    populateFieldSelection(Object.keys(secondFileData[0]));
+                    secondFileColumns = Object.keys(secondFileData[0]);
+                    populateColumnSelect(secondFileColumns);
+                    populateFieldSelection(secondFileColumns);
                 }
             };
             reader.readAsBinaryString(file);
@@ -81,21 +79,50 @@
             });
         }
 
-        function findUnmatched() {
+        function mergeFiles() {
             if (firstFileData.length === 0 || secondFileData.length === 0) {
-                alert("يجب تحميل كلا الملفين للبحث عن البيانات غير المطابقة");
+                alert("يجب تحميل كلا الملفين للدمج");
                 return;
             }
             const mergeColumn = document.getElementById('columnSelect').value;
-            unmatchedData = firstFileData.filter(firstRow => 
-                !secondFileData.some(secondRow => secondRow[mergeColumn] === firstRow[mergeColumn])
-            );
+            const selectedFields = Array.from(document.querySelectorAll('#fieldSelection input:checked')).map(input => input.value);
+            let mergedData = [];
 
-            displayResults(unmatchedData, firstFileColumns, 'unmatchedTable');
+            firstFileData.forEach(firstRow => {
+                const matchKey = firstRow[mergeColumn];
+                const matchingRows = secondFileData.filter(secondRow => secondRow[mergeColumn] === matchKey);
+
+                if (matchingRows.length > 0) {
+                    matchingRows.forEach(secondRow => {
+                        let combinedRow = {};
+
+                        // Copy fields from the first file
+                        firstFileColumns.forEach(col => {
+                            combinedRow[col] = firstRow[col];
+                        });
+
+                        // Add the selected fields from the second file
+                        selectedFields.forEach(col => {
+                            combinedRow[col] = secondRow[col];
+                        });
+
+                        mergedData.push(combinedRow);
+                    });
+                } else {
+                    // Add unmatched rows from the first file (without second file data)
+                    let combinedRow = {};
+                    firstFileColumns.forEach(col => {
+                        combinedRow[col] = firstRow[col];
+                    });
+                    mergedData.push(combinedRow);
+                }
+            });
+
+            displayResults(mergedData, [...firstFileColumns, ...selectedFields]);
         }
 
-        function displayResults(data, columns, tableId) {
-            const table = document.getElementById(tableId);
+        function displayResults(data, columns) {
+            const table = document.getElementById('resultTable');
             table.innerHTML = '';
             
             // Add sequence column
@@ -133,23 +160,15 @@
     <label for="secondFileInput">تحميل الملف الثاني:</label>
     <input type="file" id="secondFileInput" accept=".xlsx, .xls"><br><br>
 
-    <label for="columnSelect">اختر العمود الأساسي للبحث عن البيانات غير المطابقة:</label>
+    <label for="columnSelect">اختر العمود الأساسي للدمج:</label>
     <select id="columnSelect"></select><br><br>
 
     <div id="fieldSelection">
-        <h3>حدد الحقول التي تريد استخدامها من الملف الثاني:</h3>
+        <h3>حدد الحقول التي تريد عرضها من الملف الثاني:</h3>
     </div>
 
-    <button onclick="findUnmatched()">عرض البيانات غير المطابقة</button>
-
-    <div id="resultTableContainer">
-        <h3>البيانات من الملف الثابت:</h3>
-        <table border="1" id="resultTable"></table>
-    </div>
-
-    <div id="unmatchedTableContainer">
-        <h3>البيانات غير المطابقة:</h3>
-        <table border="1" id="unmatchedTable"></table>
-    </div>
+    <button onclick="mergeFiles()">دمج الملفات</button>
+    <h3>النتائج:</h3>
+    <table border="1" id="resultTable"></table>
 </body>
 </html>
