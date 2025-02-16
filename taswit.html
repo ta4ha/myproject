@@ -9,6 +9,7 @@
         let firstFileData = [];
         let secondFileData = [];
         let firstFileColumns = [];
+        let secondFileColumns = [];
         let unmatchedData = [];
 
         document.addEventListener("DOMContentLoaded", function () {
@@ -23,9 +24,10 @@
                 const workbook = XLSX.read(e.target.result, { type: 'binary' });
                 const sheetName = workbook.SheetNames[0];
                 firstFileData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { raw: true });
-                
+
                 if (firstFileData.length > 0) {
                     firstFileColumns = Object.keys(firstFileData[0]);
+                    displayFirstFileResults(firstFileData, firstFileColumns);
                 }
             };
             reader.readAsBinaryString(file);
@@ -38,12 +40,43 @@
                 const workbook = XLSX.read(e.target.result, { type: 'binary' });
                 const sheetName = workbook.SheetNames[0];
                 secondFileData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { raw: true });
-                
+
                 if (secondFileData.length > 0) {
-                    populateColumnSelect(Object.keys(secondFileData[0]));
+                    secondFileColumns = Object.keys(secondFileData[0]);
+                    populateColumnSelect(secondFileColumns);
                 }
             };
             reader.readAsBinaryString(file);
+        }
+
+        function displayFirstFileResults(data, columns) {
+            const table = document.getElementById('resultTable');
+            table.innerHTML = '';
+
+            // Add sequence column
+            let headerRow = table.insertRow();
+            let thSeq = document.createElement('th');
+            thSeq.textContent = 'تسلسل';
+            headerRow.appendChild(thSeq);
+
+            columns.forEach(col => {
+                let th = document.createElement('th');
+                th.textContent = col;
+                headerRow.appendChild(th);
+            });
+
+            data.forEach((row, index) => {
+                let tr = table.insertRow();
+                
+                // Insert sequence number
+                let tdSeq = tr.insertCell();
+                tdSeq.textContent = index + 1;
+                
+                columns.forEach(col => {
+                    let td = tr.insertCell();
+                    td.textContent = row[col] !== undefined ? row[col] : '';
+                });
+            });
         }
 
         function populateColumnSelect(columns) {
@@ -63,6 +96,7 @@
                 return;
             }
             const mergeColumn = document.getElementById('columnSelect').value;
+            const selectedFields = Array.from(document.querySelectorAll('#fieldSelection input:checked')).map(input => input.value);
             let mergedData = [];
             unmatchedData = []; // Reset unmatched data
 
@@ -79,8 +113,8 @@
                             combinedRow[col] = firstRow[col];
                         });
 
-                        // Add fields from the second file
-                        Object.keys(secondRow).forEach(col => {
+                        // Add the selected fields from the second file
+                        selectedFields.forEach(col => {
                             combinedRow[col] = secondRow[col];
                         });
 
@@ -92,12 +126,12 @@
                 }
             });
 
-            displayResults(mergedData, [...firstFileColumns, ...Object.keys(secondFileData[0] || {})]);
+            displayResults(mergedData, [...firstFileColumns, ...selectedFields]);
             displayUnmatchedResults(unmatchedData); // Display unmatched results
         }
 
         function displayResults(data, columns) {
-            const table = document.getElementById('resultTable');
+            const table = document.getElementById('mergedResultsTable');
             table.innerHTML = '';
 
             // Add sequence column
@@ -170,8 +204,8 @@
 
     <button onclick="mergeFiles()">دمج الملفات</button>
 
-    <h3>النتائج:</h3>
-    <table border="1" id="resultTable"></table>
+    <h3>النتائج المطابقة:</h3>
+    <table border="1" id="mergedResultsTable"></table>
 
     <h3>البيانات غير المطابقة:</h3>
     <table border="1" id="unmatchedTable"></table>
