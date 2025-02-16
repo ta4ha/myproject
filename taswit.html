@@ -10,6 +10,7 @@
         let secondFileData = [];
         let firstFileColumns = [];
         let secondFileColumns = [];
+        let unmatchedData = [];
 
         document.addEventListener("DOMContentLoaded", function () {
             document.getElementById('firstFileInput').addEventListener('change', handleFirstFile);
@@ -59,7 +60,6 @@
             });
         }
 
-        
         function populateFieldSelection(columns) {
             const container = document.getElementById('fieldSelection');
             container.innerHTML = '';
@@ -88,6 +88,7 @@
             const mergeColumn = document.getElementById('columnSelect').value;
             const selectedFields = Array.from(document.querySelectorAll('#fieldSelection input:checked')).map(input => input.value);
             let mergedData = [];
+            unmatchedData = [];
 
             firstFileData.forEach(firstRow => {
                 const matchKey = firstRow[mergeColumn];
@@ -110,20 +111,16 @@
                         mergedData.push(combinedRow);
                     });
                 } else {
-                    // Add unmatched rows from the first file (without second file data)
-                    let combinedRow = {};
-                    firstFileColumns.forEach(col => {
-                        combinedRow[col] = firstRow[col];
-                    });
-                    mergedData.push(combinedRow);
+                    // Add unmatched rows from the first file
+                    unmatchedData.push(firstRow);
                 }
             });
 
-            displayResults(mergedData, [...firstFileColumns, ...selectedFields]);
+            displayResults(mergedData, [...firstFileColumns, ...selectedFields], 'resultTable');
         }
 
-        function displayResults(data, columns) {
-            const table = document.getElementById('resultTable');
+        function displayResults(data, columns, tableId) {
+            const table = document.getElementById(tableId);
             table.innerHTML = '';
             
             // Add sequence column
@@ -151,6 +148,17 @@
                 });
             });
         }
+
+        function showUnmatched() {
+            document.getElementById('resultTable').style.display = 'none';
+            displayResults(unmatchedData, firstFileColumns, 'unmatchedTable');
+            document.getElementById('unmatchedTable').style.display = 'block';
+        }
+
+        function showMatched() {
+            document.getElementById('unmatchedTable').style.display = 'none';
+            document.getElementById('resultTable').style.display = 'block';
+        }
     </script>
 </head>
 <body>
@@ -169,7 +177,13 @@
     </div>
 
     <button onclick="mergeFiles()">دمج الملفات</button>
+    <button onclick="showUnmatched()">عرض البيانات غير المطابقة</button>
+    <button onclick="showMatched()">عرض البيانات المطابقة</button>
+
     <h3>النتائج:</h3>
     <table border="1" id="resultTable"></table>
+
+    <h3>البيانات غير المطابقة:</h3>
+    <table border="1" id="unmatchedTable" style="display:none;"></table>
 </body>
 </html>
