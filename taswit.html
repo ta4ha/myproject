@@ -21,7 +21,7 @@
             reader.onload = (e) => {
                 const workbook = XLSX.read(e.target.result, { type: 'binary' });
                 const sheetName = workbook.SheetNames[0];
-                firstFileData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+                firstFileData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { raw: true });
                 
                 if (firstFileData.length > 0) {
                     Object.keys(firstFileData[0]).forEach(col => columnSet.add(col));
@@ -36,7 +36,7 @@
             reader.onload = (e) => {
                 const workbook = XLSX.read(e.target.result, { type: 'binary' });
                 const sheetName = workbook.SheetNames[0];
-                secondFileData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+                secondFileData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { raw: true });
                 
                 if (secondFileData.length > 0) {
                     Object.keys(secondFileData[0]).forEach(col => columnSet.add(col));
@@ -102,25 +102,15 @@
                         // Copy selected fields from the second file
                         const selectedFields = Array.from(document.querySelectorAll('#fieldSelection input:checked')).map(input => input.value);
                         selectedFields.forEach(col => {
-                            if (secondRow[col]) {
+                            if (secondRow[col] !== undefined) {
                                 combinedRow[col] = secondRow[col];
                             }
                         });
 
                         mergedData.push(combinedRow);
                     });
-                }
-            });
-
-            // Add unmatched rows from the first file
-            firstFileData.forEach(firstRow => {
-                const matchKey = firstRow[mergeColumn];
-                if (!mergedData.some(row => row[mergeColumn] === matchKey)) {
-                    let combinedRow = {};
-                    Object.keys(firstRow).forEach(col => {
-                        combinedRow[col] = firstRow[col];
-                    });
-                    mergedData.push(combinedRow);
+                } else {
+                    mergedData.push(firstRow); // Add unmatched rows from the first file
                 }
             });
 
@@ -157,7 +147,7 @@
                 
                 columns.forEach(col => {
                     let td = tr.insertCell();
-                    td.textContent = row[col] || '';
+                    td.textContent = row[col] !== undefined ? row[col] : '';
                 });
             });
         }
