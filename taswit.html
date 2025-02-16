@@ -66,7 +66,7 @@
                 checkbox.type = 'checkbox';
                 checkbox.value = col;
                 checkbox.id = `field-${col}`;
-                checkbox.checked = true; // By default, all fields are selected
+                checkbox.checked = true; // بشكل افتراضي، جميع الحقول محددة
 
                 const label = document.createElement('label');
                 label.htmlFor = `field-${col}`;
@@ -84,26 +84,47 @@
                 return;
             }
             const mergeColumn = document.getElementById('columnSelect').value;
-            let mergedData = {};
-            let allColumns = new Set(columnSet);
+            let mergedData = [];
 
-            [firstFileData, secondFileData].forEach(sheet => {
-                sheet.forEach(row => {
-                    const key = row[mergeColumn];
-                    if (!mergedData[key]) {
-                        mergedData[key] = {};
-                    }
-                    Object.keys(row).forEach(col => {
-                        mergedData[key][col] = row[col];
-                        allColumns.add(col);
+            firstFileData.forEach(firstRow => {
+                const matchKey = firstRow[mergeColumn];
+                const matchingRows = secondFileData.filter(secondRow => secondRow[mergeColumn] === matchKey);
+
+                if (matchingRows.length > 0) {
+                    matchingRows.forEach(secondRow => {
+                        let combinedRow = {};
+
+                        // Copy fields from the first file
+                        Object.keys(firstRow).forEach(col => {
+                            combinedRow[col] = firstRow[col];
+                        });
+
+                        // Copy selected fields from the second file
+                        const selectedFields = Array.from(document.querySelectorAll('#fieldSelection input:checked')).map(input => input.value);
+                        selectedFields.forEach(col => {
+                            if (secondRow[col]) {
+                                combinedRow[col] = secondRow[col];
+                            }
+                        });
+
+                        mergedData.push(combinedRow);
                     });
-                });
+                }
             });
 
-            // Filter selected fields
-            const selectedFields = Array.from(document.querySelectorAll('#fieldSelection input:checked')).map(input => input.value);
+            // Add unmatched rows from the first file
+            firstFileData.forEach(firstRow => {
+                const matchKey = firstRow[mergeColumn];
+                if (!mergedData.some(row => row[mergeColumn] === matchKey)) {
+                    let combinedRow = {};
+                    Object.keys(firstRow).forEach(col => {
+                        combinedRow[col] = firstRow[col];
+                    });
+                    mergedData.push(combinedRow);
+                }
+            });
 
-            displayResults(Object.values(mergedData), selectedFields, mergeColumn);
+            displayResults(mergedData, Array.from(columnSet), mergeColumn);
         }
 
         function displayResults(data, columns, mergeColumn) {
@@ -154,7 +175,7 @@
     <select id="columnSelect"></select><br><br>
 
     <div id="fieldSelection">
-        <h3>حدد الحقول التي تريد عرضها:</h3>
+        <h3>حدد الحقول التي تريد عرضها من الملف الثاني:</h3>
     </div>
 
     <button onclick="mergeFiles()">دمج الملفات</button>
