@@ -78,8 +78,8 @@
                             combinedRow[col] = firstRow[col];
                         });
 
-                        // Add the selected fields from the second file
-                        secondFileColumns.forEach(col => {
+                        // Add fields from the second file
+                        Object.keys(secondRow).forEach(col => {
                             combinedRow[col] = secondRow[col];
                         });
 
@@ -87,34 +87,18 @@
                     });
                 } else {
                     // Add unmatched rows from the first file
-                    let combinedRow = {};
-                    firstFileColumns.forEach(col => {
-                        combinedRow[col] = firstRow[col];
-                    });
-                    mergedData.push(combinedRow);
+                    unmatchedData.push(firstRow);
                 }
             });
 
-            displayResults(mergedData, [...firstFileColumns, ...secondFileColumns]);
-        }
-
-        function findUnmatched() {
-            if (firstFileData.length === 0 || secondFileData.length === 0) {
-                alert("يجب تحميل كلا الملفين للبحث عن البيانات غير المطابقة");
-                return;
-            }
-            const mergeColumn = document.getElementById('columnSelect').value;
-            unmatchedData = firstFileData.filter(firstRow => 
-                !secondFileData.some(secondRow => secondRow[mergeColumn] === firstRow[mergeColumn])
-            );
-
+            displayResults(mergedData, [...firstFileColumns]);
             displayUnmatchedResults(unmatchedData);
         }
 
         function displayResults(data, columns) {
             const table = document.getElementById('resultTable');
             table.innerHTML = '';
-            
+
             // Add sequence column
             let headerRow = table.insertRow();
             let thSeq = document.createElement('th');
@@ -144,7 +128,7 @@
         function displayUnmatchedResults(data) {
             const table = document.getElementById('unmatchedTable');
             table.innerHTML = '';
-            
+
             // Add sequence column
             let headerRow = table.insertRow();
             let thSeq = document.createElement('th');
@@ -184,7 +168,6 @@
     <select id="columnSelect"></select><br><br>
 
     <button onclick="mergeFiles()">دمج الملفات</button>
-    <button onclick="findUnmatched()">عرض البيانات غير المطابقة</button>
 
     <h3>النتائج:</h3>
     <table border="1" id="resultTable"></table>
