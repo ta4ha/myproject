@@ -64,6 +64,7 @@
             }
             const mergeColumn = document.getElementById('columnSelect').value;
             let mergedData = [];
+            unmatchedData = []; // Reset unmatched data
 
             firstFileData.forEach(firstRow => {
                 const matchKey = firstRow[mergeColumn];
@@ -92,7 +93,7 @@
             });
 
             displayResults(mergedData, [...firstFileColumns, ...Object.keys(secondFileData[0] || {})]);
-            displayUnmatchedResults(unmatchedData);
+            displayUnmatchedResults(unmatchedData); // Display unmatched results
         }
 
         function displayResults(data, columns) {
