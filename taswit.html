@@ -7,24 +7,32 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
         let dataFiles = [];
-        document.getElementById('fileInput').addEventListener('change', handleFiles);
+        let columnSet = new Set();
+
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById('fileInput').addEventListener('change', handleFiles);
+        });
 
         function handleFiles(event) {
             const files = event.target.files;
             dataFiles = [];
-            let columnSet = new Set();
+            columnSet.clear();
+            let filesRead = 0;
 
-            Array.from(files).forEach((file, index) => {
+            Array.from(files).forEach((file) => {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const workbook = XLSX.read(e.target.result, { type: 'binary' });
                     const sheetName = workbook.SheetNames[0];
                     const sheet = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+                    
                     if (sheet.length > 0) {
                         dataFiles.push(sheet);
                         Object.keys(sheet[0]).forEach(col => columnSet.add(col));
                     }
-                    if (index === files.length - 1) {
+                    
+                    filesRead++;
+                    if (filesRead === files.length) {
                         populateColumnSelect([...columnSet]);
                     }
                 };
@@ -50,7 +58,7 @@
             }
             const mergeColumn = document.getElementById('columnSelect').value;
             let mergedData = {};
-            let allColumns = new Set();
+            let allColumns = new Set(columnSet);
 
             dataFiles.forEach(sheet => {
                 sheet.forEach(row => {
