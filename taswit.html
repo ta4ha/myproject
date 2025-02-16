@@ -9,7 +9,7 @@
         let firstFileData = [];
         let secondFileData = [];
         let firstFileColumns = [];
-        let unmatchedData = [];
+        let secondFileColumns = [];
 
         document.addEventListener("DOMContentLoaded", function () {
             document.getElementById('firstFileInput').addEventListener('change', handleFirstFile);
@@ -26,7 +26,6 @@
                 
                 if (firstFileData.length > 0) {
                     firstFileColumns = Object.keys(firstFileData[0]);
-                    displayFirstFileResults(firstFileData, firstFileColumns);
                 }
             };
             reader.readAsBinaryString(file);
@@ -41,40 +40,12 @@
                 secondFileData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { raw: true });
                 
                 if (secondFileData.length > 0) {
-                    populateColumnSelect(Object.keys(secondFileData[0]));
+                    secondFileColumns = Object.keys(secondFileData[0]);
+                    populateColumnSelect(secondFileColumns);
+                    populateFieldSelection(secondFileColumns);
                 }
             };
             reader.readAsBinaryString(file);
-        }
-
-        function displayFirstFileResults(data, columns) {
-            const table = document.getElementById('resultTable');
-            table.innerHTML = '';
-
-            // Add sequence column
-            let headerRow = table.insertRow();
-            let thSeq = document.createElement('th');
-            thSeq.textContent = 'تسلسل';
-            headerRow.appendChild(thSeq);
-
-            columns.forEach(col => {
-                let th = document.createElement('th');
-                th.textContent = col;
-                headerRow.appendChild(th);
-            });
-
-            data.forEach((row, index) => {
-                let tr = table.insertRow();
-                
-                // Insert sequence number
-                let tdSeq = tr.insertCell();
-                tdSeq.textContent = index + 1;
-                
-                columns.forEach(col => {
-                    let td = tr.insertCell();
-                    td.textContent = row[col] !== undefined ? row[col] : '';
-                });
-            });
         }
 
         function populateColumnSelect(columns) {
@@ -88,14 +59,34 @@
             });
         }
 
+        function populateFieldSelection(columns) {
+            const container = document.getElementById('fieldSelection');
+            container.innerHTML = '';
+            columns.forEach(col => {
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = col;
+                checkbox.id = `field-${col}`;
+                checkbox.checked = true; // By default, all fields are selected
+
+                const label = document.createElement('label');
+                label.htmlFor = `field-${col}`;
+                label.textContent = col;
+
+                container.appendChild(checkbox);
+                container.appendChild(label);
+                container.appendChild(document.createElement('br'));
+            });
+        }
+
         function mergeFiles() {
             if (firstFileData.length === 0 || secondFileData.length === 0) {
                 alert("يجب تحميل كلا الملفين للدمج");
                 return;
             }
             const mergeColumn = document.getElementById('columnSelect').value;
+            const selectedFields = Array.from(document.querySelectorAll('#fieldSelection input:checked')).map(input => input.value);
             let mergedData = [];
-            unmatchedData = []; // Reset unmatched data
 
             firstFileData.forEach(firstRow => {
                 const matchKey = firstRow[mergeColumn];
@@ -110,27 +101,30 @@
                             combinedRow[col] = firstRow[col];
                         });
 
-                        // Add fields from the second file
-                        Object.keys(secondRow).forEach(col => {
+                        // Add the selected fields from the second file
+                        selectedFields.forEach(col => {
                             combinedRow[col] = secondRow[col];
                         });
 
                         mergedData.push(combinedRow);
                     });
                 } else {
-                    // Add unmatched rows from the first file
-                    unmatchedData.push(firstRow);
+                    // Add unmatched rows from the first file (without second file data)
+                    let combinedRow = {};
+                    firstFileColumns.forEach(col => {
+                        combinedRow[col] = firstRow[col];
+                    });
+                    mergedData.push(combinedRow);
                 }
             });
 
-            displayResults(mergedData, [...firstFileColumns, ...Object.keys(secondFileData[0] || {})]);
-            displayUnmatchedResults(unmatchedData); // Display unmatched results
+            displayResults(mergedData, [...firstFileColumns, ...selectedFields]);
         }
 
         function displayResults(data, columns) {
-            const table = document.getElementById('mergedResultsTable');
+            const table = document.getElementById('resultTable');
             table.innerHTML = '';
-
+            
             // Add sequence column
             let headerRow = table.insertRow();
             let thSeq = document.createElement('th');
@@ -151,36 +145,6 @@
                 tdSeq.textContent = index + 1;
                 
                 columns.forEach(col => {
-                    let td = tr.insertCell();
-                    td.textContent = row[col] !== undefined ? row[col] : '';
-                });
-            });
-        }
-
-        function displayUnmatchedResults(data) {
-            const table = document.getElementById('unmatchedTable');
-            table.innerHTML = '';
-
-            // Add sequence column
-            let headerRow = table.insertRow();
-            let thSeq = document.createElement('th');
-            thSeq.textContent = 'تسلسل';
-            headerRow.appendChild(thSeq);
-
-            firstFileColumns.forEach(col => {
-                let th = document.createElement('th');
-                th.textContent = col;
-                headerRow.appendChild(th);
-            });
-
-            data.forEach((row, index) => {
-                let tr = table.insertRow();
-                
-                // Insert sequence number
-                let tdSeq = tr.insertCell();
-                tdSeq.textContent = index + 1;
-                
-                firstFileColumns.forEach(col => {
                     let td = tr.insertCell();
                     td.textContent = row[col] !== undefined ? row[col] : '';
                 });
@@ -199,12 +163,12 @@
     <label for="columnSelect">اختر العمود الأساسي للدمج:</label>
     <select id="columnSelect"></select><br><br>
 
+    <div id="fieldSelection">
+        <h3>حدد الحقول التي تريد عرضها من الملف الثاني:</h3>
+    </div>
+
     <button onclick="mergeFiles()">دمج الملفات</button>
-
-    <h3>النتائج المطابقة:</h3>
-    <table border="1" id="mergedResultsTable"></table>
-
-    <h3>البيانات غير المطابقة:</h3>
-    <table border="1" id="unmatchedTable"></table>
+    <h3>النتائج:</h3>
+    <table border="1" id="resultTable"></table>
 </body>
 </html>
