@@ -1,84 +1,100 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>دمج ملفات Excel</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <style>
-        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-        th { background-color: #f4f4f4; }
-    </style>
-</head>
-<body>
-    <h2>دمج ملفات Excel</h2>
-    <input type="file" id="fileInput" multiple accept=".xlsx, .xls" />
-    <input type="text" id="mergeColumn" placeholder="اسم العمود الأساسي" />
-    <button onclick="mergeFiles()">دمج الملفات</button>
-    <table id="resultTable"></table>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
-        async function mergeFiles() {
-            const files = document.getElementById('fileInput').files;
-            const mergeColumn = document.getElementById('mergeColumn').value.trim();
-            if (files.length < 2 || !mergeColumn) {
-                alert("يرجى اختيار ملفين على الأقل وإدخال اسم العمود الأساسي");
-                return;
-            }
+        let dataFiles = [];
+        document.getElementById('fileInput').addEventListener('change', handleFiles);
 
-            let mergedData = {};
-            let allColumns = new Set([mergeColumn]);
+        function handleFiles(event) {
+            const files = event.target.files;
+            dataFiles = [];
+            let columnSet = new Set();
 
-            for (const file of files) {
-                const data = await readExcelFile(file);
-                data.forEach(row => {
-                    const key = row[mergeColumn];
-                    if (!key) return;
-                    if (!mergedData[key]) mergedData[key] = {};
-                    Object.keys(row).forEach(col => {
-                        if (col !== mergeColumn) allColumns.add(col);
-                        mergedData[key][col] = row[col];
-                    });
-                });
-            }
-
-            renderTable(Array.from(allColumns), mergedData);
-        }
-
-        function readExcelFile(file) {
-            return new Promise((resolve) => {
+            Array.from(files).forEach((file, index) => {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: "array" });
-                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                    resolve(XLSX.utils.sheet_to_json(sheet));
+                    const workbook = XLSX.read(e.target.result, { type: 'binary' });
+                    const sheetName = workbook.SheetNames[0];
+                    const sheet = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+                    if (sheet.length > 0) {
+                        dataFiles.push(sheet);
+                        Object.keys(sheet[0]).forEach(col => columnSet.add(col));
+                    }
+                    if (index === files.length - 1) {
+                        populateColumnSelect([...columnSet]);
+                    }
                 };
-                reader.readAsArrayBuffer(file);
+                reader.readAsBinaryString(file);
             });
         }
 
-        function renderTable(columns, data) {
-            const table = document.getElementById("resultTable");
-            table.innerHTML = "";
-            let thead = table.createTHead();
-            let headerRow = thead.insertRow();
+        function populateColumnSelect(columns) {
+            const select = document.getElementById('columnSelect');
+            select.innerHTML = '';
             columns.forEach(col => {
-                let th = document.createElement("th");
+                const option = document.createElement('option');
+                option.value = col;
+                option.textContent = col;
+                select.appendChild(option);
+            });
+        }
+
+        function mergeFiles() {
+            if (dataFiles.length < 2) {
+                alert("يجب تحميل ملفين على الأقل للدمج");
+                return;
+            }
+            const mergeColumn = document.getElementById('columnSelect').value;
+            let mergedData = {};
+            let allColumns = new Set();
+
+            dataFiles.forEach(sheet => {
+                sheet.forEach(row => {
+                    const key = row[mergeColumn];
+                    if (!mergedData[key]) {
+                        mergedData[key] = {};
+                    }
+                    Object.keys(row).forEach(col => {
+                        mergedData[key][col] = row[col];
+                        allColumns.add(col);
+                    });
+                });
+            });
+
+            displayResults(Object.values(mergedData), [...allColumns]);
+        }
+
+        function displayResults(data, columns) {
+            const table = document.getElementById('resultTable');
+            table.innerHTML = '';
+            let headerRow = table.insertRow();
+            columns.forEach(col => {
+                let th = document.createElement('th');
                 th.textContent = col;
                 headerRow.appendChild(th);
             });
-
-            let tbody = table.createTBody();
-            Object.entries(data).forEach(([key, rowData]) => {
-                let row = tbody.insertRow();
+            data.forEach(row => {
+                let tr = table.insertRow();
                 columns.forEach(col => {
-                    let cell = row.insertCell();
-                    cell.textContent = rowData[col] || "";
+                    let td = tr.insertCell();
+                    td.textContent = row[col] || '';
                 });
             });
         }
     </script>
+</head>
+<body>
+    <h2>تحميل ملفات Excel</h2>
+    <input type="file" id="fileInput" multiple accept=".xlsx, .xls">
+    <br>
+    <label for="columnSelect">اختر العمود الأساسي للدمج:</label>
+    <select id="columnSelect"></select>
+    <button onclick="mergeFiles()">دمج الملفات</button>
+    <h3>النتائج:</h3>
+    <table border="1" id="resultTable"></table>
 </body>
 </html>
