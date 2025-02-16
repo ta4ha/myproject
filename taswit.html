@@ -6,38 +6,44 @@
     <title>دمج ملفات Excel</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
-        let dataFiles = [];
+        let firstFileData = [];
+        let secondFileData = [];
         let columnSet = new Set();
 
         document.addEventListener("DOMContentLoaded", function () {
-            document.getElementById('fileInput').addEventListener('change', handleFiles);
+            document.getElementById('firstFileInput').addEventListener('change', handleFirstFile);
+            document.getElementById('secondFileInput').addEventListener('change', handleSecondFile);
         });
 
-        function handleFiles(event) {
-            const files = event.target.files;
-            dataFiles = [];
-            columnSet.clear();
-            let filesRead = 0;
+        function handleFirstFile(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const workbook = XLSX.read(e.target.result, { type: 'binary' });
+                const sheetName = workbook.SheetNames[0];
+                firstFileData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+                
+                if (firstFileData.length > 0) {
+                    Object.keys(firstFileData[0]).forEach(col => columnSet.add(col));
+                }
+            };
+            reader.readAsBinaryString(file);
+        }
 
-            Array.from(files).forEach((file) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const workbook = XLSX.read(e.target.result, { type: 'binary' });
-                    const sheetName = workbook.SheetNames[0];
-                    const sheet = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-                    
-                    if (sheet.length > 0) {
-                        dataFiles.push(sheet);
-                        Object.keys(sheet[0]).forEach(col => columnSet.add(col));
-                    }
-                    
-                    filesRead++;
-                    if (filesRead === files.length) {
-                        populateColumnSelect([...columnSet]);
-                    }
-                };
-                reader.readAsBinaryString(file);
-            });
+        function handleSecondFile(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const workbook = XLSX.read(e.target.result, { type: 'binary' });
+                const sheetName = workbook.SheetNames[0];
+                secondFileData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+                
+                if (secondFileData.length > 0) {
+                    Object.keys(secondFileData[0]).forEach(col => columnSet.add(col));
+                    populateColumnSelect(Object.keys(secondFileData[0]));
+                }
+            };
+            reader.readAsBinaryString(file);
         }
 
         function populateColumnSelect(columns) {
@@ -52,15 +58,15 @@
         }
 
         function mergeFiles() {
-            if (dataFiles.length < 2) {
-                alert("يجب تحميل ملفين على الأقل للدمج");
+            if (firstFileData.length === 0 || secondFileData.length === 0) {
+                alert("يجب تحميل كلا الملفين للدمج");
                 return;
             }
             const mergeColumn = document.getElementById('columnSelect').value;
             let mergedData = {};
             let allColumns = new Set(columnSet);
 
-            dataFiles.forEach(sheet => {
+            [firstFileData, secondFileData].forEach(sheet => {
                 sheet.forEach(row => {
                     const key = row[mergeColumn];
                     if (!mergedData[key]) {
@@ -100,7 +106,7 @@
                 tdSeq.textContent = index + 1;
                 
                 // Check if the row comes from the first file
-                if (dataFiles[0].some(firstFileRow => firstFileRow[mergeColumn] === row[mergeColumn])) {
+                if (firstFileData.some(firstFileRow => firstFileRow[mergeColumn] === row[mergeColumn])) {
                     tr.style.backgroundColor = '#dce775'; // لون الخلفية للأسماء من الملف الأول
                 }
                 
@@ -114,10 +120,15 @@
 </head>
 <body>
     <h2>تحميل ملفات Excel</h2>
-    <input type="file" id="fileInput" multiple accept=".xlsx, .xls">
-    <br>
+    <label for="firstFileInput">تحميل الملف الأول الثابت:</label>
+    <input type="file" id="firstFileInput" accept=".xlsx, .xls"><br><br>
+
+    <label for="secondFileInput">تحميل الملف الثاني:</label>
+    <input type="file" id="secondFileInput" accept=".xlsx, .xls"><br><br>
+
     <label for="columnSelect">اختر العمود الأساسي للدمج:</label>
-    <select id="columnSelect"></select>
+    <select id="columnSelect"></select><br><br>
+
     <button onclick="mergeFiles()">دمج الملفات</button>
     <h3>النتائج:</h3>
     <table border="1" id="resultTable"></table>
