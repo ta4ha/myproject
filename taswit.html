@@ -9,6 +9,8 @@
         let firstFileData = [];
         let secondFileData = [];
         let firstFileColumns = [];
+        let secondFileColumns = [];
+        let mergedResults = []; // لتخزين النتائج المدمجة
 
         document.addEventListener("DOMContentLoaded", function () {
             document.getElementById('firstFileInput').addEventListener('change', handleFirstFile);
@@ -39,7 +41,9 @@
                 secondFileData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { raw: true });
                 
                 if (secondFileData.length > 0) {
-                    populateColumnSelect(Object.keys(secondFileData[0]));
+                    secondFileColumns = Object.keys(secondFileData[0]);
+                    populateColumnSelect(secondFileColumns);
+                    populateFieldSelection(secondFileColumns);
                 }
             };
             reader.readAsBinaryString(file);
@@ -56,13 +60,34 @@
             });
         }
 
+        function populateFieldSelection(columns) {
+            const container = document.getElementById('fieldSelection');
+            container.innerHTML = '';
+            columns.forEach(col => {
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = col;
+                checkbox.id = `field-${col}`;
+                checkbox.checked = true; // By default, all fields are selected
+
+                const label = document.createElement('label');
+                label.htmlFor = `field-${col}`;
+                label.textContent = col;
+
+                container.appendChild(checkbox);
+                container.appendChild(label);
+                container.appendChild(document.createElement('br'));
+            });
+        }
+
         function mergeFiles() {
             if (firstFileData.length === 0 || secondFileData.length === 0) {
                 alert("يجب تحميل كلا الملفين للدمج");
                 return;
             }
             const mergeColumn = document.getElementById('columnSelect').value;
-            let mergedData = [];
+            const selectedFields = Array.from(document.querySelectorAll('#fieldSelection input:checked')).map(input => input.value);
+            mergedResults = []; // إعادة تعيين النتائج المدمجة
 
             firstFileData.forEach(firstRow => {
                 const matchKey = firstRow[mergeColumn];
@@ -77,26 +102,30 @@
                             combinedRow[col] = firstRow[col];
                         });
 
-                        // Add fields from the second file
-                        Object.keys(secondRow).forEach(col => {
+                        // Add the selected fields from the second file
+                        selectedFields.forEach(col => {
                             combinedRow[col] = secondRow[col];
                         });
 
-                        mergedData.push(combinedRow);
+                        mergedResults.push(combinedRow);
                     });
                 } else {
-                    // If no match found, add the row without any changes
-                    mergedData.push(firstRow);
+                    // Add unmatched rows from the first file (without second file data)
+                    let combinedRow = {};
+                    firstFileColumns.forEach(col => {
+                        combinedRow[col] = firstRow[col];
+                    });
+                    mergedResults.push(combinedRow);
                 }
             });
 
-            displayResults(mergedData, [...firstFileColumns, ...Object.keys(secondFileData[0] || {})]);
+            displayResults(mergedResults, [...firstFileColumns, ...selectedFields]);
         }
 
         function displayResults(data, columns) {
             const table = document.getElementById('resultTable');
             table.innerHTML = '';
-
+            
             // Add sequence column
             let headerRow = table.insertRow();
             let thSeq = document.createElement('th');
@@ -124,9 +153,16 @@
         }
 
         function downloadExcel() {
-            const tableData = document.getElementById('resultTable');
-            const wb = XLSX.utils.table_to_book(tableData, { sheet: "Results" });
-            XLSX.writeFile(wb, "mergedResults.xlsx");
+            if (mergedResults.length === 0) {
+                alert("لا توجد بيانات لتحميلها.");
+                return;
+            }
+
+            const worksheet = XLSX.utils.json_to_sheet(mergedResults);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "النتائج");
+
+            XLSX.writeFile(workbook, "merged_results.xlsx");
         }
     </script>
 </head>
@@ -141,11 +177,14 @@
     <label for="columnSelect">اختر العمود الأساسي للدمج:</label>
     <select id="columnSelect"></select><br><br>
 
-    <button onclick="mergeFiles()">دمج الملفات</button>
-    <button onclick="downloadExcel()">تحميل نتائج الدمج</button>
+    <div id="fieldSelection">
+        <h3>حدد الحقول التي تريد عرضها من الملف الثاني:</h3>
+    </div>
 
+    <button onclick="mergeFiles()">دمج الملفات</button>
+    <button onclick="downloadExcel()">تحميل نتائج الدمج كملف Excel</button>
+    
     <h3>النتائج:</h3>
     <table border="1" id="resultTable"></table>
 </body>
 </html>
-
