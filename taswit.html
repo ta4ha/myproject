@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دمج ملفات Excel</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #f4f4f4; }
+    </style>
+</head>
+<body>
+    <h2>دمج ملفات Excel</h2>
+    <input type="file" id="fileInput" multiple accept=".xlsx, .xls" />
+    <input type="text" id="mergeColumn" placeholder="اسم العمود الأساسي" />
+    <button onclick="mergeFiles()">دمج الملفات</button>
+    <table id="resultTable"></table>
+    <script>
+        async function mergeFiles() {
+            const files = document.getElementById('fileInput').files;
+            const mergeColumn = document.getElementById('mergeColumn').value.trim();
+            if (files.length < 2 || !mergeColumn) {
+                alert("يرجى اختيار ملفين على الأقل وإدخال اسم العمود الأساسي");
+                return;
+            }
+
+            let mergedData = {};
+            let allColumns = new Set([mergeColumn]);
+
+            for (const file of files) {
+                const data = await readExcelFile(file);
+                data.forEach(row => {
+                    const key = row[mergeColumn];
+                    if (!key) return;
+                    if (!mergedData[key]) mergedData[key] = {};
+                    Object.keys(row).forEach(col => {
+                        if (col !== mergeColumn) allColumns.add(col);
+                        mergedData[key][col] = row[col];
+                    });
+                });
+            }
+
+            renderTable(Array.from(allColumns), mergedData);
+        }
+
+        function readExcelFile(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: "array" });
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                    resolve(XLSX.utils.sheet_to_json(sheet));
+                };
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        function renderTable(columns, data) {
+            const table = document.getElementById("resultTable");
+            table.innerHTML = "";
+            let thead = table.createTHead();
+            let headerRow = thead.insertRow();
+            columns.forEach(col => {
+                let th = document.createElement("th");
+                th.textContent = col;
+                headerRow.appendChild(th);
+            });
+
+            let tbody = table.createTBody();
+            Object.entries(data).forEach(([key, rowData]) => {
+                let row = tbody.insertRow();
+                columns.forEach(col => {
+                    let cell = row.insertCell();
+                    cell.textContent = rowData[col] || "";
+                });
+            });
+        }
+    </script>
+</body>
+</html>
