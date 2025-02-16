@@ -9,7 +9,6 @@
         let firstFileData = [];
         let secondFileData = [];
         let firstFileColumns = [];
-        let secondFileColumns = [];
         let unmatchedData = [];
 
         document.addEventListener("DOMContentLoaded", function () {
@@ -24,7 +23,7 @@
                 const workbook = XLSX.read(e.target.result, { type: 'binary' });
                 const sheetName = workbook.SheetNames[0];
                 firstFileData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { raw: true });
-
+                
                 if (firstFileData.length > 0) {
                     firstFileColumns = Object.keys(firstFileData[0]);
                     displayFirstFileResults(firstFileData, firstFileColumns);
@@ -40,10 +39,9 @@
                 const workbook = XLSX.read(e.target.result, { type: 'binary' });
                 const sheetName = workbook.SheetNames[0];
                 secondFileData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { raw: true });
-
+                
                 if (secondFileData.length > 0) {
-                    secondFileColumns = Object.keys(secondFileData[0]);
-                    populateColumnSelect(secondFileColumns);
+                    populateColumnSelect(Object.keys(secondFileData[0]));
                 }
             };
             reader.readAsBinaryString(file);
@@ -96,7 +94,6 @@
                 return;
             }
             const mergeColumn = document.getElementById('columnSelect').value;
-            const selectedFields = Array.from(document.querySelectorAll('#fieldSelection input:checked')).map(input => input.value);
             let mergedData = [];
             unmatchedData = []; // Reset unmatched data
 
@@ -113,8 +110,8 @@
                             combinedRow[col] = firstRow[col];
                         });
 
-                        // Add the selected fields from the second file
-                        selectedFields.forEach(col => {
+                        // Add fields from the second file
+                        Object.keys(secondRow).forEach(col => {
                             combinedRow[col] = secondRow[col];
                         });
 
@@ -126,7 +123,7 @@
                 }
             });
 
-            displayResults(mergedData, [...firstFileColumns, ...selectedFields]);
+            displayResults(mergedData, [...firstFileColumns, ...Object.keys(secondFileData[0] || {})]);
             displayUnmatchedResults(unmatchedData); // Display unmatched results
         }
 
