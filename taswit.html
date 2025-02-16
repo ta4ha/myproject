@@ -41,7 +41,8 @@
                 
                 if (secondFileData.length > 0) {
                     secondFileColumns = Object.keys(secondFileData[0]);
-                    populateColumnSelect(Object.keys(secondFileData[0]));
+                    populateColumnSelect(secondFileColumns);
+                    populateFieldSelect(secondFileColumns);
                 }
             };
             reader.readAsBinaryString(file);
@@ -58,13 +59,24 @@
             });
         }
 
+        function populateFieldSelect(columns) {
+            const select = document.getElementById('fieldSelect');
+            select.innerHTML = '';
+            columns.forEach(col => {
+                const option = document.createElement('option');
+                option.value = col;
+                option.textContent = col;
+                select.appendChild(option);
+            });
+        }
+
         function mergeFiles() {
             if (firstFileData.length === 0 || secondFileData.length === 0) {
                 alert("يجب تحميل كلا الملفين للدمج");
                 return;
             }
             const mergeColumn = document.getElementById('columnSelect').value;
-            const selectedField = document.querySelector('#fieldSelect').value;
+            const selectedField = document.getElementById('fieldSelect').value;
             let mergedData = [];
 
             firstFileData.forEach(firstRow => {
