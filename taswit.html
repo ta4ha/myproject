@@ -79,14 +79,26 @@
         function displayResults(data, columns) {
             const table = document.getElementById('resultTable');
             table.innerHTML = '';
+            
+            // Add sequence column
             let headerRow = table.insertRow();
+            let thSeq = document.createElement('th');
+            thSeq.textContent = 'تسلسل';
+            headerRow.appendChild(thSeq);
+
             columns.forEach(col => {
                 let th = document.createElement('th');
                 th.textContent = col;
                 headerRow.appendChild(th);
             });
-            data.forEach(row => {
+
+            data.forEach((row, index) => {
                 let tr = table.insertRow();
+                
+                // Insert sequence number
+                let tdSeq = tr.insertCell();
+                tdSeq.textContent = index + 1;
+                
                 columns.forEach(col => {
                     let td = tr.insertCell();
                     td.textContent = row[col] || '';
