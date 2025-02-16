@@ -73,10 +73,10 @@
                 });
             });
 
-            displayResults(Object.values(mergedData), [...allColumns]);
+            displayResults(Object.values(mergedData), [...allColumns], mergeColumn);
         }
 
-        function displayResults(data, columns) {
+        function displayResults(data, columns, mergeColumn) {
             const table = document.getElementById('resultTable');
             table.innerHTML = '';
             
@@ -98,6 +98,11 @@
                 // Insert sequence number
                 let tdSeq = tr.insertCell();
                 tdSeq.textContent = index + 1;
+                
+                // Check if the row comes from the first file
+                if (dataFiles[0].some(firstFileRow => firstFileRow[mergeColumn] === row[mergeColumn])) {
+                    tr.style.backgroundColor = '#dce775'; // لون الخلفية للأسماء من الملف الأول
+                }
                 
                 columns.forEach(col => {
                     let td = tr.insertCell();
